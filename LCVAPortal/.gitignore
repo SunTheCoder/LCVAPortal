@@ -1,0 +1,44 @@
+# Swift Packages
+*.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+*.xcodeproj/xcuserdata/
+*.swiftpm
+.build/
+*.xcodeproj/project.pbxproj
+
+# Ignore user-specific settings
+xcuserdata/
+DerivedData/
+.idea/
+.DS_Store
+*.swp
+*.swm
+*.swo
+*.swn
+
+# Generated files
+*.log
+*.tmp
+*.lock
+
+# Dependency Managers
+Carthage/Build/
+Carthage/Checkouts/
+Carthage/Packages.resolved
+Pods/
+Podfile.lock
+*.xcworkspace
+Carthage/Build/
+Carthage/Checkouts/
+Carthage/Packages.resolved
+
+# Firebase and GoogleService info (if used)
+GoogleService-Info.plist
+
+# Other
+*.icloud
+.env
+*.env
+
+
+# Google Cloud credentials
+*.json

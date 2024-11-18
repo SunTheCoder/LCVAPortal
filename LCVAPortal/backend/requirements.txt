@@ -1,0 +1,14 @@
+<<<<<<< HEAD
+Flask
+gunicorn
+python-dotenv
+vertexai
+google-auth
+google-cloud-aiplatform
+gunicorn
+=======
+flask
+vertexai
+google-cloud
+>>>>>>> c814233 (ai recommendations working. need training)
+
