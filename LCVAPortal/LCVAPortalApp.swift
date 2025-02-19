@@ -40,12 +40,14 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 struct LCVAPortalApp: App {
     
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    @AppStorage("isDarkMode") private var isDarkMode = false
     
     var body: some Scene {
         WindowGroup {
             NavigationView {
                 ContentView()
             }
+            .preferredColorScheme(isDarkMode ? .dark : .light)
         }
     }
 }

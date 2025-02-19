@@ -10,61 +10,169 @@ struct ContentView: View {
         videos: ["small", "immure"]
     )
     
+    @State private var email = ""
+    @State private var password = ""
+    @State private var name = ""
+    @State private var preferences: [String] = []
+    
     @State private var isArtistDetailPresented = false
 
     @State private var selectedArtPiece: ArtPiece? = nil
     @State private var isAnimating = false
     @StateObject private var userManager = UserManager()
     @State private var recommendedArt: [ArtPiece] = [] // State to store mood-based recommendations
+    @State private var selectedTab = 0
 
     
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack {
-//                    HeaderView(isAnimating: $isAnimating)
-                    CurrentExhibitionsView(exhibitions: exhibitions, colorScheme: colorScheme)
-                    FeaturedArtistView(sampleArtist: sampleArtist, colorScheme: colorScheme)
-                    FeaturedArtOnCampusView(colorScheme: colorScheme, selectedArtPiece: $selectedArtPiece)
-                    MoodInputView(recommendedArt: $recommendedArt) // Add MoodInputView here
-
-                    UserAuthenticationView(userManager: userManager)
+            TabView(selection: $selectedTab) {
+                // Home Tab
+                ScrollView {
+                    VStack {
+                        HoursAccordionView()
+                            .padding(.top, -20)
+                        CurrentExhibitionsView(exhibitions: exhibitions, colorScheme: colorScheme)
+                        FeaturedArtistView(sampleArtist: sampleArtist, colorScheme: colorScheme)
+                        FeaturedArtOnCampusView(colorScheme: colorScheme, selectedArtPiece: $selectedArtPiece)
+                        MoodInputView(recommendedArt: $recommendedArt)
+                        UserAuthenticationView(userManager: userManager)
+                    }
                 }
-                .navigationBarTitleDisplayMode(.inline) // Keeps the title inline
-                .toolbar {
-                    ToolbarItem(placement: .principal) { // Centers the content in the navigation bar
-                        VStack(spacing: -10) { // Adds spacing between the texts
-                            Text("LONGWOOD")
-                                .font(.system(size: 35, weight: .bold, design: .serif))
-                                .tracking(5)
-                                .offset(y: isAnimating ? 50 : -10)
-                                .opacity(isAnimating ? 1 : 0)
-                                .animation(.easeOut(duration: 1), value: isAnimating)
-                                .padding(.bottom, 10)
+                .tag(0)
+                .tabItem {
+                    Label("Home", systemImage: "house.fill")
+                }
+                
+                // Exhibitions Tab
+                ExhibitionsTabView(exhibitions: exhibitions)
+                    .tag(1)
+                    .tabItem {
+                        Label("Exhibitions", systemImage: "photo.stack.fill")
+                    }
+                
+                // Settings Tab
+                VStack(spacing: 20) {
+                    Text("Settings")
+                        .font(.title2)
+                        .bold()
+                    
+                    DarkModeToggle()
+                        .padding(.horizontal)
+                    
+                    Divider()
+                        .padding(.vertical)
+                    
+                    // User Authentication Section
+                    if userManager.isLoggedIn {
+                        VStack(spacing: 16) {
+                            Text("Welcome, \(userManager.currentUser?.displayName ?? "User")!")
+                                .font(.title3)
+                                .bold()
+                                .multilineTextAlignment(.center)
                             
-                            Text("CENTER for the VISUAL ARTS")
-                                .font(.system(size: 25, weight: .regular, design: .serif))
-                                .italic()
-                                .offset(y: isAnimating ? 50 : -10)
-                                .opacity(isAnimating ? 1 : 0)
-                                .animation(.easeOut(duration: 1).delay(0.2), value: isAnimating)
+                            Button("Log Out") {
+                                userManager.logOut()
+                            }
+                            .font(.system(size: 16))
+                            .foregroundColor(.white)
+                            .padding(4)
+                            .padding(.horizontal, 2)
+                            .background(Color.primary.opacity(0.2))
+                            .cornerRadius(7)
+                            .shadow(radius: 2)
                         }
-                        .frame(maxWidth: .infinity) // Ensures full width
-                        .padding(.vertical, -30) // Adds vertical padding to increase space
-                        .offset(y: -30)
-                        .multilineTextAlignment(.center)
-                        .foregroundColor(Color.primary)
-                        .onAppear {
-                            isAnimating = false
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                isAnimating = true
+                    } else {
+                        // Your existing login/signup form
+                        VStack(spacing: 16) {
+                            TextField("Email", text: $email)
+                                .autocapitalization(.none)
+                                .padding()
+                                .background(Color.gray.opacity(0.1))
+                                .cornerRadius(14)
+                                .shadow(radius: 5)
+
+                            SecureField("Password", text: $password)
+                                .padding()
+                                .background(Color.gray.opacity(0.1))
+                                .cornerRadius(14)
+                                .shadow(radius: 5)
+
+                            TextField("Name", text: $name)
+                                .padding()
+                                .background(Color.gray.opacity(0.1))
+                                .cornerRadius(14)
+                                .shadow(radius: 5)
+
+                            HStack {
+                                Button("Log In") {
+                                    userManager.logIn(email: email, password: password)
+                                }
+                                .font(.system(size: 16))
+                                .foregroundColor(.white)
+                                .padding(4)
+                                .padding(.horizontal, 2)
+                                
+                                .background(Color.primary.opacity(0.2))
+                                
+                                .cornerRadius(7)
+                                .shadow(radius: 2)
+
+                                Button("Sign Up") {
+                                    userManager.signUp(email: email, password: password, name: name, preferences: preferences)
+                                }
+                                .font(.system(size: 16))
+                                .foregroundColor(.white)
+                                .padding(4)
+                                .padding(.horizontal, 2)
+                                
+                                .background(Color.primary.opacity(0.2))
+                                
+                                .cornerRadius(7)
+                                .shadow(radius: 2)
                             }
                         }
                     }
                 }
-                
+                .padding()
+                .tag(3)
+                .tabItem {
+                    Label("Settings", systemImage: "gear")
+                }
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    VStack(spacing: -10) {
+                        Text("LONGWOOD")
+                            .font(.system(size: 35, weight: .bold, design: .serif))
+                            .tracking(5)
+                            .offset(y: isAnimating ? 50 : -10)
+                            .opacity(isAnimating ? 1 : 0)
+                            .animation(.easeOut(duration: 1), value: isAnimating)
+                            .padding(.bottom, 10)
+                        
+                        Text("CENTER for the VISUAL ARTS")
+                            .font(.system(size: 25, weight: .regular, design: .serif))
+                            .italic()
+                            .offset(y: isAnimating ? 50 : -10)
+                            .opacity(isAnimating ? 1 : 0)
+                            .animation(.easeOut(duration: 1).delay(0.2), value: isAnimating)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, -30)
+                    .offset(y: -30)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(Color.primary)
+                    .onAppear {
+                        isAnimating = false
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            isAnimating = true
+                        }
+                    }
+                }
             }
         }
         .navigationViewStyle(StackNavigationViewStyle())
