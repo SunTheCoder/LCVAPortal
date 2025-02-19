@@ -37,6 +37,7 @@ struct ContentView: View {
                             .padding(.top, -20)
                         // CurrentExhibitionsView(exhibitions: activeExhibitions, colorScheme: colorScheme)
                         MoodInputView(recommendedArt: $recommendedArt)
+                        InfoAccordionView()
                         FeaturedArtistView(sampleArtist: sampleArtist, colorScheme: colorScheme)
                         FeaturedArtOnCampusView(colorScheme: colorScheme, selectedArtPiece: $selectedArtPiece)
                         
