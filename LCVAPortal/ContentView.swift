@@ -36,9 +36,10 @@ struct ContentView: View {
                         HoursAccordionView()
                             .padding(.top, -20)
                         // CurrentExhibitionsView(exhibitions: activeExhibitions, colorScheme: colorScheme)
+                        MoodInputView(recommendedArt: $recommendedArt)
                         FeaturedArtistView(sampleArtist: sampleArtist, colorScheme: colorScheme)
                         FeaturedArtOnCampusView(colorScheme: colorScheme, selectedArtPiece: $selectedArtPiece)
-                        MoodInputView(recommendedArt: $recommendedArt)
+                        
                         UserAuthenticationView(userManager: userManager)
                     }
                 }
