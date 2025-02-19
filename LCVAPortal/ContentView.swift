@@ -2,7 +2,8 @@ import SwiftUI
 import AVKit
 
 struct ContentView: View {
-    let exhibitions = sampleExhibitions
+    let pastExhibitions = sampleExhibitions
+    let activeExhibitions = currentExhibitions
     let sampleArtist = Artist(
         name: "Sun English Jr.",
         bio: "Sun English Jr. is a sculptor and performance artist known for immersive installations.",
@@ -34,7 +35,7 @@ struct ContentView: View {
                     VStack {
                         HoursAccordionView()
                             .padding(.top, -20)
-                        CurrentExhibitionsView(exhibitions: exhibitions, colorScheme: colorScheme)
+                        // CurrentExhibitionsView(exhibitions: activeExhibitions, colorScheme: colorScheme)
                         FeaturedArtistView(sampleArtist: sampleArtist, colorScheme: colorScheme)
                         FeaturedArtOnCampusView(colorScheme: colorScheme, selectedArtPiece: $selectedArtPiece)
                         MoodInputView(recommendedArt: $recommendedArt)
@@ -46,11 +47,18 @@ struct ContentView: View {
                     Label("Home", systemImage: "house.fill")
                 }
                 
-                // Exhibitions Tab
-                ExhibitionsTabView(exhibitions: exhibitions)
+                // Current Exhibitions Tab
+                ExhibitionsTabView(exhibitions: activeExhibitions)
                     .tag(1)
                     .tabItem {
-                        Label("Exhibitions", systemImage: "photo.stack.fill")
+                        Label("Current", systemImage: "photo.stack.fill")
+                    }
+                
+                // Past Exhibitions Tab
+                ExhibitionsTabView(exhibitions: pastExhibitions)
+                    .tag(2)
+                    .tabItem {
+                        Label("Past", systemImage: "clock.fill")
                     }
                 
                 // Settings Tab
@@ -347,11 +355,18 @@ struct CurrentExhibitionsView: View {
     }
 
     private func formatTime(_ reception: String) -> String {
-        // Split the string by commas
+        // Split by commas and safely handle the parts
         let parts = reception.split(separator: ",")
         
-        // Return the second part if it exists, trimmed of extra spaces
-        return parts.count > 1 ? parts[3].trimmingCharacters(in: .whitespaces) : reception
+        // If we have enough parts, get the time portion
+        if parts.count >= 2 {
+            // Get the last part which should contain the time
+            let timePart = parts.last?.trimmingCharacters(in: .whitespaces) ?? ""
+            return timePart
+        }
+        
+        // If we can't parse it, return the original string
+        return reception
     }
     /// Trigger slide-in animation only if the image has loaded
     private func triggerSlideIn(_ index: Int) {
