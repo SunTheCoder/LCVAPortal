@@ -65,12 +65,33 @@ struct ContentView: View {
                 
                 // Settings Tab
                 VStack(spacing: 20) {
-                    Text("Settings")
+                    Text("Settings & ADA")
                         .font(.title2)
                         .bold()
                     
                     DarkModeToggle()
                         .padding(.horizontal)
+                    
+                    // Accessibility Assistance Section
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Accessibility")
+                            .font(.headline)
+                            .bold()
+                        
+                        Text("Plan your visit with accommodations")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        AssistanceOptionButton(
+                            title: "Request Assistance",
+                            icon: "person.fill.checkmark",
+                            action: { /* Form is handled by the button */ }
+                        )
+                    }
+                    .padding()
+                    .background(Color.primary.opacity(0.05))
+                    .cornerRadius(10)
+                    .padding(.horizontal)
                     
                     Divider()
                         .padding(.vertical)
@@ -149,7 +170,7 @@ struct ContentView: View {
                 .padding()
                 .tag(3)
                 .tabItem {
-                    Label("Settings", systemImage: "gear")
+                    Label("Settings & ADA", systemImage: "gear")
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
