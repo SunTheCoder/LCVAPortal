@@ -1,6 +1,66 @@
 import SwiftUI
 import AVKit
 
+extension Color {
+    static let lcvaNavy = Color(red: 13/255, green: 27/255, blue: 62/255)  // Dark navy
+    static let lcvaBlue = Color(red: 52/255, green: 144/255, blue: 220/255)  // Lighter blue
+}
+
+struct SplashView: View {
+    @Binding var isPresented: Bool
+    @State private var isAnimating = false
+    @State private var opacity: CGFloat = 1
+    
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                gradient: Gradient(colors: [Color.lcvaBlue.opacity(1), Color.white]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .opacity(opacity)
+            
+            VStack(spacing: 0) {
+                Text("LONGWOOD")
+                    .font(.system(size: 35, weight: .bold, design: .serif))
+                    .tracking(5)
+                    .offset(x: isAnimating ? 0 : -UIScreen.main.bounds.width)
+                    .opacity(isAnimating ? 1 : 0)
+                
+                Text("CENTER for the")
+                    .font(.system(size: 25, weight: .regular, design: .serif))
+                    .italic()
+                    .offset(y: isAnimating ? 0 : UIScreen.main.bounds.height)
+                    .opacity(isAnimating ? 1 : 0)
+                
+                Text("VISUAL ARTS")
+                    .font(.system(size: 25, weight: .regular, design: .serif))
+                    .italic()
+                    .offset(x: isAnimating ? 0 : UIScreen.main.bounds.width)
+                    .opacity(isAnimating ? 1 : 0)
+            }
+            .foregroundColor(Color.lcvaNavy)
+            .opacity(opacity)
+        }
+        .ignoresSafeArea()
+        .onAppear {
+            withAnimation(.easeOut(duration: 1.8)) {
+                isAnimating = true
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                withAnimation(.easeOut(duration: 1.2)) {
+                    opacity = 0
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                    isPresented = false
+                }
+            }
+        }
+    }
+}
+
 struct ContentView: View {
     let pastExhibitions = sampleExhibitions
     let activeExhibitions = currentExhibitions
@@ -26,151 +86,192 @@ struct ContentView: View {
 
     
     @Environment(\.colorScheme) var colorScheme
+    @State private var showingSplash = true
     
     var body: some View {
-        NavigationView {
-            TabView(selection: $selectedTab) {
-                // Home Tab
-                ScrollView {
-                    VStack {
-                        HoursAccordionView()
-                            .padding(.top, -20)
-                        // CurrentExhibitionsView(exhibitions: activeExhibitions, colorScheme: colorScheme)
-                        MoodInputView(recommendedArt: $recommendedArt)
-                        InfoAccordionView()
-                        FeaturedArtistView(sampleArtist: sampleArtist, colorScheme: colorScheme)
-                        FeaturedArtOnCampusView(colorScheme: colorScheme, selectedArtPiece: $selectedArtPiece)
+        ZStack {
+            NavigationView {
+                TabView(selection: $selectedTab) {
+                    // Home Tab
+                    ZStack {
+                        // Background gradient
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.lcvaBlue, Color.white]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .ignoresSafeArea()
                         
-                        UserAuthenticationView(userManager: userManager)
+                        // Content
+                        ScrollView {
+                            VStack {
+                                HoursAccordionView()
+                                    .padding(.top, -20)
+                                MoodInputView(recommendedArt: $recommendedArt)
+                                InfoAccordionView()
+                                FeaturedArtistView(sampleArtist: sampleArtist, colorScheme: colorScheme)
+                                FeaturedArtOnCampusView(colorScheme: colorScheme, selectedArtPiece: $selectedArtPiece)
+                                UserAuthenticationView(userManager: userManager)
+                            }
+                        }
                     }
-                }
-                .tag(0)
-                .tabItem {
-                    Label("Home", systemImage: "house.fill")
-                }
-                
-                // Current Exhibitions Tab
-                ExhibitionsTabView(exhibitions: activeExhibitions)
-                    .tag(1)
+                    .tag(0)
                     .tabItem {
-                        Label("Current", systemImage: "photo.stack.fill")
+                        Label("Home", systemImage: "house.fill")
                     }
-                
-                // Past Exhibitions Tab
-                ExhibitionsTabView(exhibitions: pastExhibitions)
-                    .tag(2)
-                    .tabItem {
-                        Label("Past", systemImage: "clock.fill")
-                    }
-                
-                // Settings Tab
-                VStack(spacing: 20) {
-                    Text("Settings & ADA")
-                        .font(.title2)
-                        .bold()
                     
-                    DarkModeToggle()
-                        .padding(.horizontal)
+                    // Current Exhibitions Tab
+                    ExhibitionsTabView(exhibitions: activeExhibitions)
+                        .tag(1)
+                        .tabItem {
+                            Label("Current Exhibitions", systemImage: "photo.stack.fill")
+                        }
                     
-                    // Accessibility Assistance Section
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Accessibility")
-                            .font(.headline)
+                    // Past Exhibitions Tab
+                    ExhibitionsTabView(exhibitions: pastExhibitions)
+                        .tag(2)
+                        .tabItem {
+                            Label("Past Exhibitions", systemImage: "clock.fill")
+                        }
+                    
+                    // Settings Tab
+                    VStack(spacing: 20) {
+                        Text("Settings & ADA")
+                            .font(.title2)
                             .bold()
                         
-                        Text("Plan your visit with accommodations")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+                        DarkModeToggle()
+                            .padding(.horizontal)
                         
-                        AssistanceOptionButton(
-                            title: "Request Assistance",
-                            icon: "person.fill.checkmark",
-                            action: { /* Form is handled by the button */ }
-                        )
+                        // Accessibility Assistance Section
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Accessibility")
+                                .font(.headline)
+                                .bold()
+                            
+                            Text("Plan your visit with accommodations")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            
+                            AssistanceOptionButton(
+                                title: "Request Assistance",
+                                icon: "person.fill.checkmark",
+                                action: { /* Form is handled by the button */ }
+                            )
+                        }
+                        .padding()
+                        .background(Color.primary.opacity(0.05))
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+                        
+                        Divider()
+                            .padding(.vertical)
+                        
+                        // User Authentication Section
+                        if userManager.isLoggedIn {
+                            VStack(spacing: 16) {
+                                Text("Welcome, \(userManager.currentUser?.displayName ?? "User")!")
+                                    .font(.title3)
+                                    .bold()
+                                    .multilineTextAlignment(.center)
+                                
+                                Button("Log Out") {
+                                    userManager.logOut()
+                                }
+                                .font(.system(size: 16))
+                                .foregroundColor(.white)
+                                .padding(4)
+                                .padding(.horizontal, 2)
+                                .background(Color.primary.opacity(0.2))
+                                .cornerRadius(7)
+                                .shadow(radius: 2)
+                            }
+                        } else {
+                            // Your existing login/signup form
+                            VStack(spacing: 16) {
+                                TextField("Email", text: $email)
+                                    .autocapitalization(.none)
+                                    .padding()
+                                    .background(Color.gray.opacity(0.1))
+                                    .cornerRadius(14)
+                                    .shadow(radius: 5)
+
+                                SecureField("Password", text: $password)
+                                    .padding()
+                                    .background(Color.gray.opacity(0.1))
+                                    .cornerRadius(14)
+                                    .shadow(radius: 5)
+
+                                TextField("Name", text: $name)
+                                    .padding()
+                                    .background(Color.gray.opacity(0.1))
+                                    .cornerRadius(14)
+                                    .shadow(radius: 5)
+
+                                HStack {
+                                    Button("Log In") {
+                                        userManager.logIn(email: email, password: password)
+                                    }
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.white)
+                                    .padding(4)
+                                    .padding(.horizontal, 2)
+                                    
+                                    .background(Color.lcvaBlue)
+                                    
+                                    .cornerRadius(4)
+                                    .shadow(radius: 2)
+
+                                    Button("Sign Up") {
+                                        userManager.signUp(email: email, password: password, name: name, preferences: preferences)
+                                    }
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.white)
+                                    .padding(4)
+                                    .padding(.horizontal, 2)
+                                    
+                                    .background(Color.primary.opacity(0.2))
+                                    
+                                    .cornerRadius(7)
+                                    .shadow(radius: 2)
+                                }
+                            }
+                        }
                     }
                     .padding()
-                    .background(Color.primary.opacity(0.05))
-                    .cornerRadius(10)
-                    .padding(.horizontal)
-                    
-                    Divider()
-                        .padding(.vertical)
-                    
-                    // User Authentication Section
-                    if userManager.isLoggedIn {
-                        VStack(spacing: 16) {
-                            Text("Welcome, \(userManager.currentUser?.displayName ?? "User")!")
-                                .font(.title3)
-                                .bold()
-                                .multilineTextAlignment(.center)
-                            
-                            Button("Log Out") {
-                                userManager.logOut()
-                            }
-                            .font(.system(size: 16))
-                            .foregroundColor(.white)
-                            .padding(4)
-                            .padding(.horizontal, 2)
-                            .background(Color.primary.opacity(0.2))
-                            .cornerRadius(7)
-                            .shadow(radius: 2)
-                        }
-                    } else {
-                        // Your existing login/signup form
-                        VStack(spacing: 16) {
-                            TextField("Email", text: $email)
-                                .autocapitalization(.none)
-                                .padding()
-                                .background(Color.gray.opacity(0.1))
-                                .cornerRadius(14)
-                                .shadow(radius: 5)
-
-                            SecureField("Password", text: $password)
-                                .padding()
-                                .background(Color.gray.opacity(0.1))
-                                .cornerRadius(14)
-                                .shadow(radius: 5)
-
-                            TextField("Name", text: $name)
-                                .padding()
-                                .background(Color.gray.opacity(0.1))
-                                .cornerRadius(14)
-                                .shadow(radius: 5)
-
-                            HStack {
-                                Button("Log In") {
-                                    userManager.logIn(email: email, password: password)
-                                }
-                                .font(.system(size: 16))
-                                .foregroundColor(.white)
-                                .padding(4)
-                                .padding(.horizontal, 2)
-                                
-                                .background(Color.primary.opacity(0.2))
-                                
-                                .cornerRadius(7)
-                                .shadow(radius: 2)
-
-                                Button("Sign Up") {
-                                    userManager.signUp(email: email, password: password, name: name, preferences: preferences)
-                                }
-                                .font(.system(size: 16))
-                                .foregroundColor(.white)
-                                .padding(4)
-                                .padding(.horizontal, 2)
-                                
-                                .background(Color.primary.opacity(0.2))
-                                
-                                .cornerRadius(7)
-                                .shadow(radius: 2)
-                            }
-                        }
+                    .tag(3)
+                    .tabItem {
+                        Label("Settings & ADA", systemImage: "gear")
                     }
                 }
-                .padding()
-                .tag(3)
-                .tabItem {
-                    Label("Settings & ADA", systemImage: "gear")
+                .onAppear {
+                    // Set the tab bar background and styling
+                    let tabBarAppearance = UITabBarAppearance()
+                    tabBarAppearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+                    tabBarAppearance.backgroundColor = UIColor(Color.lcvaNavy.opacity(0.2))
+                    
+                    // Configure item appearance for unselected state
+                    tabBarAppearance.stackedLayoutAppearance.normal.iconColor = .white
+                    tabBarAppearance.stackedLayoutAppearance.normal.titleTextAttributes = [
+                        .foregroundColor: UIColor.white,
+                        .font: UIFont.systemFont(ofSize: 12)
+                    ]
+                    
+                    // Add more padding at the top
+                    tabBarAppearance.stackedLayoutAppearance.normal.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 4)
+                    tabBarAppearance.stackedLayoutAppearance.selected.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 4)
+                    
+                    // Selected state remains blue
+                    tabBarAppearance.stackedLayoutAppearance.selected.iconColor = UIColor(Color.lcvaBlue)
+                    tabBarAppearance.stackedLayoutAppearance.selected.titleTextAttributes = [
+                        .foregroundColor: UIColor(Color.lcvaBlue),
+                        .font: UIFont.systemFont(ofSize: 12)
+                    ]
+                    
+                    UITabBar.appearance().standardAppearance = tabBarAppearance
+                    if #available(iOS 15.0, *) {
+                        UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+                    }
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -205,8 +306,14 @@ struct ContentView: View {
                     }
                 }
             }
+            
+            if showingSplash {
+                SplashView(isPresented: $showingSplash)
+                    .transition(.opacity)
+            }
         }
         .navigationViewStyle(StackNavigationViewStyle())
+        .accentColor(Color.lcvaBlue)
     }
 }
 
@@ -339,8 +446,8 @@ struct CurrentExhibitionsView: View {
                     .padding()
                     .frame(maxWidth: 400)
                     .background(
-                        RoundedRectangle(cornerRadius: 14)
-                            .fill(colorScheme == .dark ? Color.gray.opacity(0.3) : Color.white)
+                        RoundedRectangle(cornerRadius: 7)
+                            .fill(colorScheme == .dark ? Color.lcvaNavy.opacity(0.9) : .white)
                             .shadow(radius: 3)
                     )
                     .offset(x: slideInIndices.contains(index) ? 0 : -UIScreen.main.bounds.width) // Slide-in from left
@@ -411,49 +518,37 @@ struct CurrentExhibitionsView: View {
 struct FeaturedArtistView: View {
     let sampleArtist: Artist
     let colorScheme: ColorScheme
-
-    @State private var isArtistDetailPresented = false // State to control modal presentation
-    @State private var slideInOffset: CGFloat = -UIScreen.main.bounds.width // Initial offset for sliding in
+    @State private var isArtistDetailPresented = false
+    @State private var slideInOffset: CGFloat = -UIScreen.main.bounds.width
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            TitleView()
-        }
         VStack(alignment: .center, spacing: 16) {
+            Text("Local Artist Spotlight")
+                .font(.title2)
+                .bold()
+                .foregroundColor(.white)
+            
             ArtistInfoView(name: sampleArtist.name)
-            MainImageView()
             ImageGalleryView(imageUrls: sampleArtist.imageUrls)
             LearnMoreButton(sampleArtist: sampleArtist, isArtistDetailPresented: $isArtistDetailPresented)
         }
-        .padding()
+        .padding(.vertical, 16)
+        .padding(.horizontal, 24)
         .background(
-            RoundedRectangle(cornerRadius: 14)
-                .fill(colorScheme == .dark ? Color.gray.opacity(0.3) : Color.white)
+            RoundedRectangle(cornerRadius: 7)
+                .fill(Color.lcvaNavy.opacity(0.6))
                 .shadow(radius: 3)
         )
         .frame(maxWidth: 400)
-        .offset(x: slideInOffset) // Apply offset for sliding effect
+        .padding(.horizontal)
+        .offset(x: slideInOffset)
         .onAppear {
-            withAnimation(.easeOut(duration: 1.3).delay(1)) { // Animate when the view appears
-                slideInOffset = 0 // Move to the final position
+            withAnimation(.easeOut(duration: 1.3).delay(1)) {
+                slideInOffset = 0
             }
         }
-        // Present the modal view
         .sheet(isPresented: $isArtistDetailPresented) {
             ArtistDetailModalView(artist: sampleArtist, isPresented: $isArtistDetailPresented)
-//                .presentationDetents([.medium]) // Ensure compact modal style
-//                .presentationDragIndicator(.visible)
-        }
-    }
-
-    private struct TitleView: View {
-        var body: some View {
-            Text("Local Artist Spotlight")
-                .font(.system(size: 20, weight: .regular, design: .serif))
-                .italic()
-                .foregroundColor(.secondary)
-                .padding(.top, 25)
-                .padding(.bottom, 16)
         }
     }
 
@@ -462,24 +557,30 @@ struct FeaturedArtistView: View {
         var body: some View {
             Text(name)
                 .font(.system(size: 18))
-                .italic()
-                .padding()
+//                .italic()
+                // .padding()
         }
     }
 
-    private struct MainImageView: View {
-        var body: some View {
-            Image("LCVAPhoto")
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(width: 200, height: 200)
-                .clipShape(RoundedRectangle(cornerRadius: 7))
-                .shadow(radius: 3)
+    private class ImagePresentationModel: ObservableObject {
+        @Published var selectedImage: String?
+        @Published var isPresenting = false
+        
+        func presentImage(_ imageUrl: String) {
+            selectedImage = imageUrl
+            isPresenting = true
+        }
+        
+        func dismissImage() {
+            isPresenting = false
+            selectedImage = nil
         }
     }
 
     private struct ImageGalleryView: View {
         let imageUrls: [String]
+        @StateObject private var presentationModel = ImagePresentationModel()
+        
         var body: some View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 20) {
@@ -488,12 +589,66 @@ struct FeaturedArtistView: View {
                             .resizable()
                             .scaledToFill()
                             .frame(width: 120, height: 120)
-                            .clipShape(RoundedRectangle(cornerRadius: 7))
+                            .clipShape(Rectangle())
                             .padding(.vertical, 5)
                             .shadow(radius: 3)
+                            .onTapGesture {
+                                presentationModel.presentImage(imageUrl)
+                            }
                     }
                 }
                 .padding(.horizontal)
+            }
+            .fullScreenCover(isPresented: $presentationModel.isPresenting) {
+                if let selectedImage = presentationModel.selectedImage {
+                    EnlargedImageView(
+                        imageUrl: selectedImage,
+                        isPresented: $presentationModel.isPresenting
+                    )
+                }
+            }
+        }
+    }
+
+    private struct EnlargedImageView: View {
+        let imageUrl: String
+        @Binding var isPresented: Bool
+        @State private var scale: CGFloat = 1.0
+        @GestureState private var gestureScale: CGFloat = 1.0
+        
+        var body: some View {
+            NavigationView {
+                GeometryReader { geometry in
+                    ZStack {
+                        Color.black.edgesIgnoringSafeArea(.all)
+                        
+                        Image(imageUrl)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(maxWidth: geometry.size.width)
+                            .frame(maxHeight: geometry.size.height)
+                            .scaleEffect(scale * gestureScale)
+                            .gesture(
+                                MagnificationGesture()
+                                    .updating($gestureScale) { currentState, gestureState, _ in
+                                        gestureState = currentState
+                                    }
+                                    .onEnded { value in
+                                        scale *= value
+                                        scale = min(max(scale, 1), 4)
+                                    }
+                            )
+                    }
+                }
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Done") {
+                            scale = 1.0
+                            isPresented = false
+                        }
+                    }
+                }
             }
         }
     }
@@ -511,8 +666,8 @@ struct FeaturedArtistView: View {
                     .foregroundColor(.white)
                     .padding(4)
                     .padding(.horizontal, 2)
-                    .background(Color.primary.opacity(0.2))
-                    .cornerRadius(7)
+                    .background(Color.lcvaBlue)
+                    .cornerRadius(4)
                     .shadow(radius: 2)
             }
         }
@@ -526,64 +681,34 @@ struct FeaturedArtOnCampusView: View {
     @Binding var selectedArtPiece: ArtPiece?
 
     var body: some View {
-        
-        Text("Featured Art on Campus")
-            .font(.system(size: 20, weight: .regular, design: .serif))
-            .italic()
-            .padding(.top, 25)
-            .padding(.bottom, 18)
-            .foregroundColor(.secondary)
-
         VStack(alignment: .center, spacing: 16) {
+            Text("Featured Art on Campus")
+                .font(.title2)
+                .bold()
+                .foregroundColor(.white)
             
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 16) {
+                HStack(spacing: 20) {
                     ForEach(featuredArtPieces) { artPiece in
-                        VStack(spacing: 8) {
-                            AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
-                                image
-                                    .resizable()
-                                    .frame(width: 150, height: 150)
-                                    .clipShape(RoundedRectangle(cornerRadius: 7))
-                                    .shadow(radius: 3)
-                                    .onTapGesture {
-                                        selectedArtPiece = artPiece
-                                    }
-                            } placeholder: {
-                                ProgressView()
-                            }
-                            
-                            Text(artPiece.title)
-                                .font(.headline)
-                                .multilineTextAlignment(.center)
-                                .frame(maxWidth: 200)
-
-                            Text(artPiece.description)
-                                .font(.subheadline)
-                                .lineLimit(3)
-                                .multilineTextAlignment(.center)
-                                .frame(maxWidth: 200)
-                        }
-                        .padding()
+                        ArtPieceCard(artPiece: artPiece, selectedArtPiece: $selectedArtPiece)
                     }
                 }
                 .padding(.horizontal)
             }
-            .background(
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(colorScheme == .dark ? Color.gray.opacity(0.3) : Color.white)
-                    .shadow(radius: 3)
-            )
-            .frame(maxWidth: 400)
-            .sheet(item: $selectedArtPiece) { artPiece in
-                NavigationView {
-                    MapModalView(artPiece: artPiece, userManager: UserManager())
-//                        .presentationDetents([.medium]) // Ensure compact modal style
-//                        .presentationDragIndicator(.visible)
-                }
-                
+        }
+        .padding(.vertical, 16)
+        .padding(.horizontal, 24)
+        .background(
+            RoundedRectangle(cornerRadius: 7)
+                .fill(Color.lcvaNavy.opacity(0.6))
+                .shadow(radius: 3)
+        )
+        .frame(maxWidth: 400)
+        .padding(.horizontal)
+        .sheet(item: $selectedArtPiece) { artPiece in
+            NavigationView {
+                MapModalView(artPiece: artPiece, userManager: UserManager())
             }
-            
         }
     }
 }
@@ -642,9 +767,9 @@ struct UserAuthenticationView: View {
                     .padding(4)
                     .padding(.horizontal, 2)
                     
-                    .background(Color.primary.opacity(0.2))
+                    .background(Color.lcvaBlue)
                     
-                    .cornerRadius(7)
+                    .cornerRadius(4)
                     .shadow(radius: 2)
 
                     Button("Sign Up") {
@@ -690,5 +815,41 @@ struct ContentView_Previews: PreviewProvider {
             }
         }
     }
+
+// First, add the ArtPieceCard view
+private struct ArtPieceCard: View {
+    let artPiece: ArtPiece
+    @Binding var selectedArtPiece: ArtPiece?
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
+                image
+                    .resizable()
+                    .frame(width: 150, height: 150)
+                    .clipShape(Rectangle())
+                    .shadow(radius: 3)
+                    .onTapGesture {
+                        selectedArtPiece = artPiece
+                    }
+            } placeholder: {
+                ProgressView()
+            }
+            
+            Text(artPiece.title)
+                .font(.headline)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: 200)
+
+            Text(artPiece.description)
+                .font(.subheadline)
+                .lineLimit(3)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: 200)
+        }
+        .padding()
+    }
+}
+
 
 

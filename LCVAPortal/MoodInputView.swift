@@ -5,34 +5,79 @@ struct MoodInputView: View {
     @Binding var recommendedArt: [ArtPiece] // Uses your existing ArtPiece model
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var pulseAnimation = false // For skeleton animation
 
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 12) {
             Text("How are you feeling today?")
                 .font(.title2)
+                .foregroundColor(.white)
                 .bold()
                 .multilineTextAlignment(.center)
+                .padding(.bottom, -4)
 
             TextField("Enter your mood (e.g., happy, calm)", text: $mood)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
+                .padding(.horizontal)
+            Text("We'll suggest campus art pieces that match your mood")
+                .font(.caption)
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+                .padding(.top, -4)
+                .padding(.bottom, 4)
 
             Button(action: {
                 fetchRecommendedArt(for: mood)
             }) {
                 if isLoading {
-                    ProgressView()
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.lcvaBlue.opacity(pulseAnimation ? 0.2 : 0.8),
+                                    Color.lcvaNavy.opacity(pulseAnimation ? 0.8 : 0.2)
+                                ],
+                                startPoint: pulseAnimation ? .leading : .trailing,
+                                endPoint: pulseAnimation ? .trailing : .leading
+                            )
+                        )
+                        .frame(width: 160, height: 35)
+                        .shadow(
+                            color: Color.black.opacity(0.15),
+                            radius: 2,
+                            x: 0,
+                            y: 1
+                        )
+                        .onAppear {
+                            withAnimation(
+                                .easeInOut(duration: 1.2)
+                                .repeatForever(autoreverses: true)
+                            ) {
+                                pulseAnimation.toggle()
+                            }
+                        }
                 } else {
-                    Text("Get Recommendations")
+                    Text("Find Art")
+                        .font(.subheadline)
                         .bold()
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.blue)
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(Color.lcvaBlue)
+                                .shadow(
+                                    color: Color.black.opacity(0.15),
+                                    radius: 2,
+                                    x: 0,
+                                    y: 1
+                                )
+                        )
                         .foregroundColor(.white)
-                        .cornerRadius(10)
                 }
             }
             .disabled(isLoading || mood.isEmpty)
+            .frame(maxWidth: 200)
+            .padding(.vertical, 2)
 
             if let errorMessage = errorMessage {
                 Text(errorMessage)
