@@ -105,12 +105,129 @@ struct ContentView: View {
                         // Content
                         ScrollView {
                             VStack {
-                                HoursAccordionView()
-                                    .padding(.top, -20)
+                                // Add padding for notch/camera area
+                                Color.clear
+                                    .frame(height: 35)
+                                
+                                // Mood Input
                                 MoodInputView(recommendedArt: $recommendedArt)
+                                
+                                // Info Accordion
                                 InfoAccordionView()
-                                FeaturedArtistView(sampleArtist: sampleArtist, colorScheme: colorScheme)
-                                FeaturedArtOnCampusView(colorScheme: colorScheme, selectedArtPiece: $selectedArtPiece)
+                                
+                                // Side by side sections
+                                HStack(spacing: 12) {
+                                    // Local Artist Section
+                                    VStack(alignment: .leading, spacing: 12) {
+                                        Text("Local Artist Spotlight")
+                                            .font(.title3)
+                                            .bold()
+                                            .foregroundColor(.white)
+                                            .font(.system(size: 18))
+                                        
+                                        ScrollView(.horizontal, showsIndicators: false) {
+                                            HStack(spacing: 16) {
+                                                ForEach(sampleArtist.imageUrls, id: \.self) { imageUrl in
+                                                    VStack(alignment: .leading) {
+                                                        Image(imageUrl)
+                                                            .resizable()
+                                                            .scaledToFill()
+                                                            .frame(width: 120, height: 120)
+                                                            .clipShape(RoundedRectangle(cornerRadius: 4))
+                                                            .shadow(radius: 2)
+                                                        
+                                                        Text(sampleArtist.name)
+                                                            .font(.callout)
+                                                            .bold()
+                                                            .foregroundColor(.white)
+                                                            .lineLimit(1)
+                                                        
+                                                        Text("Local Artist")
+                                                            .font(.caption)
+                                                            .foregroundColor(.white.opacity(0.7))
+                                                    }
+                                                    .frame(width: 140)
+                                                }
+                                            }
+                                            .padding(.horizontal, 8)
+                                        }
+                                    }
+                                    .padding(.vertical, 12)
+                                    .padding(.horizontal, 16)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 7)
+                                            .fill(Color.lcvaNavy.opacity(0.6))
+                                            .shadow(radius: 3)
+                                    )
+                                    .frame(maxWidth: .infinity)
+                                    .onTapGesture {
+                                        isArtistDetailPresented = true
+                                    }
+                                    .contentShape(Rectangle())
+                                    .buttonStyle(PlainButtonStyle())
+                                    .sheet(isPresented: $isArtistDetailPresented) {
+                                        ArtistDetailModalView(artist: sampleArtist, isPresented: $isArtistDetailPresented)
+                                    }
+                                    
+                                    // Featured Art Section
+                                    VStack(alignment: .leading, spacing: 12) {
+                                        Text("Featured Art on Campus")
+                                            .font(.title3)
+                                            .bold()
+                                            .foregroundColor(.white)
+                                            .font(.system(size: 18))
+                                        
+                                        ScrollView(.horizontal, showsIndicators: false) {
+                                            HStack(spacing: 16) {
+                                                ForEach(featuredArtPieces) { artPiece in
+                                                    VStack(alignment: .leading) {
+                                                        AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
+                                                            image
+                                                                .resizable()
+                                                                .scaledToFill()
+                                                                .frame(width: 120, height: 120)
+                                                                .clipShape(RoundedRectangle(cornerRadius: 4))
+                                                                .shadow(radius: 2)
+                                                        } placeholder: {
+                                                            ProgressView()
+                                                                .frame(width: 140, height: 140)
+                                                        }
+                                                        
+                                                        Text(artPiece.title)
+                                                            .font(.callout)
+                                                            .bold()
+                                                            .foregroundColor(.white)
+                                                            .lineLimit(1)
+                                                        
+                                                        Text("Campus Art")
+                                                            .font(.caption)
+                                                            .foregroundColor(.white.opacity(0.7))
+                                                    }
+                                                    .frame(width: 140)
+                                                    .onTapGesture {
+                                                        selectedArtPiece = artPiece
+                                                    }
+                                                }
+                                            }
+                                            .padding(.horizontal, 8)
+                                        }
+                                    }
+                                    .padding(.vertical, 12)
+                                    .padding(.horizontal, 16)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 7)
+                                            .fill(Color.lcvaNavy.opacity(0.6))
+                                            .shadow(radius: 3)
+                                    )
+                                    .frame(maxWidth: .infinity)
+                                }
+                                .padding(.horizontal)
+                                
+                                // Hours above login
+                                HoursAccordionView()
+                                    .padding(.vertical)
+                                
+                                // Login at the bottom
                                 UserAuthenticationView(userManager: userManager)
                             }
                         }
@@ -216,9 +333,7 @@ struct ContentView: View {
                                     .foregroundColor(.white)
                                     .padding(4)
                                     .padding(.horizontal, 2)
-                                    
                                     .background(Color.lcvaBlue)
-                                    
                                     .cornerRadius(4)
                                     .shadow(radius: 2)
 
@@ -229,10 +344,8 @@ struct ContentView: View {
                                     .foregroundColor(.white)
                                     .padding(4)
                                     .padding(.horizontal, 2)
-                                    
-                                    .background(Color.primary.opacity(0.2))
-                                    
-                                    .cornerRadius(7)
+                                    .background(Color.lcvaBlue.opacity(0.6))
+                                    .cornerRadius(4)
                                     .shadow(radius: 2)
                                 }
                             }
@@ -274,46 +387,15 @@ struct ContentView: View {
                     }
                 }
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    VStack(spacing: -10) {
-                        Text("LONGWOOD")
-                            .font(.system(size: 35, weight: .bold, design: .serif))
-                            .tracking(5)
-                            .offset(y: isAnimating ? 50 : -10)
-                            .opacity(isAnimating ? 1 : 0)
-                            .animation(.easeOut(duration: 1), value: isAnimating)
-                            .padding(.bottom, 10)
-                        
-                        Text("CENTER for the VISUAL ARTS")
-                            .font(.system(size: 25, weight: .regular, design: .serif))
-                            .italic()
-                            .offset(y: isAnimating ? 50 : -10)
-                            .opacity(isAnimating ? 1 : 0)
-                            .animation(.easeOut(duration: 1).delay(0.2), value: isAnimating)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, -30)
-                    .offset(y: -30)
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(Color.primary)
-                    .onAppear {
-                        isAnimating = false
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            isAnimating = true
-                        }
-                    }
-                }
-            }
+            .navigationBarHidden(true)
+            .navigationViewStyle(StackNavigationViewStyle())
+            .accentColor(Color.lcvaBlue)
             
             if showingSplash {
                 SplashView(isPresented: $showingSplash)
                     .transition(.opacity)
             }
         }
-        .navigationViewStyle(StackNavigationViewStyle())
-        .accentColor(Color.lcvaBlue)
     }
 }
 
@@ -557,8 +639,7 @@ struct FeaturedArtistView: View {
         var body: some View {
             Text(name)
                 .font(.system(size: 18))
-//                .italic()
-                // .padding()
+                .foregroundColor(.white)
         }
     }
 
@@ -655,7 +736,7 @@ struct FeaturedArtistView: View {
 
     private struct LearnMoreButton: View {
         let sampleArtist: Artist
-        @Binding var isArtistDetailPresented: Bool // Binding to control modal state
+        @Binding var isArtistDetailPresented: Bool
         
         var body: some View {
             Button(action: {
@@ -766,9 +847,7 @@ struct UserAuthenticationView: View {
                     .foregroundColor(.white)
                     .padding(4)
                     .padding(.horizontal, 2)
-                    
                     .background(Color.lcvaBlue)
-                    
                     .cornerRadius(4)
                     .shadow(radius: 2)
 
@@ -779,10 +858,8 @@ struct UserAuthenticationView: View {
                     .foregroundColor(.white)
                     .padding(4)
                     .padding(.horizontal, 2)
-                    
-                    .background(Color.primary.opacity(0.2))
-                    
-                    .cornerRadius(7)
+                    .background(Color.lcvaBlue.opacity(0.6))
+                    .cornerRadius(4)
                     .shadow(radius: 2)
                 }
             }

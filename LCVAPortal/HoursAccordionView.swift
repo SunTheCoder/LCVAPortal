@@ -19,14 +19,18 @@ struct HoursAccordionView: View {
             },
             label: {
                 Text("Regular Hours")
-                    .font(.system(size: 20, weight: .regular, design: .serif))
-                    .italic()
-                    .foregroundColor(.secondary)
+                    .font(.system(size: 18))
+                    .bold()
+                    .foregroundColor(.white)
             }
         )
+        .accentColor(.white)
         .padding()
-        .background(Color.primary.opacity(0.05))
-        .cornerRadius(10)
+        .background(
+            RoundedRectangle(cornerRadius: 7)
+                .fill(Color.lcvaNavy.opacity(0.6))
+                .shadow(radius: 3)
+        )
         .padding(.horizontal)
     }
 }
