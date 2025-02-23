@@ -344,95 +344,112 @@ struct ContentView: View {
                     
                     // Collection Tab
                     VStack {
-                        // Header with title and buttons
-                        HStack {
-                            // User avatar/profile pic (optional)
-                            Circle()
-                                .fill(Color.gray.opacity(0.3))
-                                .frame(width: 35, height: 35)
+                        ZStack {
+                            // Background gradient
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color.lcvaBlue, Color.white]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            .ignoresSafeArea()
                             
-                            Text("Collections")
-                                .font(.title2)
-                                .bold()
-                            
-                            Spacer()
-                            
-                            // Search and Add buttons
-                            Button(action: { /* Search action */ }) {
-                                Image(systemName: "magnifyingglass")
-                                    .foregroundColor(.primary)
-                            }
-                            .padding(.horizontal, 8)
-                            
-                            Button(action: { /* Add to collection action */ }) {
-                                Image(systemName: "plus")
-                                    .foregroundColor(.primary)
-                            }
-                        }
-                        .padding(.horizontal)
-                        
-                        // Filter buttons
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 12) {
-                                ForEach(["Museum Collection", "Your Collection", "Favorites", "Artists"], id: \.self) { filter in
-                                    Text(filter)
-                                        .font(.subheadline)
-                                        .padding(.horizontal, 16)
-                                        .padding(.vertical, 8)
-                                        .background(Color.gray.opacity(0.2))
-                                        .clipShape(Capsule())
+                            // Existing content
+                            VStack {
+                                // Header with title and buttons
+                                HStack {
+                                    // User avatar/profile pic
+                                    Circle()
+                                        .fill(Color.white.opacity(0.3))  // Made lighter
+                                        .frame(width: 35, height: 35)
+                                    
+                                    Text("Collections")
+                                        .font(.title2)
+                                        .bold()
+                                        .foregroundColor(.white)  // Made white
+                                    
+                                    Spacer()
+                                    
+                                    // Search and Add buttons
+                                    Button(action: { /* Search action */ }) {
+                                        Image(systemName: "magnifyingglass")
+                                            .foregroundColor(.white)  // Made white
+                                    }
+                                    .padding(.horizontal, 8)
+                                    
+                                    Button(action: { /* Add to collection action */ }) {
+                                        Image(systemName: "plus")
+                                            .foregroundColor(.white)  // Made white
+                                    }
                                 }
-                            }
-                            .padding(.horizontal)
-                        }
-                        
-                        // Recent header with sort/view options
-                        HStack {
-                            Text("Recents")
-                                .font(.title3)
-                                .bold()
-                            
-                            Spacer()
-                            
-                            // Grid view toggle
-                            Button(action: { /* Toggle view */ }) {
-                                Image(systemName: "square.grid.2x2")
-                                    .foregroundColor(.primary)
-                            }
-                        }
-                        .padding()
-                        
-                        // Collection items
-                        ScrollView {
-                            LazyVStack(spacing: 16) {
-                                ForEach(featuredArtPieces) { artPiece in
-                                    HStack {
-                                        // Artwork image
-                                        AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
-                                            image
-                                                .resizable()
-                                                .aspectRatio(contentMode: .fill)
-                                                .frame(width: 60, height: 60)
-                                                .clipShape(RoundedRectangle(cornerRadius: 4))
-                                        } placeholder: {
-                                            ProgressView()
-                                                .frame(width: 60, height: 60)
-                                        }
-                                        
-                                        // Artwork info
-                                        VStack(alignment: .leading) {
-                                            Text(artPiece.title)
-                                                .font(.headline)
-                                            Text("Museum Collection")
+                                .padding(.horizontal)
+                                
+                                // Filter buttons
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 12) {
+                                        ForEach(["Museum Collection", "Your Collection", "Favorites", "Artists"], id: \.self) { filter in
+                                            Text(filter)
                                                 .font(.subheadline)
-                                                .foregroundColor(.green)
+                                                .foregroundColor(.white)  // Made white
+                                                .padding(.horizontal, 16)
+                                                .padding(.vertical, 8)
+                                                .background(Color.white.opacity(0.2))  // Made lighter
+                                                .clipShape(Capsule())
                                         }
-                                        
-                                        Spacer()
                                     }
                                     .padding(.horizontal)
-                                    .onTapGesture {
-                                        selectedArtPiece = artPiece
+                                }
+                                
+                                // Recent header with sort/view options
+                                HStack {
+                                    Text("Recents")
+                                        .font(.title3)
+                                        .bold()
+                                        .foregroundColor(.white)  // Made white
+                                    
+                                    Spacer()
+                                    
+                                    // Grid view toggle
+                                    Button(action: { /* Toggle view */ }) {
+                                        Image(systemName: "square.grid.2x2")
+                                            .foregroundColor(.white)  // Made white
+                                    }
+                                }
+                                .padding()
+                                
+                                // Collection items
+                                ScrollView {
+                                    LazyVStack(spacing: 16) {
+                                        ForEach(featuredArtPieces) { artPiece in
+                                            HStack {
+                                                // Artwork image
+                                                AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
+                                                    image
+                                                        .resizable()
+                                                        .aspectRatio(contentMode: .fill)
+                                                        .frame(width: 60, height: 60)
+                                                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                                                } placeholder: {
+                                                    ProgressView()
+                                                        .frame(width: 60, height: 60)
+                                                }
+                                                
+                                                // Artwork info
+                                                VStack(alignment: .leading) {
+                                                    Text(artPiece.title)
+                                                        .font(.headline)
+                                                        .foregroundColor(.white)  // Made white
+                                                    Text("Museum Collection")
+                                                        .font(.subheadline)
+                                                        .foregroundColor(.white.opacity(0.7))  // Made white with opacity
+                                                }
+                                                
+                                                Spacer()
+                                            }
+                                            .padding(.horizontal)
+                                            .onTapGesture {
+                                                selectedArtPiece = artPiece
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -444,117 +461,131 @@ struct ContentView: View {
                     }
                     
                     // Settings Tab
-                    VStack(spacing: 20) {
-                        Text("Settings & ADA")
-                            .font(.title2)
-                            .bold()
-                        
-                        DarkModeToggle()
-                            .padding(.horizontal)
-                        
-                        // Accessibility Assistance Section
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Accessibility")
-                                .font(.headline)
-                                .bold()
-                            
-                            Text("Plan your visit with accommodations")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            
-                            AssistanceOptionButton(
-                                title: "Request Assistance",
-                                icon: "person.fill.checkmark",
-                                action: { /* Form is handled by the button */ }
+                    VStack {
+                        ZStack {
+                            // Background gradient
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color.lcvaBlue, Color.white]),
+                                startPoint: .top,
+                                endPoint: .bottom
                             )
-                        }
-                        .padding()
-                        .background(Color.primary.opacity(0.05))
-                        .cornerRadius(10)
-                        .padding(.horizontal)
-                        
-                        Divider()
-                            .padding(.vertical)
-                        
-                        // User Authentication Section
-                        if userManager.isLoggedIn {
-                            VStack(spacing: 16) {
-                                Text("Welcome, \(userManager.currentUser?.displayName ?? "User")!")
-                                    .font(.title3)
-                                    .bold()
-                                    .multilineTextAlignment(.center)
-                                
-                                Button("Log Out") {
-                                    userManager.logOut()
-                                }
-                                .font(.system(size: 16))
-                                .foregroundColor(.white)
-                                .padding(4)
-                                .padding(.horizontal, 2)
-                                .background(Color.primary.opacity(0.2))
-                                .cornerRadius(7)
-                                .shadow(radius: 2)
-                            }
-                        } else {
-                            // Your existing login/signup form
-                            VStack(spacing: 16) {
-                                TextField("Email", text: $email)
-                                    .autocapitalization(.none)
+                            .ignoresSafeArea()
+                            
+                            // Existing content
+                            ScrollView {
+                                VStack(spacing: 20) {
+                                    Text("Settings & ADA")
+                                        .font(.title2)
+                                        .bold()
+                                    
+                                    DarkModeToggle()
+                                        .padding(.horizontal)
+                                    
+                                    // Accessibility Assistance Section
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text("Accessibility")
+                                            .font(.headline)
+                                            .bold()
+                                        
+                                        Text("Plan your visit with accommodations")
+                                            .font(.subheadline)
+                                            .foregroundColor(.secondary)
+                                        
+                                        AssistanceOptionButton(
+                                            title: "Request Assistance",
+                                            icon: "person.fill.checkmark",
+                                            action: { /* Form is handled by the button */ }
+                                        )
+                                    }
                                     .padding()
-                                    .background(Color.gray.opacity(0.1))
-                                    .cornerRadius(14)
-                                    .shadow(radius: 5)
+                                    .background(Color.primary.opacity(0.05))
+                                    .cornerRadius(10)
+                                    .padding(.horizontal)
+                                    
+                                    Divider()
+                                        .padding(.vertical)
+                                    
+                                    // User Authentication Section
+                                    if userManager.isLoggedIn {
+                                        VStack(spacing: 16) {
+                                            Text("Welcome, \(userManager.currentUser?.displayName ?? "User")!")
+                                                .font(.title3)
+                                                .bold()
+                                                .multilineTextAlignment(.center)
+                                            
+                                            Button("Log Out") {
+                                                userManager.logOut()
+                                            }
+                                            .font(.system(size: 16))
+                                            .foregroundColor(.white)
+                                            .padding(4)
+                                            .padding(.horizontal, 2)
+                                            .background(Color.primary.opacity(0.2))
+                                            .cornerRadius(7)
+                                            .shadow(radius: 2)
+                                        }
+                                    } else {
+                                        // Your existing login/signup form
+                                        VStack(spacing: 16) {
+                                            TextField("Email", text: $email)
+                                                .autocapitalization(.none)
+                                                .padding()
+                                                .background(Color.gray.opacity(0.1))
+                                                .cornerRadius(14)
+                                                .shadow(radius: 5)
 
-                                SecureField("Password", text: $password)
-                                    .padding()
-                                    .background(Color.gray.opacity(0.1))
-                                    .cornerRadius(14)
-                                    .shadow(radius: 5)
+                                            SecureField("Password", text: $password)
+                                                .padding()
+                                                .background(Color.gray.opacity(0.1))
+                                                .cornerRadius(14)
+                                                .shadow(radius: 5)
 
-                                TextField("Name", text: $name)
-                                    .padding()
-                                    .background(Color.gray.opacity(0.1))
-                                    .cornerRadius(14)
-                                    .shadow(radius: 5)
+                                            TextField("Name", text: $name)
+                                                .padding()
+                                                .background(Color.gray.opacity(0.1))
+                                                .cornerRadius(14)
+                                                .shadow(radius: 5)
 
-                                HStack {
-                                    Button("Log In") {
-                                        Task {
-                                            await userManager.logIn(email: email, password: password)
-                                            // Clear fields after successful login
-                                            email = ""
-                                            password = ""
+                                            HStack {
+                                                Button("Log In") {
+                                                    Task {
+                                                        await userManager.logIn(email: email, password: password)
+                                                        // Clear fields after successful login
+                                                        email = ""
+                                                        password = ""
+                                                    }
+                                                }
+                                                .font(.system(size: 16))
+                                                .foregroundColor(.white)
+                                                .padding(4)
+                                                .padding(.horizontal, 2)
+                                                .background(Color.lcvaBlue)
+                                                .cornerRadius(4)
+                                                .shadow(radius: 2)
+
+                                                Button("Sign Up") {
+                                                    Task {
+                                                        await userManager.signUp(email: email, password: password, name: name, preferences: preferences)
+                                                        // Clear fields after successful signup
+                                                        email = ""
+                                                        password = ""
+                                                        name = ""
+                                                    }
+                                                }
+                                                .font(.system(size: 16))
+                                                .foregroundColor(.white)
+                                                .padding(4)
+                                                .padding(.horizontal, 2)
+                                                .background(Color.lcvaBlue.opacity(0.6))
+                                                .cornerRadius(4)
+                                                .shadow(radius: 2)
+                                            }
                                         }
                                     }
-                                    .font(.system(size: 16))
-                                    .foregroundColor(.white)
-                                    .padding(4)
-                                    .padding(.horizontal, 2)
-                                    .background(Color.lcvaBlue)
-                                    .cornerRadius(4)
-                                    .shadow(radius: 2)
-
-                                    Button("Sign Up") {
-                                        Task {
-                                            await userManager.signUp(email: email, password: password, name: name, preferences: preferences)
-                                            // Clear fields after successful signup
-                                            email = ""
-                                            password = ""
-                                            name = ""
-                                        }
-                                    }
-                                    .font(.system(size: 16))
-                                    .foregroundColor(.white)
-                                    .padding(4)
-                                    .padding(.horizontal, 2)
-                                    .background(Color.lcvaBlue.opacity(0.6))
-                                    .cornerRadius(4)
-                                    .shadow(radius: 2)
                                 }
                             }
                         }
                     }
-                    .padding()
                     .tag(2)
                     .tabItem {
                         Label("Settings & ADA", systemImage: "gear")

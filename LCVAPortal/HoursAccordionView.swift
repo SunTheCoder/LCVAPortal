@@ -8,14 +8,15 @@ struct HoursAccordionView: View {
             isExpanded: $isExpanded,
             content: {
                 VStack(alignment: .leading, spacing: 8) {
-                    HourRow(day: "Monday", hours: "11:00 AM - 5:00 PM")
+                    HourRow(day: "Monday", hours: "Closed")
                     HourRow(day: "Tuesday", hours: "11:00 AM - 5:00 PM")
                     HourRow(day: "Wednesday", hours: "11:00 AM - 5:00 PM")
                     HourRow(day: "Thursday", hours: "11:00 AM - 5:00 PM")
                     HourRow(day: "Friday", hours: "11:00 AM - 5:00 PM")
-                    HourRow(day: "Saturday - Sunday", hours: "Closed")
+                    HourRow(day: "Saturday - Sunday", hours: "1:00 PM - 5:00 PM")
                 }
                 .padding(.vertical, 8)
+                .foregroundColor(.white)
             },
             label: {
                 Text("Regular Hours")
@@ -44,9 +45,10 @@ struct HourRow: View {
             Text(day)
                 .frame(width: 120, alignment: .leading)
                 .font(.subheadline)
+                .foregroundColor(.white)
             Text(hours)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(.white)
         }
     }
 }
