@@ -327,7 +327,12 @@ struct ContentView: View {
 
                                 HStack {
                                     Button("Log In") {
-                                        userManager.logIn(email: email, password: password)
+                                        Task {
+                                            await userManager.logIn(email: email, password: password)
+                                            // Clear fields after successful login
+                                            email = ""
+                                            password = ""
+                                        }
                                     }
                                     .font(.system(size: 16))
                                     .foregroundColor(.white)
@@ -338,7 +343,13 @@ struct ContentView: View {
                                     .shadow(radius: 2)
 
                                     Button("Sign Up") {
-                                        userManager.signUp(email: email, password: password, name: name, preferences: preferences)
+                                        Task {
+                                            await userManager.signUp(email: email, password: password, name: name, preferences: preferences)
+                                            // Clear fields after successful signup
+                                            email = ""
+                                            password = ""
+                                            name = ""
+                                        }
                                     }
                                     .font(.system(size: 16))
                                     .foregroundColor(.white)
@@ -841,7 +852,12 @@ struct UserAuthenticationView: View {
 
                 HStack {
                     Button("Log In") {
-                        userManager.logIn(email: email, password: password)
+                        Task {
+                            await userManager.logIn(email: email, password: password)
+                            // Clear fields after successful login
+                            email = ""
+                            password = ""
+                        }
                     }
                     .font(.system(size: 16))
                     .foregroundColor(.white)
@@ -852,7 +868,13 @@ struct UserAuthenticationView: View {
                     .shadow(radius: 2)
 
                     Button("Sign Up") {
-                        userManager.signUp(email: email, password: password, name: name, preferences: preferences)
+                        Task {
+                            await userManager.signUp(email: email, password: password, name: name, preferences: preferences)
+                            // Clear fields after successful signup
+                            email = ""
+                            password = ""
+                            name = ""
+                        }
                     }
                     .font(.system(size: 16))
                     .foregroundColor(.white)
