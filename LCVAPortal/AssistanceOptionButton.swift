@@ -146,8 +146,15 @@ struct AssistanceRequestForm: View {
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding()
-                                .background(Color.lcvaBlue)
+                                .background(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [Color.lcvaBlue.opacity(0.6), Color.white.opacity(0.1)]),
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
                                 .cornerRadius(10)
+                                .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 2)
                         }
                     }
                     .padding()
