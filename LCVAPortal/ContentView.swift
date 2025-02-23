@@ -84,6 +84,7 @@ struct ContentView: View {
     @State private var recommendedArt: [ArtPiece] = [] // State to store mood-based recommendations
     @State private var selectedTab = 0
 
+    @State private var selectedExhibition: Exhibition? = nil
     
     @Environment(\.colorScheme) var colorScheme
     @State private var showingSplash = true
@@ -115,15 +116,120 @@ struct ContentView: View {
                                 // Info Accordion
                                 InfoAccordionView()
                                 
-                                // Side by side sections
+                                // First row: Exhibitions
+                                HStack(spacing: 12) {
+                                    // Current Shows Section
+                                    VStack(alignment: .leading, spacing: 12) {
+                                        Text("Current Shows")
+                                            .font(.system(size: 18))
+                                            .bold()
+                                            .foregroundColor(.white)
+                                        
+                                        ScrollView(.horizontal, showsIndicators: false) {
+                                            HStack(spacing: 16) {
+                                                ForEach(activeExhibitions) { exhibition in
+                                                    VStack(alignment: .leading) {
+                                                        AsyncImage(url: URL(string: exhibition.imageUrl)) { image in
+                                                            image
+                                                                .resizable()
+                                                                .scaledToFill()
+                                                                .frame(width: 160, height: 160)
+                                                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                                .shadow(radius: 2)
+                                                        } placeholder: {
+                                                            ProgressView()
+                                                                .frame(width: 160, height: 160)
+                                                        }
+                                                        
+                                                        Text(exhibition.title)
+                                                            .font(.callout)
+                                                            .bold()
+                                                            .foregroundColor(.white)
+                                                            .lineLimit(1)
+                                                        
+                                                        Text(exhibition.reception)
+                                                            .font(.caption)
+                                                            .foregroundColor(.white.opacity(0.7))
+                                                    }
+                                                    .frame(width: 180)
+                                                    .onTapGesture {
+                                                        selectedExhibition = exhibition
+                                                    }
+                                                }
+                                            }
+                                            .padding(.horizontal, 8)
+                                        }
+                                    }
+                                    .padding(.vertical, 12)
+                                    .padding(.horizontal, 16)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 7)
+                                            .fill(Color.lcvaNavy.opacity(0.6))
+                                            .shadow(radius: 3)
+                                    )
+                                    .frame(maxWidth: .infinity)
+                                    
+                                    // Past Shows Section
+                                    VStack(alignment: .leading, spacing: 12) {
+                                        Text("Past Shows")
+                                            .font(.system(size: 18))
+                                            .bold()
+                                            .foregroundColor(.white)
+                                        
+                                        ScrollView(.horizontal, showsIndicators: false) {
+                                            HStack(spacing: 16) {
+                                                ForEach(pastExhibitions) { exhibition in
+                                                    VStack(alignment: .leading) {
+                                                        AsyncImage(url: URL(string: exhibition.imageUrl)) { image in
+                                                            image
+                                                                .resizable()
+                                                                .scaledToFill()
+                                                                .frame(width: 160, height: 160)
+                                                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                                .shadow(radius: 2)
+                                                        } placeholder: {
+                                                            ProgressView()
+                                                                .frame(width: 160, height: 160)
+                                                        }
+                                                        
+                                                        Text(exhibition.title)
+                                                            .font(.callout)
+                                                            .bold()
+                                                            .foregroundColor(.white)
+                                                            .lineLimit(1)
+                                                        
+                                                        Text(exhibition.reception)
+                                                            .font(.caption)
+                                                            .foregroundColor(.white.opacity(0.7))
+                                                    }
+                                                    .frame(width: 180)
+                                                    .onTapGesture {
+                                                        selectedExhibition = exhibition
+                                                    }
+                                                }
+                                            }
+                                            .padding(.horizontal, 8)
+                                        }
+                                    }
+                                    .padding(.vertical, 12)
+                                    .padding(.horizontal, 16)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 7)
+                                            .fill(Color.lcvaNavy.opacity(0.6))
+                                            .shadow(radius: 3)
+                                    )
+                                    .frame(maxWidth: .infinity)
+                                }
+                                .padding(.horizontal)
+                                
+                                // Second row: Existing Artist and Art sections
                                 HStack(spacing: 12) {
                                     // Local Artist Section
                                     VStack(alignment: .leading, spacing: 12) {
                                         Text("Local Artist Spotlight")
-                                            .font(.title3)
+                                            .font(.system(size: 16))
                                             .bold()
                                             .foregroundColor(.white)
-                                            .font(.system(size: 18))
                                         
                                         ScrollView(.horizontal, showsIndicators: false) {
                                             HStack(spacing: 16) {
@@ -132,7 +238,7 @@ struct ContentView: View {
                                                         Image(imageUrl)
                                                             .resizable()
                                                             .scaledToFill()
-                                                            .frame(width: 120, height: 120)
+                                                            .frame(width: 100, height: 100)
                                                             .clipShape(RoundedRectangle(cornerRadius: 4))
                                                             .shadow(radius: 2)
                                                         
@@ -146,14 +252,14 @@ struct ContentView: View {
                                                             .font(.caption)
                                                             .foregroundColor(.white.opacity(0.7))
                                                     }
-                                                    .frame(width: 140)
+                                                    .frame(width: 120)
                                                 }
                                             }
                                             .padding(.horizontal, 8)
                                         }
                                     }
-                                    .padding(.vertical, 12)
-                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 10)
+                                    .padding(.horizontal, 14)
                                     .background(
                                         RoundedRectangle(cornerRadius: 7)
                                             .fill(Color.lcvaNavy.opacity(0.6))
@@ -172,10 +278,9 @@ struct ContentView: View {
                                     // Featured Art Section
                                     VStack(alignment: .leading, spacing: 12) {
                                         Text("Featured Art on Campus")
-                                            .font(.title3)
+                                            .font(.system(size: 16))
                                             .bold()
                                             .foregroundColor(.white)
-                                            .font(.system(size: 18))
                                         
                                         ScrollView(.horizontal, showsIndicators: false) {
                                             HStack(spacing: 16) {
@@ -185,12 +290,12 @@ struct ContentView: View {
                                                             image
                                                                 .resizable()
                                                                 .scaledToFill()
-                                                                .frame(width: 120, height: 120)
+                                                                .frame(width: 100, height: 100)
                                                                 .clipShape(RoundedRectangle(cornerRadius: 4))
                                                                 .shadow(radius: 2)
                                                         } placeholder: {
                                                             ProgressView()
-                                                                .frame(width: 140, height: 140)
+                                                                .frame(width: 100, height: 100)
                                                         }
                                                         
                                                         Text(artPiece.title)
@@ -203,7 +308,7 @@ struct ContentView: View {
                                                             .font(.caption)
                                                             .foregroundColor(.white.opacity(0.7))
                                                     }
-                                                    .frame(width: 140)
+                                                    .frame(width: 120)
                                                     .onTapGesture {
                                                         selectedArtPiece = artPiece
                                                     }
@@ -212,8 +317,8 @@ struct ContentView: View {
                                             .padding(.horizontal, 8)
                                         }
                                     }
-                                    .padding(.vertical, 12)
-                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 10)
+                                    .padding(.horizontal, 14)
                                     .background(
                                         RoundedRectangle(cornerRadius: 7)
                                             .fill(Color.lcvaNavy.opacity(0.6))
@@ -237,19 +342,106 @@ struct ContentView: View {
                         Label("Home", systemImage: "house.fill")
                     }
                     
-                    // Current Exhibitions Tab
-                    ExhibitionsTabView(exhibitions: activeExhibitions)
-                        .tag(1)
-                        .tabItem {
-                            Label("Current Exhibitions", systemImage: "photo.stack.fill")
+                    // Collection Tab
+                    VStack {
+                        // Header with title and buttons
+                        HStack {
+                            // User avatar/profile pic (optional)
+                            Circle()
+                                .fill(Color.gray.opacity(0.3))
+                                .frame(width: 35, height: 35)
+                            
+                            Text("Collections")
+                                .font(.title2)
+                                .bold()
+                            
+                            Spacer()
+                            
+                            // Search and Add buttons
+                            Button(action: { /* Search action */ }) {
+                                Image(systemName: "magnifyingglass")
+                                    .foregroundColor(.primary)
+                            }
+                            .padding(.horizontal, 8)
+                            
+                            Button(action: { /* Add to collection action */ }) {
+                                Image(systemName: "plus")
+                                    .foregroundColor(.primary)
+                            }
                         }
-                    
-                    // Past Exhibitions Tab
-                    ExhibitionsTabView(exhibitions: pastExhibitions)
-                        .tag(2)
-                        .tabItem {
-                            Label("Past Exhibitions", systemImage: "clock.fill")
+                        .padding(.horizontal)
+                        
+                        // Filter buttons
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 12) {
+                                ForEach(["Museum Collection", "Your Collection", "Favorites", "Artists"], id: \.self) { filter in
+                                    Text(filter)
+                                        .font(.subheadline)
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 8)
+                                        .background(Color.gray.opacity(0.2))
+                                        .clipShape(Capsule())
+                                }
+                            }
+                            .padding(.horizontal)
                         }
+                        
+                        // Recent header with sort/view options
+                        HStack {
+                            Text("Recents")
+                                .font(.title3)
+                                .bold()
+                            
+                            Spacer()
+                            
+                            // Grid view toggle
+                            Button(action: { /* Toggle view */ }) {
+                                Image(systemName: "square.grid.2x2")
+                                    .foregroundColor(.primary)
+                            }
+                        }
+                        .padding()
+                        
+                        // Collection items
+                        ScrollView {
+                            LazyVStack(spacing: 16) {
+                                ForEach(featuredArtPieces) { artPiece in
+                                    HStack {
+                                        // Artwork image
+                                        AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
+                                            image
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .frame(width: 60, height: 60)
+                                                .clipShape(RoundedRectangle(cornerRadius: 4))
+                                        } placeholder: {
+                                            ProgressView()
+                                                .frame(width: 60, height: 60)
+                                        }
+                                        
+                                        // Artwork info
+                                        VStack(alignment: .leading) {
+                                            Text(artPiece.title)
+                                                .font(.headline)
+                                            Text("Museum Collection")
+                                                .font(.subheadline)
+                                                .foregroundColor(.green)
+                                        }
+                                        
+                                        Spacer()
+                                    }
+                                    .padding(.horizontal)
+                                    .onTapGesture {
+                                        selectedArtPiece = artPiece
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .tag(1)
+                    .tabItem {
+                        Label("Collections", systemImage: "line.3.horizontal")
+                    }
                     
                     // Settings Tab
                     VStack(spacing: 20) {
@@ -363,7 +555,7 @@ struct ContentView: View {
                         }
                     }
                     .padding()
-                    .tag(3)
+                    .tag(2)
                     .tabItem {
                         Label("Settings & ADA", systemImage: "gear")
                     }
@@ -407,6 +599,23 @@ struct ContentView: View {
                     .transition(.opacity)
             }
         }
+        .sheet(item: $selectedExhibition) { exhibition in
+            ExhibitionDetailModalView(
+                exhibition: exhibition,
+                isPresented: Binding(
+                    get: { selectedExhibition != nil },
+                    set: { if !$0 { selectedExhibition = nil } }
+                )
+            )
+        }
+    }
+
+    private func formatDate(_ reception: String) -> String {
+        // Split the string by commas
+        let parts = reception.split(separator: ",")
+        
+        // Return the second part if it exists, trimmed of extra spaces
+        return parts.count > 1 ? parts[1].trimmingCharacters(in: .whitespaces) + ", " + parts[2].trimmingCharacters(in: .whitespaces) : reception
     }
 }
 
@@ -574,7 +783,7 @@ struct CurrentExhibitionsView: View {
         let parts = reception.split(separator: ",")
         
         // Return the second part if it exists, trimmed of extra spaces
-        return parts.count > 1 ? parts[1].trimmingCharacters(in: .whitespaces) + ", " + parts[2].trimmingCharacters(in: .whitespaces): reception
+        return parts.count > 1 ? parts[1].trimmingCharacters(in: .whitespaces) + ", " + parts[2].trimmingCharacters(in: .whitespaces) : reception
     }
 
     private func formatTime(_ reception: String) -> String {
