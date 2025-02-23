@@ -9,14 +9,14 @@ struct MoodInputView: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            Text("How are you feeling today?")
+            Text("How is everything going?")
                 .font(.title2)
                 .foregroundColor(.white)
                 .bold()
                 .multilineTextAlignment(.center)
                 .padding(.bottom, -4)
 
-            TextField("Enter your mood (e.g., happy, calm)", text: $mood)
+            TextField("(e.g., happy, calm, great class, hard test)", text: $mood)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding(.horizontal)
             Text("We'll suggest campus art pieces that match your mood")
