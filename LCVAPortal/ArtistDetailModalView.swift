@@ -14,55 +14,69 @@ struct ArtistDetailModalView: View {
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(alignment: .center, spacing: 20) {
-                    Text(artist.name)
-                        .font(.system(size: 28))
-                        .bold()
-                        .padding(.top)
-                    
-                    Text(artist.bio)
-                        .font(.body)
-                        .padding(.bottom)
-                    
-                    
-                    
-                    Text("Video")
-                        .font(.system(size: 20, weight: .regular, design: .serif))
-                        .italic()
-                        .foregroundColor(.secondary)
-                    
-                    ForEach(artist.videos.prefix(3), id: \.self) { video in
-                        VideoPlayerView(videoName: video)
-                            .scaledToFill()
-                            .frame(maxWidth: 400, maxHeight: 400)
-                            .clipShape(RoundedRectangle(cornerRadius: 7))
-                            .padding(.vertical, 10)
+            ZStack {
+                // Add background gradient
+                LinearGradient(
+                    gradient: Gradient(colors: [Color.lcvaBlue, Color.white]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(alignment: .center, spacing: 20) {
+                        Text(artist.name)
+                            .font(.system(size: 28))
+                            .bold()
+                            .foregroundColor(.white)  // Made white
+                            .padding(.top)
+                        
+                        Text(artist.bio)
+                            .font(.body)
+                            .foregroundColor(.white)  // Made white
+                            .padding(.bottom)
+                        
+                        Text("Video")
+                            .font(.system(size: 20, weight: .regular, design: .serif))
+                            .italic()
+                            .foregroundColor(.white.opacity(0.7))  // Made white with opacity
+                        
+                        ForEach(artist.videos.prefix(3), id: \.self) { video in
+                            VideoPlayerView(videoName: video)
+                                .scaledToFill()
+                                .frame(maxWidth: 400, maxHeight: 400)
+                                .clipShape(RoundedRectangle(cornerRadius: 7))
+                                .padding(.vertical, 10)
+                        }
+                        
+                        Text("Mixed Media")
+                            .font(.system(size: 20, weight: .regular, design: .serif))
+                            .italic()
+                            .foregroundColor(.white.opacity(0.7))  // Made white with opacity
+                        
+                        ForEach(artist.imageUrls, id: \.self) { imageUrl in
+                            Image(imageUrl)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(maxWidth: 400, maxHeight: 400)
+                                .clipShape(RoundedRectangle(cornerRadius: 7))
+                                .padding(.vertical, 10)
+                        }
                     }
-                    
-                    Text("Mixed Media")
-                        .font(.system(size: 20, weight: .regular, design: .serif))
-                        .italic()
-                        .foregroundColor(.secondary)
-                    
-                    ForEach(artist.imageUrls, id: \.self) { imageUrl in
-                        Image(imageUrl)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(maxWidth: 400, maxHeight: 400)  // Set the size as desired
-                            .clipShape(RoundedRectangle(cornerRadius: 7))  // Optional: Rounded corners
-                            .padding(.vertical, 10)  // Vertical padding to center the images in the ScrollView
-                    }
+                    .padding()
                 }
-                .padding()
             }
-            .navigationTitle("Local Artist Spotlight")
+            .navigationTitle("Artist Spotlight")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Color.lcvaBlue, for: .navigationBar)  // Added blue nav background
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)  // Force white text
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close") {
                         isPresented = false
                     }
+                    .foregroundColor(.white)  // Made white
                 }
             }
         }

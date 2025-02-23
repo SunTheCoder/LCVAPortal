@@ -39,7 +39,7 @@ struct SplashView: View {
                     .offset(x: isAnimating ? 0 : UIScreen.main.bounds.width)
                     .opacity(isAnimating ? 1 : 0)
             }
-            .foregroundColor(Color.lcvaNavy)
+            .foregroundColor(.white)
             .opacity(opacity)
         }
         .ignoresSafeArea()
@@ -66,7 +66,9 @@ struct ContentView: View {
     let activeExhibitions = currentExhibitions
     let sampleArtist = Artist(
         name: "Sun English Jr.",
+        medium: "Sculpture",
         bio: "Sun English Jr. is a sculptor and performance artist known for immersive installations.",
+        
         imageUrls: ["Black Front", "M1", "Poison I", "Poison II"],
         videos: ["small", "immure"]
     )
@@ -125,39 +127,43 @@ struct ContentView: View {
                                             .bold()
                                             .foregroundColor(.white)
                                         
-                                        ScrollView(.horizontal, showsIndicators: false) {
-                                            HStack(spacing: 16) {
-                                                ForEach(activeExhibitions) { exhibition in
-                                                    VStack(alignment: .leading) {
-                                                        AsyncImage(url: URL(string: exhibition.imageUrl)) { image in
-                                                            image
-                                                                .resizable()
-                                                                .scaledToFill()
-                                                                .frame(width: 160, height: 160)
-                                                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                                .shadow(radius: 2)
-                                                        } placeholder: {
-                                                            ProgressView()
-                                                                .frame(width: 160, height: 160)
+                                        ZStack {
+                                            ScrollView(.horizontal, showsIndicators: false) {
+                                                HStack(spacing: 16) {
+                                                    ForEach(activeExhibitions) { exhibition in
+                                                        VStack(alignment: .leading) {
+                                                            AsyncImage(url: URL(string: exhibition.imageUrl)) { image in
+                                                                image
+                                                                    .resizable()
+                                                                    .scaledToFill()
+                                                                    .frame(width: 160, height: 160)
+                                                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                                    .shadow(radius: 2)
+                                                            } placeholder: {
+                                                                ProgressView()
+                                                                    .frame(width: 160, height: 160)
+                                                            }
+                                                            
+                                                            Text(exhibition.title)
+                                                                .font(.callout)
+                                                                .bold()
+                                                                .foregroundColor(.white)
+                                                                .lineLimit(1)
+                                                            
+                                                            Text(exhibition.reception)
+                                                                .font(.caption)
+                                                                .foregroundColor(.white.opacity(0.7))
                                                         }
-                                                        
-                                                        Text(exhibition.title)
-                                                            .font(.callout)
-                                                            .bold()
-                                                            .foregroundColor(.white)
-                                                            .lineLimit(1)
-                                                        
-                                                        Text(exhibition.reception)
-                                                            .font(.caption)
-                                                            .foregroundColor(.white.opacity(0.7))
-                                                    }
-                                                    .frame(width: 180)
-                                                    .onTapGesture {
-                                                        selectedExhibition = exhibition
+                                                        .frame(width: 180)
+                                                        .onTapGesture {
+                                                            selectedExhibition = exhibition
+                                                        }
                                                     }
                                                 }
+                                                .padding(.horizontal, 8)
                                             }
-                                            .padding(.horizontal, 8)
+                                            
+                                            ScrollArrowIndicators()
                                         }
                                     }
                                     .padding(.vertical, 12)
@@ -176,39 +182,43 @@ struct ContentView: View {
                                             .bold()
                                             .foregroundColor(.white)
                                         
-                                        ScrollView(.horizontal, showsIndicators: false) {
-                                            HStack(spacing: 16) {
-                                                ForEach(pastExhibitions) { exhibition in
-                                                    VStack(alignment: .leading) {
-                                                        AsyncImage(url: URL(string: exhibition.imageUrl)) { image in
-                                                            image
-                                                                .resizable()
-                                                                .scaledToFill()
-                                                                .frame(width: 160, height: 160)
-                                                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                                .shadow(radius: 2)
-                                                        } placeholder: {
-                                                            ProgressView()
-                                                                .frame(width: 160, height: 160)
+                                        ZStack {
+                                            ScrollView(.horizontal, showsIndicators: false) {
+                                                HStack(spacing: 16) {
+                                                    ForEach(pastExhibitions) { exhibition in
+                                                        VStack(alignment: .leading) {
+                                                            AsyncImage(url: URL(string: exhibition.imageUrl)) { image in
+                                                                image
+                                                                    .resizable()
+                                                                    .scaledToFill()
+                                                                    .frame(width: 160, height: 160)
+                                                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                                    .shadow(radius: 2)
+                                                            } placeholder: {
+                                                                ProgressView()
+                                                                    .frame(width: 160, height: 160)
+                                                            }
+                                                            
+                                                            Text(exhibition.title)
+                                                                .font(.callout)
+                                                                .bold()
+                                                                .foregroundColor(.white)
+                                                                .lineLimit(1)
+                                                            
+                                                            Text(exhibition.reception)
+                                                                .font(.caption)
+                                                                .foregroundColor(.white.opacity(0.7))
                                                         }
-                                                        
-                                                        Text(exhibition.title)
-                                                            .font(.callout)
-                                                            .bold()
-                                                            .foregroundColor(.white)
-                                                            .lineLimit(1)
-                                                        
-                                                        Text(exhibition.reception)
-                                                            .font(.caption)
-                                                            .foregroundColor(.white.opacity(0.7))
-                                                    }
-                                                    .frame(width: 180)
-                                                    .onTapGesture {
-                                                        selectedExhibition = exhibition
+                                                        .frame(width: 180)
+                                                        .onTapGesture {
+                                                            selectedExhibition = exhibition
+                                                        }
                                                     }
                                                 }
+                                                .padding(.horizontal, 8)
                                             }
-                                            .padding(.horizontal, 8)
+                                            
+                                            ScrollArrowIndicators()
                                         }
                                     }
                                     .padding(.vertical, 12)
@@ -226,36 +236,40 @@ struct ContentView: View {
                                 HStack(spacing: 12) {
                                     // Local Artist Section
                                     VStack(alignment: .leading, spacing: 12) {
-                                        Text("Local Artist Spotlight")
+                                        Text("Artist Spotlight")
                                             .font(.system(size: 16))
                                             .bold()
                                             .foregroundColor(.white)
                                         
-                                        ScrollView(.horizontal, showsIndicators: false) {
-                                            HStack(spacing: 16) {
-                                                ForEach(sampleArtist.imageUrls, id: \.self) { imageUrl in
-                                                    VStack(alignment: .leading) {
-                                                        Image(imageUrl)
-                                                            .resizable()
-                                                            .scaledToFill()
-                                                            .frame(width: 100, height: 100)
-                                                            .clipShape(RoundedRectangle(cornerRadius: 4))
-                                                            .shadow(radius: 2)
-                                                        
-                                                        Text(sampleArtist.name)
-                                                            .font(.callout)
-                                                            .bold()
-                                                            .foregroundColor(.white)
-                                                            .lineLimit(1)
-                                                        
-                                                        Text("Local Artist")
-                                                            .font(.caption)
-                                                            .foregroundColor(.white.opacity(0.7))
+                                        ZStack {
+                                            ScrollView(.horizontal, showsIndicators: false) {
+                                                HStack(spacing: 16) {
+                                                    ForEach(sampleArtist.imageUrls, id: \.self) { imageUrl in
+                                                        VStack(alignment: .leading) {
+                                                            Image(imageUrl)
+                                                                .resizable()
+                                                                .scaledToFill()
+                                                                .frame(width: 100, height: 100)
+                                                                .clipShape(RoundedRectangle(cornerRadius: 4))
+                                                                .shadow(radius: 2)
+                                                            
+                                                            Text(sampleArtist.name)
+                                                                .font(.callout)
+                                                                .bold()
+                                                                .foregroundColor(.white)
+                                                                .lineLimit(1)
+                                                            
+                                                            Text(sampleArtist.medium)
+                                                                .font(.caption)
+                                                                .foregroundColor(.white.opacity(0.7))
+                                                        }
+                                                        .frame(width: 120)
                                                     }
-                                                    .frame(width: 120)
                                                 }
+                                                .padding(.horizontal, 8)
                                             }
-                                            .padding(.horizontal, 8)
+                                            
+                                            ScrollArrowIndicators()
                                         }
                                     }
                                     .padding(.vertical, 10)
@@ -282,39 +296,43 @@ struct ContentView: View {
                                             .bold()
                                             .foregroundColor(.white)
                                         
-                                        ScrollView(.horizontal, showsIndicators: false) {
-                                            HStack(spacing: 16) {
-                                                ForEach(featuredArtPieces) { artPiece in
-                                                    VStack(alignment: .leading) {
-                                                        AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
-                                                            image
-                                                                .resizable()
-                                                                .scaledToFill()
-                                                                .frame(width: 100, height: 100)
-                                                                .clipShape(RoundedRectangle(cornerRadius: 4))
-                                                                .shadow(radius: 2)
-                                                        } placeholder: {
-                                                            ProgressView()
-                                                                .frame(width: 100, height: 100)
+                                        ZStack {
+                                            ScrollView(.horizontal, showsIndicators: false) {
+                                                HStack(spacing: 16) {
+                                                    ForEach(featuredArtPieces) { artPiece in
+                                                        VStack(alignment: .leading) {
+                                                            AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
+                                                                image
+                                                                    .resizable()
+                                                                    .scaledToFill()
+                                                                    .frame(width: 100, height: 100)
+                                                                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                                                                    .shadow(radius: 2)
+                                                            } placeholder: {
+                                                                ProgressView()
+                                                                    .frame(width: 100, height: 100)
+                                                            }
+                                                            
+                                                            Text(artPiece.title)
+                                                                .font(.callout)
+                                                                .bold()
+                                                                .foregroundColor(.white)
+                                                                .lineLimit(1)
+                                                            
+                                                            Text("Campus Art")
+                                                                .font(.caption)
+                                                                .foregroundColor(.white.opacity(0.7))
                                                         }
-                                                        
-                                                        Text(artPiece.title)
-                                                            .font(.callout)
-                                                            .bold()
-                                                            .foregroundColor(.white)
-                                                            .lineLimit(1)
-                                                        
-                                                        Text("Campus Art")
-                                                            .font(.caption)
-                                                            .foregroundColor(.white.opacity(0.7))
-                                                    }
-                                                    .frame(width: 120)
-                                                    .onTapGesture {
-                                                        selectedArtPiece = artPiece
+                                                        .frame(width: 120)
+                                                        .onTapGesture {
+                                                            selectedArtPiece = artPiece
+                                                        }
                                                     }
                                                 }
+                                                .padding(.horizontal, 8)
                                             }
-                                            .padding(.horizontal, 8)
+                                            
+                                            ScrollArrowIndicators()
                                         }
                                     }
                                     .padding(.vertical, 10)
@@ -847,7 +865,7 @@ struct FeaturedArtistView: View {
 
     var body: some View {
         VStack(alignment: .center, spacing: 16) {
-            Text("Local Artist Spotlight")
+            Text("Artist Spotlight")
                 .font(.title2)
                 .bold()
                 .foregroundColor(.white)
@@ -1190,6 +1208,32 @@ struct CustomTextFieldStyle: TextFieldStyle {
             .background(Color.white.opacity(0.1))
             .cornerRadius(14)
             .shadow(radius: 5)
+    }
+}
+
+// First, add this helper view
+struct ScrollArrowIndicators: View {
+    var body: some View {
+        HStack {
+            // Left arrow
+            Image(systemName: "chevron.left")
+                .foregroundColor(.white)
+                .opacity(0.6)
+                .padding(8)
+                .background(Color.black.opacity(0.2))
+                .clipShape(Circle())
+            
+            Spacer()
+            
+            // Right arrow
+            Image(systemName: "chevron.right")
+                .foregroundColor(.white)
+                .opacity(0.6)
+                .padding(8)
+                .background(Color.black.opacity(0.2))
+                .clipShape(Circle())
+        }
+        .padding(.horizontal, 4)
     }
 }
 

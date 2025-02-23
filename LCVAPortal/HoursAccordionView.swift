@@ -13,7 +13,8 @@ struct HoursAccordionView: View {
                     HourRow(day: "Wednesday", hours: "11:00 AM - 5:00 PM")
                     HourRow(day: "Thursday", hours: "11:00 AM - 5:00 PM")
                     HourRow(day: "Friday", hours: "11:00 AM - 5:00 PM")
-                    HourRow(day: "Saturday - Sunday", hours: "1:00 PM - 5:00 PM")
+                    HourRow(day: "Saturday", hours: "11:00 AM - 5:00 PM")
+                    HourRow(day: "Sunday", hours: "1:00 PM - 5:00 PM")
                 }
                 .padding(.vertical, 8)
                 .foregroundColor(.white)
