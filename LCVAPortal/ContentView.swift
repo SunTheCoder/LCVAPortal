@@ -277,7 +277,7 @@ struct ContentView: View {
                                     
                                     // Featured Art Section
                                     VStack(alignment: .leading, spacing: 12) {
-                                        Text("Featured Art on Campus")
+                                        Text("Featured Art")
                                             .font(.system(size: 16))
                                             .bold()
                                             .foregroundColor(.white)
@@ -471,12 +471,12 @@ struct ContentView: View {
                             )
                             .ignoresSafeArea()
                             
-                            // Existing content
                             ScrollView {
                                 VStack(spacing: 20) {
                                     Text("Settings & ADA")
                                         .font(.title2)
                                         .bold()
+                                        .foregroundColor(.white)
                                     
                                     DarkModeToggle()
                                         .padding(.horizontal)
@@ -486,10 +486,11 @@ struct ContentView: View {
                                         Text("Accessibility")
                                             .font(.headline)
                                             .bold()
+                                            .foregroundColor(.white)
                                         
                                         Text("Plan your visit with accommodations")
                                             .font(.subheadline)
-                                            .foregroundColor(.secondary)
+                                            .foregroundColor(.white.opacity(0.7))
                                         
                                         AssistanceOptionButton(
                                             title: "Request Assistance",
@@ -498,11 +499,12 @@ struct ContentView: View {
                                         )
                                     }
                                     .padding()
-                                    .background(Color.primary.opacity(0.05))
+                                    .background(Color.white.opacity(0.1))
                                     .cornerRadius(10)
                                     .padding(.horizontal)
                                     
                                     Divider()
+                                        .background(.white)
                                         .padding(.vertical)
                                     
                                     // User Authentication Section
@@ -511,7 +513,7 @@ struct ContentView: View {
                                             Text("Welcome, \(userManager.currentUser?.displayName ?? "User")!")
                                                 .font(.title3)
                                                 .bold()
-                                                .multilineTextAlignment(.center)
+                                                .foregroundColor(.white)
                                             
                                             Button("Log Out") {
                                                 userManager.logOut()
@@ -520,32 +522,21 @@ struct ContentView: View {
                                             .foregroundColor(.white)
                                             .padding(4)
                                             .padding(.horizontal, 2)
-                                            .background(Color.primary.opacity(0.2))
+                                            .background(Color.white.opacity(0.2))
                                             .cornerRadius(7)
                                             .shadow(radius: 2)
                                         }
                                     } else {
-                                        // Your existing login/signup form
                                         VStack(spacing: 16) {
                                             TextField("Email", text: $email)
-                                                .autocapitalization(.none)
-                                                .padding()
-                                                .background(Color.gray.opacity(0.1))
-                                                .cornerRadius(14)
-                                                .shadow(radius: 5)
-
+                                                .textFieldStyle(CustomTextFieldStyle())
+                                            
                                             SecureField("Password", text: $password)
-                                                .padding()
-                                                .background(Color.gray.opacity(0.1))
-                                                .cornerRadius(14)
-                                                .shadow(radius: 5)
-
+                                                .textFieldStyle(CustomTextFieldStyle())
+                                            
                                             TextField("Name", text: $name)
-                                                .padding()
-                                                .background(Color.gray.opacity(0.1))
-                                                .cornerRadius(14)
-                                                .shadow(radius: 5)
-
+                                                .textFieldStyle(CustomTextFieldStyle())
+                                            
                                             HStack {
                                                 Button("Log In") {
                                                     Task {
@@ -1187,6 +1178,18 @@ private struct ArtPieceCard: View {
                 .frame(maxWidth: 200)
         }
         .padding()
+    }
+}
+
+// Add this custom text field style
+struct CustomTextFieldStyle: TextFieldStyle {
+    func _body(configuration: TextField<Self._Label>) -> some View {
+        configuration
+            .foregroundColor(.white)
+            .padding()
+            .background(Color.white.opacity(0.1))
+            .cornerRadius(14)
+            .shadow(radius: 5)
     }
 }
 

@@ -10,18 +10,22 @@ struct AssistanceOptionButton: View {
         Button(action: { isShowingForm = true }) {
             HStack {
                 Image(systemName: icon)
-                    .font(.system(size: 16))
+                    .foregroundColor(.white)
                 Text(title)
-                    .font(.system(size: 16))
+                    .foregroundColor(.white)
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.white)
             }
-            .padding(.vertical, 8)
-            .padding(.horizontal, 12)
-            .background(Color.primary.opacity(0.1))
-            .cornerRadius(8)
+            .padding()
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: [Color.lcvaBlue.opacity(0.3), Color.white.opacity(0.1)]),
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+            .cornerRadius(10)
         }
         .foregroundColor(.primary)
         .sheet(isPresented: $isShowingForm) {
@@ -49,56 +53,121 @@ struct AssistanceRequestForm: View {
     
     var body: some View {
         NavigationView {
-            Form {
-                Section(header: Text("Contact Information")) {
-                    TextField("Name", text: $name)
-                    TextField("Email", text: $email)
-                        .keyboardType(.emailAddress)
-                        .autocapitalization(.none)
-                }
+            ZStack {
+                // Background gradient
+                LinearGradient(
+                    gradient: Gradient(colors: [Color.lcvaBlue, Color.white]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
                 
-                Section(header: Text("Assistance Needed")) {
-                    ForEach(assistanceOptions) { option in
-                        Toggle(isOn: Binding(
-                            get: { selectedAssistance.contains(option.title) },
-                            set: { isSelected in
-                                if isSelected {
-                                    selectedAssistance.insert(option.title)
-                                } else {
-                                    selectedAssistance.remove(option.title)
+                ScrollView {
+                    VStack(spacing: 20) {
+                        // Contact Information
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Contact Information")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                            
+                            TextField("Name", text: $name)
+                                .textFieldStyle(CustomTextFieldStyle())
+                            
+                            TextField("Email", text: $email)
+                                .textFieldStyle(CustomTextFieldStyle())
+                                .keyboardType(.emailAddress)
+                                .autocapitalization(.none)
+                        }
+                        .padding()
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(10)
+                        
+                        // Assistance Options
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Assistance Needed")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                            
+                            ForEach(assistanceOptions) { option in
+                                Toggle(isOn: Binding(
+                                    get: { selectedAssistance.contains(option.title) },
+                                    set: { isSelected in
+                                        if isSelected {
+                                            selectedAssistance.insert(option.title)
+                                        } else {
+                                            selectedAssistance.remove(option.title)
+                                        }
+                                    }
+                                )) {
+                                    HStack {
+                                        Image(systemName: option.icon)
+                                            .foregroundColor(.white)
+                                        Text(option.title)
+                                            .foregroundColor(.white)
+                                    }
                                 }
-                            }
-                        )) {
-                            HStack {
-                                Image(systemName: option.icon)
-                                    .foregroundColor(.secondary)
-                                Text(option.title)
+                                .padding(.vertical, 4)
                             }
                         }
+                        .padding()
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(10)
+                        
+                        // Visit Details
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Visit Details")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                            
+                            DatePicker(
+                                "Planned Visit Date",
+                                selection: $date,
+                                displayedComponents: [.date]
+                            )
+                            .colorScheme(.dark)
+                            .foregroundColor(.white)
+                            .accentColor(.white)
+                            
+                            TextField("Additional Information or Specific Needs", text: $additionalInfo, axis: .vertical)
+                                .textFieldStyle(CustomTextFieldStyle())
+                                .lineLimit(4)
+                        }
+                        .padding()
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(10)
+                        
+                        // Submit Button
+                        Button(action: {
+                            // Handle submission
+                            isPresented = false
+                        }) {
+                            Text("Submit Request")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.lcvaBlue)
+                                .cornerRadius(10)
+                        }
                     }
-                }
-                
-                Section(header: Text("Visit Details")) {
-                    DatePicker("Planned Visit Date", selection: $date, displayedComponents: [.date])
-                    
-                    TextField("Additional Information or Specific Needs", text: $additionalInfo, axis: .vertical)
-                        .lineLimit(4)
-                }
-                
-                Section {
-                    Button("Submit Request") {
-                        // Handle submission
-                        isPresented = false
-                    }
-                    .frame(maxWidth: .infinity)
-                    .foregroundColor(.blue)
+                    .padding()
                 }
             }
             .navigationTitle("Assistance Request")
-            .navigationBarItems(trailing: Button("Cancel") {
-                isPresented = false
-            })
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Color.lcvaBlue, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Cancel") {
+                        isPresented = false
+                    }
+                    .foregroundColor(.white)
+                }
+            }
         }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 
