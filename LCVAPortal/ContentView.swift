@@ -14,7 +14,7 @@ struct SplashView: View {
     var body: some View {
         ZStack {
             LinearGradient(
-                gradient: Gradient(colors: [Color.lcvaBlue.opacity(1), Color.white]),
+                gradient: Gradient(colors: [Color.lcvaBlue, Color.white]),
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -104,7 +104,7 @@ struct ContentView: View {
                     ZStack {
                         // Background gradient
                         LinearGradient(
-                            gradient: Gradient(colors: [Color.lcvaBlue, Color.white]),
+                            gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaBlue.opacity(0.4)]),
                             startPoint: .top,
                             endPoint: .bottom
                         )
@@ -135,8 +135,7 @@ struct ContentView: View {
                                         ZStack {
                                             ScrollViewReader { scrollProxy in
                                                 ScrollView(.horizontal, showsIndicators: false) {
-                                                    HStack(spacing: 16) {
-                                                        // Add spacer at start for centering in the section
+                                                    HStack(spacing: 32) {
                                                         Spacer()
                                                             .frame(width: 120)
                                                         
@@ -179,7 +178,6 @@ struct ContentView: View {
                                                             }
                                                         }
                                                         
-                                                        // Add spacer at end for centering
                                                         Spacer()
                                                             .frame(width: 120)
                                                     }
@@ -242,7 +240,7 @@ struct ContentView: View {
                                         ZStack {
                                             ScrollViewReader { scrollProxy in
                                                 ScrollView(.horizontal, showsIndicators: false) {
-                                                    HStack(spacing: 16) {
+                                                    HStack(spacing: 32) {
                                                         Spacer()
                                                             .frame(width: 120)
                                                         
@@ -352,7 +350,7 @@ struct ContentView: View {
                                         ZStack {
                                             ScrollViewReader { scrollProxy in
                                                 ScrollView(.horizontal, showsIndicators: false) {
-                                                    HStack(spacing: 16) {
+                                                    HStack(spacing: 32) {
                                                         Spacer()
                                                             .frame(width: 120)
                                                         
@@ -457,7 +455,7 @@ struct ContentView: View {
                                         ZStack {
                                             ScrollViewReader { scrollProxy in
                                                 ScrollView(.horizontal, showsIndicators: false) {
-                                                    HStack(spacing: 16) {
+                                                    HStack(spacing: 32) {
                                                         Spacer()
                                                             .frame(width: 120)
                                                         

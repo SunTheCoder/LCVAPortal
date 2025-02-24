@@ -29,9 +29,13 @@ struct HoursAccordionView: View {
         .accentColor(.white)
         .padding()
         .background(
-            RoundedRectangle(cornerRadius: 7)
-                .fill(Color.lcvaNavy.opacity(0.6))
-                .shadow(radius: 3)
+            LinearGradient(
+                gradient: Gradient(colors: [Color.lcvaBlue.opacity(0.7), Color.white.opacity(0.1)]),
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+            .cornerRadius(7)
+            .shadow(radius: 3)
         )
         .padding(.horizontal)
     }
