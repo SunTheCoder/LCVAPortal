@@ -156,18 +156,20 @@ struct ContentView: View {
                                                                         .font(.caption)
                                                                         .bold()
                                                                         .foregroundColor(.white)
-                                                                        .lineLimit(2)
-                                                                        .frame(width: 120, alignment: .leading)  // Match image width
+                                                                        .lineLimit(3)
+                                                                        .frame(width: 120, alignment: .leading)
+                                                                        .fixedSize(horizontal: false, vertical: true)
                                                                     
-                                                                    Text(exhibition.reception)
+                                                                    Text(exhibition.artist.count > 1 ? "Various Artists" : exhibition.artist[0])
                                                                         .font(.caption)
                                                                         .foregroundColor(.white.opacity(0.7))
-                                                                        .lineLimit(2)
-                                                                        .frame(width: 120, alignment: .leading)  // Match image width
+                                                                        .lineLimit(3)
+                                                                        .frame(width: 120, alignment: .leading)
+                                                                        .fixedSize(horizontal: false, vertical: true)
                                                                 }
-                                                                .frame(height: 50)  // Fixed height for text area
+                                                                .frame(height: 70)
                                                             }
-                                                            .frame(width: 120)  // Fixed overall width
+                                                            .frame(width: 120)
                                                             .id(index)
                                                             .onTapGesture {
                                                                 selectedExhibition = exhibition
@@ -199,7 +201,7 @@ struct ContentView: View {
                                                     }) {
                                                         Image(systemName: "chevron.left")
                                                             .foregroundColor(.white)
-                                                            .padding(12)
+                                                            .padding(8)
                                                             .background(Color.black.opacity(0.3))
                                                             .clipShape(Circle())
                                                     }
@@ -215,7 +217,7 @@ struct ContentView: View {
                                                     }) {
                                                         Image(systemName: "chevron.right")
                                                             .foregroundColor(.white)
-                                                            .padding(12)
+                                                            .padding(8)
                                                             .background(Color.black.opacity(0.3))
                                                             .clipShape(Circle())
                                                     }
