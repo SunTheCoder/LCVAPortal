@@ -122,9 +122,10 @@ struct ContentView: View {
                                 
                                 // Info Accordion
                                 InfoAccordionView()
+                                    .padding(.bottom, 24)  // Add padding below Info Accordion
                                 
                                 // First row: Exhibitions
-                                HStack(spacing: 12) {
+                                VStack(spacing: 24) {  // Increased spacing between sections
                                     // Current Shows Section
                                     VStack(alignment: .leading, spacing: 12) {
                                         Text("Current Shows")
@@ -132,8 +133,24 @@ struct ContentView: View {
                                             .bold()
                                             .foregroundColor(.white)
                                         
-                                        ZStack {
-                                            ScrollViewReader { scrollProxy in
+                                        ScrollViewReader { scrollProxy in
+                                            HStack(spacing: 16) {  // Container for arrows and content
+                                                // Left arrow
+                                                Button(action: {
+                                                    withAnimation {
+                                                        let currentIndex = getCurrentIndex()
+                                                        let newIndex = max(currentIndex - 1, 0)
+                                                        scrollProxy.scrollTo(newIndex, anchor: .center)
+                                                    }
+                                                }) {
+                                                    Image(systemName: "chevron.left")
+                                                        .foregroundColor(.white)
+                                                        .padding(8)
+                                                        .background(Color.black.opacity(0.3))
+                                                        .clipShape(Circle())
+                                                }
+                                                
+                                                // ScrollView content
                                                 ScrollView(.horizontal, showsIndicators: false) {
                                                     HStack(spacing: 32) {
                                                         Spacer()
@@ -185,50 +202,32 @@ struct ContentView: View {
                                                 }
                                                 .task {
                                                     if !hasScrolledToInitialPositionCurrent {
-                                                        scrollProxy.scrollTo(0, anchor: .center)
+                                                        try? await Task.sleep(nanoseconds: 100_000_000)
+                                                        withAnimation(.easeOut(duration: 0.3)) {
+                                                            scrollProxy.scrollTo(0, anchor: .leading)
+                                                        }
                                                         hasScrolledToInitialPositionCurrent = true
                                                     }
                                                 }
                                                 
-                                                // Interactive arrows
-                                                HStack {
-                                                    Button(action: {
-                                                        withAnimation {
-                                                            let currentIndex = getCurrentIndex()
-                                                            let newIndex = max(currentIndex - 1, 0)
-                                                            scrollProxy.scrollTo(newIndex, anchor: .center)
-                                                        }
-                                                    }) {
-                                                        Image(systemName: "chevron.left")
-                                                            .foregroundColor(.white)
-                                                            .padding(8)
-                                                            .background(Color.black.opacity(0.3))
-                                                            .clipShape(Circle())
+                                                // Right arrow
+                                                Button(action: {
+                                                    withAnimation {
+                                                        let currentIndex = getCurrentIndex()
+                                                        let newIndex = min(currentIndex + 1, activeExhibitions.count - 1)
+                                                        scrollProxy.scrollTo(newIndex, anchor: .center)
                                                     }
-                                                    
-                                                    Spacer()
-                                                    
-                                                    Button(action: {
-                                                        withAnimation {
-                                                            let currentIndex = getCurrentIndex()
-                                                            let newIndex = min(currentIndex + 1, activeExhibitions.count - 1)
-                                                            scrollProxy.scrollTo(newIndex, anchor: .center)
-                                                        }
-                                                    }) {
-                                                        Image(systemName: "chevron.right")
-                                                            .foregroundColor(.white)
-                                                            .padding(8)
-                                                            .background(Color.black.opacity(0.3))
-                                                            .clipShape(Circle())
-                                                    }
+                                                }) {
+                                                    Image(systemName: "chevron.right")
+                                                        .foregroundColor(.white)
+                                                        .padding(8)
+                                                        .background(Color.black.opacity(0.3))
+                                                        .clipShape(Circle())
                                                 }
-                                                .padding(.horizontal)
                                             }
                                         }
                                     }
-                                    .padding(.vertical, 12)
                                     .padding(.horizontal, 16)
-                                    .frame(maxWidth: .infinity)
                                     
                                     // Past Shows Section
                                     VStack(alignment: .leading, spacing: 12) {
@@ -237,8 +236,24 @@ struct ContentView: View {
                                             .bold()
                                             .foregroundColor(.white)
                                         
-                                        ZStack {
-                                            ScrollViewReader { scrollProxy in
+                                        ScrollViewReader { scrollProxy in
+                                            HStack(spacing: 16) {  // Container for arrows and content
+                                                // Left arrow
+                                                Button(action: {
+                                                    withAnimation {
+                                                        let currentIndex = getCurrentIndex()
+                                                        let newIndex = max(currentIndex - 1, 0)
+                                                        scrollProxy.scrollTo(newIndex, anchor: .center)
+                                                    }
+                                                }) {
+                                                    Image(systemName: "chevron.left")
+                                                        .foregroundColor(.white)
+                                                        .padding(8)
+                                                        .background(Color.black.opacity(0.3))
+                                                        .clipShape(Circle())
+                                                }
+                                                
+                                                // ScrollView content
                                                 ScrollView(.horizontal, showsIndicators: false) {
                                                     HStack(spacing: 32) {
                                                         Spacer()
@@ -289,66 +304,59 @@ struct ContentView: View {
                                                     .padding(.horizontal, 8)
                                                 }
                                                 .task {
-                                                    try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 second delay
                                                     if !hasScrolledToInitialPositionPast {
-                                                        scrollProxy.scrollTo(0, anchor: .center)
+                                                        try? await Task.sleep(nanoseconds: 100_000_000)
+                                                        withAnimation(.easeOut(duration: 0.3)) {
+                                                            scrollProxy.scrollTo(0, anchor: .leading)
+                                                        }
                                                         hasScrolledToInitialPositionPast = true
                                                     }
                                                 }
                                                 
-                                                // Interactive arrows
-                                                HStack {
-                                                    Button(action: {
-                                                        withAnimation {
-                                                            let currentIndex = getCurrentIndex()
-                                                            let newIndex = max(currentIndex - 1, 0)
-                                                            scrollProxy.scrollTo(newIndex, anchor: .center)
-                                                        }
-                                                    }) {
-                                                        Image(systemName: "chevron.left")
-                                                            .foregroundColor(.white)
-                                                            .padding(8)
-                                                            .background(Color.black.opacity(0.3))
-                                                            .clipShape(Circle())
+                                                // Right arrow
+                                                Button(action: {
+                                                    withAnimation {
+                                                        let currentIndex = getCurrentIndex()
+                                                        let newIndex = min(currentIndex + 1, pastExhibitions.count - 1)
+                                                        scrollProxy.scrollTo(newIndex, anchor: .center)
                                                     }
-                                                    
-                                                    Spacer()
-                                                    
-                                                    Button(action: {
-                                                        withAnimation {
-                                                            let currentIndex = getCurrentIndex()
-                                                            let newIndex = min(currentIndex + 1, pastExhibitions.count - 1)
-                                                            scrollProxy.scrollTo(newIndex, anchor: .center)
-                                                        }
-                                                    }) {
-                                                        Image(systemName: "chevron.right")
-                                                            .foregroundColor(.white)
-                                                            .padding(8)
-                                                            .background(Color.black.opacity(0.3))
-                                                            .clipShape(Circle())
-                                                    }
+                                                }) {
+                                                    Image(systemName: "chevron.right")
+                                                        .foregroundColor(.white)
+                                                        .padding(8)
+                                                        .background(Color.black.opacity(0.3))
+                                                        .clipShape(Circle())
                                                 }
-                                                .padding(.horizontal)
                                             }
                                         }
                                     }
-                                    .padding(.vertical, 12)
                                     .padding(.horizontal, 16)
-                                    .frame(maxWidth: .infinity)
-                                }
-                                .padding(.horizontal)
-                                
-                                // Second row: Existing Artist and Art sections
-                                HStack(spacing: 12) {
-                                    // Local Artist Section
+                                    
+                                    // Artist Spotlight Section
                                     VStack(alignment: .leading, spacing: 12) {
                                         Text("Artist Spotlight")
-                                            .font(.system(size: 16))
+                                            .font(.system(size: 18))
                                             .bold()
                                             .foregroundColor(.white)
                                         
-                                        ZStack {
-                                            ScrollViewReader { scrollProxy in
+                                        ScrollViewReader { scrollProxy in
+                                            HStack(spacing: 16) {  // Container for arrows and content
+                                                // Left arrow
+                                                Button(action: {
+                                                    withAnimation {
+                                                        let currentIndex = getCurrentIndex()
+                                                        let newIndex = max(currentIndex - 1, 0)
+                                                        scrollProxy.scrollTo(newIndex, anchor: .center)
+                                                    }
+                                                }) {
+                                                    Image(systemName: "chevron.left")
+                                                        .foregroundColor(.white)
+                                                        .padding(8)
+                                                        .background(Color.black.opacity(0.3))
+                                                        .clipShape(Circle())
+                                                }
+                                                
+                                                // ScrollView content
                                                 ScrollView(.horizontal, showsIndicators: false) {
                                                     HStack(spacing: 32) {
                                                         Spacer()
@@ -392,48 +400,31 @@ struct ContentView: View {
                                                 }
                                                 .task {
                                                     if !hasScrolledToInitialPositionArtist {
-                                                        scrollProxy.scrollTo(0, anchor: .center)
+                                                        try? await Task.sleep(nanoseconds: 100_000_000)
+                                                        withAnimation(.easeOut(duration: 0.3)) {
+                                                            scrollProxy.scrollTo(0, anchor: .leading)
+                                                        }
                                                         hasScrolledToInitialPositionArtist = true
                                                     }
                                                 }
                                                 
-                                                // Interactive arrows
-                                                HStack {
-                                                    Button(action: {
-                                                        withAnimation {
-                                                            let currentIndex = getCurrentIndex()
-                                                            let newIndex = max(currentIndex - 1, 0)
-                                                            scrollProxy.scrollTo(newIndex, anchor: .center)
-                                                        }
-                                                    }) {
-                                                        Image(systemName: "chevron.left")
-                                                            .foregroundColor(.white)
-                                                            .padding(8)
-                                                            .background(Color.black.opacity(0.3))
-                                                            .clipShape(Circle())
+                                                // Right arrow
+                                                Button(action: {
+                                                    withAnimation {
+                                                        let currentIndex = getCurrentIndex()
+                                                        let newIndex = min(currentIndex + 1, sampleArtist.imageUrls.count - 1)
+                                                        scrollProxy.scrollTo(newIndex, anchor: .center)
                                                     }
-                                                    
-                                                    Spacer()
-                                                    
-                                                    Button(action: {
-                                                        withAnimation {
-                                                            let currentIndex = getCurrentIndex()
-                                                            let newIndex = min(currentIndex + 1, sampleArtist.imageUrls.count - 1)
-                                                            scrollProxy.scrollTo(newIndex, anchor: .center)
-                                                        }
-                                                    }) {
-                                                        Image(systemName: "chevron.right")
-                                                            .foregroundColor(.white)
-                                                            .padding(8)
-                                                            .background(Color.black.opacity(0.3))
-                                                            .clipShape(Circle())
-                                                    }
+                                                }) {
+                                                    Image(systemName: "chevron.right")
+                                                        .foregroundColor(.white)
+                                                        .padding(8)
+                                                        .background(Color.black.opacity(0.3))
+                                                        .clipShape(Circle())
                                                 }
-                                                .padding(.horizontal)
                                             }
                                         }
                                     }
-                                    .padding(.vertical, 12)
                                     .padding(.horizontal, 16)
                                     .frame(maxWidth: .infinity)
                                     .onTapGesture {
@@ -448,12 +439,28 @@ struct ContentView: View {
                                     // Featured Art Section
                                     VStack(alignment: .leading, spacing: 12) {
                                         Text("Featured Art")
-                                            .font(.system(size: 16))
+                                            .font(.system(size: 18))
                                             .bold()
                                             .foregroundColor(.white)
                                         
-                                        ZStack {
-                                            ScrollViewReader { scrollProxy in
+                                        ScrollViewReader { scrollProxy in
+                                            HStack(spacing: 16) {  // Container for arrows and content
+                                                // Left arrow
+                                                Button(action: {
+                                                    withAnimation {
+                                                        let currentIndex = getCurrentIndex()
+                                                        let newIndex = max(currentIndex - 1, 0)
+                                                        scrollProxy.scrollTo(newIndex, anchor: .center)
+                                                    }
+                                                }) {
+                                                    Image(systemName: "chevron.left")
+                                                        .foregroundColor(.white)
+                                                        .padding(8)
+                                                        .background(Color.black.opacity(0.3))
+                                                        .clipShape(Circle())
+                                                }
+                                                
+                                                // ScrollView content
                                                 ScrollView(.horizontal, showsIndicators: false) {
                                                     HStack(spacing: 32) {
                                                         Spacer()
@@ -505,48 +512,31 @@ struct ContentView: View {
                                                 }
                                                 .task {
                                                     if !hasScrolledToInitialPositionFeatured {
-                                                        scrollProxy.scrollTo(0, anchor: .center)
+                                                        try? await Task.sleep(nanoseconds: 100_000_000)
+                                                        withAnimation(.easeOut(duration: 0.3)) {
+                                                            scrollProxy.scrollTo(0, anchor: .leading)
+                                                        }
                                                         hasScrolledToInitialPositionFeatured = true
                                                     }
                                                 }
                                                 
-                                                // Interactive arrows
-                                                HStack {
-                                                    Button(action: {
-                                                        withAnimation {
-                                                            let currentIndex = getCurrentIndex()
-                                                            let newIndex = max(currentIndex - 1, 0)
-                                                            scrollProxy.scrollTo(newIndex, anchor: .center)
-                                                        }
-                                                    }) {
-                                                        Image(systemName: "chevron.left")
-                                                            .foregroundColor(.white)
-                                                            .padding(8)
-                                                            .background(Color.black.opacity(0.3))
-                                                            .clipShape(Circle())
+                                                // Right arrow
+                                                Button(action: {
+                                                    withAnimation {
+                                                        let currentIndex = getCurrentIndex()
+                                                        let newIndex = min(currentIndex + 1, featuredArtPieces.count - 1)
+                                                        scrollProxy.scrollTo(newIndex, anchor: .center)
                                                     }
-                                                    
-                                                    Spacer()
-                                                    
-                                                    Button(action: {
-                                                        withAnimation {
-                                                            let currentIndex = getCurrentIndex()
-                                                            let newIndex = min(currentIndex + 1, featuredArtPieces.count - 1)
-                                                            scrollProxy.scrollTo(newIndex, anchor: .center)
-                                                        }
-                                                    }) {
-                                                        Image(systemName: "chevron.right")
-                                                            .foregroundColor(.white)
-                                                            .padding(8)
-                                                            .background(Color.black.opacity(0.3))
-                                                            .clipShape(Circle())
-                                                    }
+                                                }) {
+                                                    Image(systemName: "chevron.right")
+                                                        .foregroundColor(.white)
+                                                        .padding(8)
+                                                        .background(Color.black.opacity(0.3))
+                                                        .clipShape(Circle())
                                                 }
-                                                .padding(.horizontal)
                                             }
                                         }
                                     }
-                                    .padding(.vertical, 12)
                                     .padding(.horizontal, 16)
                                     .frame(maxWidth: .infinity)
                                 }
