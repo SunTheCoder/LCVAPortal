@@ -91,7 +91,10 @@ struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
     @State private var showingSplash = true
     
-    @State private var hasScrolledToInitialPosition = false
+    @State private var hasScrolledToInitialPositionCurrent = false
+    @State private var hasScrolledToInitialPositionPast = false
+    @State private var hasScrolledToInitialPositionArtist = false
+    @State private var hasScrolledToInitialPositionFeatured = false
     
     var body: some View {
         ZStack {
@@ -183,10 +186,9 @@ struct ContentView: View {
                                                     .padding(.horizontal, 8)
                                                 }
                                                 .task {
-                                                    // Only scroll once when view first appears
-                                                    if !hasScrolledToInitialPosition {
+                                                    if !hasScrolledToInitialPositionCurrent {
                                                         scrollProxy.scrollTo(0, anchor: .center)
-                                                        hasScrolledToInitialPosition = true
+                                                        hasScrolledToInitialPositionCurrent = true
                                                     }
                                                 }
                                                 
@@ -238,51 +240,102 @@ struct ContentView: View {
                                             .foregroundColor(.white)
                                         
                                         ZStack {
-                                            ScrollView(.horizontal, showsIndicators: false) {
-                                                HStack(spacing: 16) {
-                                                    ForEach(pastExhibitions) { exhibition in
-                                                        VStack(alignment: .leading) {
-                                                            AsyncImage(url: URL(string: exhibition.imageUrl)) { image in
-                                                                image
-                                                                    .resizable()
-                                                                    .scaledToFill()
-                                                                    .frame(width: 160, height: 160)
-                                                                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                                    .shadow(radius: 2)
-                                                            } placeholder: {
-                                                                ProgressView()
-                                                                    .frame(width: 160, height: 160)
+                                            ScrollViewReader { scrollProxy in
+                                                ScrollView(.horizontal, showsIndicators: false) {
+                                                    HStack(spacing: 16) {
+                                                        Spacer()
+                                                            .frame(width: 120)
+                                                        
+                                                        ForEach(Array(pastExhibitions.enumerated()), id: \.element.id) { index, exhibition in
+                                                            VStack(alignment: .leading, spacing: 4) {
+                                                                AsyncImage(url: URL(string: exhibition.imageUrl)) { image in
+                                                                    image
+                                                                        .resizable()
+                                                                        .scaledToFill()
+                                                                        .frame(width: 120, height: 120)
+                                                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                                        .shadow(radius: 2)
+                                                                } placeholder: {
+                                                                    ProgressView()
+                                                                        .frame(width: 120, height: 120)
+                                                                }
+                                                                
+                                                                VStack(alignment: .leading, spacing: 2) {
+                                                                    Text(exhibition.title)
+                                                                        .font(.caption)
+                                                                        .bold()
+                                                                        .foregroundColor(.white)
+                                                                        .lineLimit(3)
+                                                                        .frame(width: 120, alignment: .leading)
+                                                                        .fixedSize(horizontal: false, vertical: true)
+                                                                    
+                                                                    Text(exhibition.artist.count > 1 ? "Various Artists" : exhibition.artist[0])
+                                                                        .font(.caption)
+                                                                        .foregroundColor(.white.opacity(0.7))
+                                                                        .lineLimit(3)
+                                                                        .frame(width: 120, alignment: .leading)
+                                                                        .fixedSize(horizontal: false, vertical: true)
+                                                                }
+                                                                .frame(height: 70)
                                                             }
-                                                            
-                                                            Text(exhibition.title)
-                                                                .font(.callout)
-                                                                .bold()
-                                                                .foregroundColor(.white)
-                                                                .lineLimit(1)
-                                                            
-                                                            Text(exhibition.reception)
-                                                                .font(.caption)
-                                                                .foregroundColor(.white.opacity(0.7))
+                                                            .frame(width: 120)
+                                                            .id(index)
+                                                            .onTapGesture {
+                                                                selectedExhibition = exhibition
+                                                            }
                                                         }
-                                                        .frame(width: 180)
-                                                        .onTapGesture {
-                                                            selectedExhibition = exhibition
-                                                        }
+                                                        
+                                                        Spacer()
+                                                            .frame(width: 120)
+                                                    }
+                                                    .padding(.horizontal, 8)
+                                                }
+                                                .task {
+                                                    try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 second delay
+                                                    if !hasScrolledToInitialPositionPast {
+                                                        scrollProxy.scrollTo(0, anchor: .center)
+                                                        hasScrolledToInitialPositionPast = true
                                                     }
                                                 }
-                                                .padding(.horizontal, 8)
+                                                
+                                                // Interactive arrows
+                                                HStack {
+                                                    Button(action: {
+                                                        withAnimation {
+                                                            let currentIndex = getCurrentIndex()
+                                                            let newIndex = max(currentIndex - 1, 0)
+                                                            scrollProxy.scrollTo(newIndex, anchor: .center)
+                                                        }
+                                                    }) {
+                                                        Image(systemName: "chevron.left")
+                                                            .foregroundColor(.white)
+                                                            .padding(8)
+                                                            .background(Color.black.opacity(0.3))
+                                                            .clipShape(Circle())
+                                                    }
+                                                    
+                                                    Spacer()
+                                                    
+                                                    Button(action: {
+                                                        withAnimation {
+                                                            let currentIndex = getCurrentIndex()
+                                                            let newIndex = min(currentIndex + 1, pastExhibitions.count - 1)
+                                                            scrollProxy.scrollTo(newIndex, anchor: .center)
+                                                        }
+                                                    }) {
+                                                        Image(systemName: "chevron.right")
+                                                            .foregroundColor(.white)
+                                                            .padding(8)
+                                                            .background(Color.black.opacity(0.3))
+                                                            .clipShape(Circle())
+                                                    }
+                                                }
+                                                .padding(.horizontal)
                                             }
-                                            
-                                            ScrollArrowIndicators()
                                         }
                                     }
                                     .padding(.vertical, 12)
                                     .padding(.horizontal, 16)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 7)
-                                            .fill(Color.lcvaNavy.opacity(0.6))
-                                            .shadow(radius: 3)
-                                    )
                                     .frame(maxWidth: .infinity)
                                 }
                                 .padding(.horizontal)
@@ -297,43 +350,93 @@ struct ContentView: View {
                                             .foregroundColor(.white)
                                         
                                         ZStack {
-                                            ScrollView(.horizontal, showsIndicators: false) {
-                                                HStack(spacing: 16) {
-                                                    ForEach(sampleArtist.imageUrls, id: \.self) { imageUrl in
-                                                        VStack(alignment: .leading) {
-                                                            Image(imageUrl)
-                                                                .resizable()
-                                                                .scaledToFill()
-                                                                .frame(width: 100, height: 100)
-                                                                .clipShape(RoundedRectangle(cornerRadius: 4))
-                                                                .shadow(radius: 2)
-                                                            
-                                                            Text(sampleArtist.name)
-                                                                .font(.callout)
-                                                                .bold()
-                                                                .foregroundColor(.white)
-                                                                .lineLimit(1)
-                                                            
-                                                            Text(sampleArtist.medium)
-                                                                .font(.caption)
-                                                                .foregroundColor(.white.opacity(0.7))
+                                            ScrollViewReader { scrollProxy in
+                                                ScrollView(.horizontal, showsIndicators: false) {
+                                                    HStack(spacing: 16) {
+                                                        Spacer()
+                                                            .frame(width: 120)
+                                                        
+                                                        ForEach(Array(sampleArtist.imageUrls.enumerated()), id: \.element) { index, imageUrl in
+                                                            VStack(alignment: .leading, spacing: 4) {
+                                                                Image(imageUrl)
+                                                                    .resizable()
+                                                                    .scaledToFill()
+                                                                    .frame(width: 120, height: 120)
+                                                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                                    .shadow(radius: 2)
+                                                                
+                                                                VStack(alignment: .leading, spacing: 2) {
+                                                                    Text(sampleArtist.name)
+                                                                        .font(.caption)
+                                                                        .bold()
+                                                                        .foregroundColor(.white)
+                                                                        .lineLimit(2)
+                                                                        .frame(width: 120, alignment: .leading)
+                                                                        .fixedSize(horizontal: false, vertical: true)
+                                                                    
+                                                                    Text(sampleArtist.medium)
+                                                                        .font(.caption)
+                                                                        .foregroundColor(.white.opacity(0.7))
+                                                                        .lineLimit(2)
+                                                                        .frame(width: 120, alignment: .leading)
+                                                                        .fixedSize(horizontal: false, vertical: true)
+                                                                }
+                                                                .frame(height: 60)
+                                                            }
+                                                            .frame(width: 120)
+                                                            .id(index)
                                                         }
-                                                        .frame(width: 120)
+                                                        
+                                                        Spacer()
+                                                            .frame(width: 120)
+                                                    }
+                                                    .padding(.horizontal, 8)
+                                                }
+                                                .task {
+                                                    if !hasScrolledToInitialPositionArtist {
+                                                        scrollProxy.scrollTo(0, anchor: .center)
+                                                        hasScrolledToInitialPositionArtist = true
                                                     }
                                                 }
-                                                .padding(.horizontal, 8)
+                                                
+                                                // Interactive arrows
+                                                HStack {
+                                                    Button(action: {
+                                                        withAnimation {
+                                                            let currentIndex = getCurrentIndex()
+                                                            let newIndex = max(currentIndex - 1, 0)
+                                                            scrollProxy.scrollTo(newIndex, anchor: .center)
+                                                        }
+                                                    }) {
+                                                        Image(systemName: "chevron.left")
+                                                            .foregroundColor(.white)
+                                                            .padding(8)
+                                                            .background(Color.black.opacity(0.3))
+                                                            .clipShape(Circle())
+                                                    }
+                                                    
+                                                    Spacer()
+                                                    
+                                                    Button(action: {
+                                                        withAnimation {
+                                                            let currentIndex = getCurrentIndex()
+                                                            let newIndex = min(currentIndex + 1, sampleArtist.imageUrls.count - 1)
+                                                            scrollProxy.scrollTo(newIndex, anchor: .center)
+                                                        }
+                                                    }) {
+                                                        Image(systemName: "chevron.right")
+                                                            .foregroundColor(.white)
+                                                            .padding(8)
+                                                            .background(Color.black.opacity(0.3))
+                                                            .clipShape(Circle())
+                                                    }
+                                                }
+                                                .padding(.horizontal)
                                             }
-                                            
-                                            ScrollArrowIndicators()
                                         }
                                     }
-                                    .padding(.vertical, 10)
-                                    .padding(.horizontal, 14)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 7)
-                                            .fill(Color.lcvaNavy.opacity(0.6))
-                                            .shadow(radius: 3)
-                                    )
+                                    .padding(.vertical, 12)
+                                    .padding(.horizontal, 16)
                                     .frame(maxWidth: .infinity)
                                     .onTapGesture {
                                         isArtistDetailPresented = true
@@ -352,51 +455,101 @@ struct ContentView: View {
                                             .foregroundColor(.white)
                                         
                                         ZStack {
-                                            ScrollView(.horizontal, showsIndicators: false) {
-                                                HStack(spacing: 16) {
-                                                    ForEach(featuredArtPieces) { artPiece in
-                                                        VStack(alignment: .leading) {
-                                                            AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
-                                                                image
-                                                                    .resizable()
-                                                                    .scaledToFill()
-                                                                    .frame(width: 100, height: 100)
-                                                                    .clipShape(RoundedRectangle(cornerRadius: 4))
-                                                                    .shadow(radius: 2)
-                                                            } placeholder: {
-                                                                ProgressView()
-                                                                    .frame(width: 100, height: 100)
+                                            ScrollViewReader { scrollProxy in
+                                                ScrollView(.horizontal, showsIndicators: false) {
+                                                    HStack(spacing: 16) {
+                                                        Spacer()
+                                                            .frame(width: 120)
+                                                        
+                                                        ForEach(Array(featuredArtPieces.enumerated()), id: \.element.id) { index, artPiece in
+                                                            VStack(alignment: .leading, spacing: 4) {
+                                                                AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
+                                                                    image
+                                                                        .resizable()
+                                                                        .scaledToFill()
+                                                                        .frame(width: 120, height: 120)
+                                                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                                        .shadow(radius: 2)
+                                                                } placeholder: {
+                                                                    ProgressView()
+                                                                        .frame(width: 120, height: 120)
+                                                                }
+                                                                
+                                                                VStack(alignment: .leading, spacing: 2) {
+                                                                    Text(artPiece.title)
+                                                                        .font(.caption)
+                                                                        .bold()
+                                                                        .foregroundColor(.white)
+                                                                        .lineLimit(3)
+                                                                        .frame(width: 120, alignment: .leading)
+                                                                        .fixedSize(horizontal: false, vertical: true)
+                                                                    
+                                                                    Text("Campus Art")
+                                                                        .font(.caption)
+                                                                        .foregroundColor(.white.opacity(0.7))
+                                                                        .lineLimit(2)
+                                                                        .frame(width: 120, alignment: .leading)
+                                                                        .fixedSize(horizontal: false, vertical: true)
+                                                                }
+                                                                .frame(height: 60)
                                                             }
-                                                            
-                                                            Text(artPiece.title)
-                                                                .font(.callout)
-                                                                .bold()
-                                                                .foregroundColor(.white)
-                                                                .lineLimit(1)
-                                                            
-                                                            Text("Campus Art")
-                                                                .font(.caption)
-                                                                .foregroundColor(.white.opacity(0.7))
+                                                            .frame(width: 120)
+                                                            .id(index)
+                                                            .onTapGesture {
+                                                                selectedArtPiece = artPiece
+                                                            }
                                                         }
-                                                        .frame(width: 120)
-                                                        .onTapGesture {
-                                                            selectedArtPiece = artPiece
-                                                        }
+                                                        
+                                                        Spacer()
+                                                            .frame(width: 120)
+                                                    }
+                                                    .padding(.horizontal, 8)
+                                                }
+                                                .task {
+                                                    if !hasScrolledToInitialPositionFeatured {
+                                                        scrollProxy.scrollTo(0, anchor: .center)
+                                                        hasScrolledToInitialPositionFeatured = true
                                                     }
                                                 }
-                                                .padding(.horizontal, 8)
+                                                
+                                                // Interactive arrows
+                                                HStack {
+                                                    Button(action: {
+                                                        withAnimation {
+                                                            let currentIndex = getCurrentIndex()
+                                                            let newIndex = max(currentIndex - 1, 0)
+                                                            scrollProxy.scrollTo(newIndex, anchor: .center)
+                                                        }
+                                                    }) {
+                                                        Image(systemName: "chevron.left")
+                                                            .foregroundColor(.white)
+                                                            .padding(8)
+                                                            .background(Color.black.opacity(0.3))
+                                                            .clipShape(Circle())
+                                                    }
+                                                    
+                                                    Spacer()
+                                                    
+                                                    Button(action: {
+                                                        withAnimation {
+                                                            let currentIndex = getCurrentIndex()
+                                                            let newIndex = min(currentIndex + 1, featuredArtPieces.count - 1)
+                                                            scrollProxy.scrollTo(newIndex, anchor: .center)
+                                                        }
+                                                    }) {
+                                                        Image(systemName: "chevron.right")
+                                                            .foregroundColor(.white)
+                                                            .padding(8)
+                                                            .background(Color.black.opacity(0.3))
+                                                            .clipShape(Circle())
+                                                    }
+                                                }
+                                                .padding(.horizontal)
                                             }
-                                            
-                                            ScrollArrowIndicators()
                                         }
                                     }
-                                    .padding(.vertical, 10)
-                                    .padding(.horizontal, 14)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 7)
-                                            .fill(Color.lcvaNavy.opacity(0.6))
-                                            .shadow(radius: 3)
-                                    )
+                                    .padding(.vertical, 12)
+                                    .padding(.horizontal, 16)
                                     .frame(maxWidth: .infinity)
                                 }
                                 .padding(.horizontal)
