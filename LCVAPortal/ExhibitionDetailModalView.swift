@@ -13,6 +13,7 @@ struct ExhibitionDetailModalView: View {
     let exhibition: Exhibition
    
     @Binding var isPresented: Bool // Binding to control modal visibility
+    @State private var showingVideo = true  // Start with video
     
     var body: some View {
         NavigationView {
@@ -27,19 +28,34 @@ struct ExhibitionDetailModalView: View {
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
-                        // Display exhibition image
-                        AsyncImage(url: URL(string: exhibition.imageUrl)) { image in
-                            image
-                                .resizable()
-                                .scaledToFit()
-                                .clipShape(RoundedRectangle(cornerRadius: 3))
-                                .shadow(radius: 3)
-                                .accessibilityLabel(Text("Image of \(exhibition.title)"))
-                        } placeholder: {
-                            ProgressView()
-                                .accessibilityHidden(true) // Hide loading indicator from VoiceOver
+                        // Video/Image container
+                        ZStack {
+                            if showingVideo && exhibition.title == "Letters from Farmville" {
+                                VideoPreview(
+                                    videoName: "Farmville_Looped",
+                                    title: "",
+                                    subtitle: ""
+                                )
+                                .frame(height: 300)
+                                .onAppear {
+                                    // Automatically transition to image after a few loops
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+                                        withAnimation {
+                                            showingVideo = false
+                                        }
+                                    }
+                                }
+                            } else {
+                                AsyncImage(url: URL(string: exhibition.imageUrl)) { image in
+                                    image
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(maxHeight: 300)
+                                } placeholder: {
+                                    ProgressView()
+                                }
+                            }
                         }
-                        .frame(maxHeight: 300)
                         
                         // Display title
                         Text(exhibition.title)

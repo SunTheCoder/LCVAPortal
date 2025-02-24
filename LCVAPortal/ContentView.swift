@@ -96,6 +96,8 @@ struct ContentView: View {
     @State private var hasScrolledToInitialPositionArtist = false
     @State private var hasScrolledToInitialPositionFeatured = false
     
+    @State private var longPressedExhibitionId: UUID? = nil
+    
     var body: some View {
         ZStack {
             NavigationView {
@@ -261,16 +263,30 @@ struct ContentView: View {
                                                         
                                                         ForEach(Array(pastExhibitions.enumerated()), id: \.element.id) { index, exhibition in
                                                             VStack(alignment: .leading, spacing: 4) {
-                                                                AsyncImage(url: URL(string: exhibition.imageUrl)) { image in
-                                                                    image
-                                                                        .resizable()
-                                                                        .scaledToFill()
+                                                                ZStack {
+                                                                    // Show video if available, otherwise show image
+                                                                    if let videoName = exhibition.videoPreview {
+                                                                        VideoPreview(
+                                                                            videoName: videoName,
+                                                                            title: "",
+                                                                            subtitle: ""
+                                                                        )
                                                                         .frame(width: 120, height: 120)
                                                                         .clipShape(RoundedRectangle(cornerRadius: 8))
                                                                         .shadow(radius: 2)
-                                                                } placeholder: {
-                                                                    ProgressView()
-                                                                        .frame(width: 120, height: 120)
+                                                                    } else {
+                                                                        AsyncImage(url: URL(string: exhibition.imageUrl)) { image in
+                                                                            image
+                                                                                .resizable()
+                                                                                .scaledToFill()
+                                                                                .frame(width: 120, height: 120)
+                                                                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                                                .shadow(radius: 2)
+                                                                        } placeholder: {
+                                                                            ProgressView()
+                                                                                .frame(width: 120, height: 120)
+                                                                        }
+                                                                    }
                                                                 }
                                                                 
                                                                 VStack(alignment: .leading, spacing: 2) {

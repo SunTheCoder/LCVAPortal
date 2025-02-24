@@ -18,6 +18,7 @@ struct Exhibition: Identifiable {
     let surveyUrl: String
     let imageUrl: String
     let extraLink: String?
+    let videoPreview: String?
     let latitude: Double
     let longitude: Double
 }
@@ -34,6 +35,7 @@ let currentExhibitions = [
         surveyUrl: "https://lcva.longwood.edu/exhibitions/digital-horizons",
         imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2025/02/Bagley-Fruit-Stand.jpg",
         extraLink: "",
+        videoPreview: nil,
         latitude: 37.297349,
         longitude: -78.395706
     ),
@@ -47,6 +49,7 @@ let currentExhibitions = [
                surveyUrl: "https://docs.google.com/forms/d/e/1FAIpQLScU3PsVCtCWAzyHbxIqa7yf-yK1A2OLYW0R500ZWyZbAp91CQ/viewform?usp=sf_link",
                imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/Bady-Kitty-Starry-Night-1.jpg",
                extraLink: "https://badkittycomicgame.netlify.app",
+               videoPreview: nil,
                latitude: 39.04,
                longitude: -77.03),
                
@@ -59,12 +62,13 @@ let sampleExhibitions = [
     Exhibition(title: "Letters from Farmville",
                artist: ["Debra Jean Ambush"],
                galleryName: "Gallery A",
-               description: "In 1989 Dr. Debra Jean Ambush came to Farmville to help settle an estate for a recently passed family member. In her family's farm house was a trunk.  This trunk contained receipts, papers, photographs, and personal correspondence dating back to 1872. For over 30 years these documents, which are an ancestral connection to the artist, have served as vital sources of artistic inspiration and interpretation as she seeks to understand her family's histories, stories, and memories. Letters from Farmville: Reflections on Ancestral Arrival into Descendant Memory is a four-part exhibition that visualizes African American family history to illuminate the ways in which memory is constructed, lost, and cherished. \n\nThe Longwood Center for the Visual Arts (LCVA) welcomes the community to an opening reception on Friday, September 6 from 5:30 – 8 pm; early entry for Friends & Partners at 5 pm. The exhibition will be on view from September 6, 2024—January 21, 2025. Letters from Farmville is made possible in part through the generous sponsorship of Ilsa Loeser and Letterpress Communications.",
+               description: "In 1989 Dr. Debra Jean Ambush came to Farmville to help settle an estate for a recently passed family member. In her familgit stashy's farm house was a trunk.  This trunk contained receipts, papers, photographs, and personal correspondence dating back to 1872. For over 30 years these documents, which are an ancestral connection to the artist, have served as vital sources of artistic inspiration and interpretation as she seeks to understand her family's histories, stories, and memories. Letters from Farmville: Reflections on Ancestral Arrival into Descendant Memory is a four-part exhibition that visualizes African American family history to illuminate the ways in which memory is constructed, lost, and cherished. \n\nThe Longwood Center for the Visual Arts (LCVA) welcomes the community to an opening reception on Friday, September 6 from 5:30 – 8 pm; early entry for Friends & Partners at 5 pm. The exhibition will be on view from September 6, 2024—January 21, 2025. Letters from Farmville is made possible in part through the generous sponsorship of Ilsa Loeser and Letterpress Communications.",
                reception: "September 6, 2024, 6:00 PM - 9:00 PM",
                closing: "January 21, 2025, 5:00 PM",
                surveyUrl: "no link",
                imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/451624173_1005858958207827_1691580555828386781_n.jpg",
                extraLink: "https://youtu.be/MKdqit-fVkY?si=j32FwPuIqSGnwMio",
+               videoPreview: "Farmville_Looped",
                latitude: 39.04,
                longitude: -77.03),
     Exhibition(title: "Of Time, and The Town",
@@ -76,6 +80,7 @@ let sampleExhibitions = [
                surveyUrl: "no link",
                imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/Screenshot-299.png",
                extraLink: nil,
+               videoPreview: nil,
                latitude: 39.04,
                longitude: -77.03),
 ]
