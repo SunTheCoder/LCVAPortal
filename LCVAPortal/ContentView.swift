@@ -91,6 +91,8 @@ struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
     @State private var showingSplash = true
     
+    @State private var hasScrolledToInitialPosition = false
+    
     var body: some View {
         ZStack {
             NavigationView {
@@ -128,51 +130,102 @@ struct ContentView: View {
                                             .foregroundColor(.white)
                                         
                                         ZStack {
-                                            ScrollView(.horizontal, showsIndicators: false) {
-                                                HStack(spacing: 16) {
-                                                    ForEach(activeExhibitions) { exhibition in
-                                                        VStack(alignment: .leading) {
-                                                            AsyncImage(url: URL(string: exhibition.imageUrl)) { image in
-                                                                image
-                                                                    .resizable()
-                                                                    .scaledToFill()
-                                                                    .frame(width: 160, height: 160)
-                                                                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                                    .shadow(radius: 2)
-                                                            } placeholder: {
-                                                                ProgressView()
-                                                                    .frame(width: 160, height: 160)
+                                            ScrollViewReader { scrollProxy in
+                                                ScrollView(.horizontal, showsIndicators: false) {
+                                                    HStack(spacing: 16) {
+                                                        // Add spacer at start for centering in the section
+                                                        Spacer()
+                                                            .frame(width: 120)
+                                                        
+                                                        ForEach(Array(activeExhibitions.enumerated()), id: \.element.id) { index, exhibition in
+                                                            VStack(alignment: .leading, spacing: 4) {  // Reduced spacing
+                                                                AsyncImage(url: URL(string: exhibition.imageUrl)) { image in
+                                                                    image
+                                                                        .resizable()
+                                                                        .scaledToFill()
+                                                                        .frame(width: 120, height: 120)
+                                                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                                        .shadow(radius: 2)
+                                                                } placeholder: {
+                                                                    ProgressView()
+                                                                        .frame(width: 120, height: 120)
+                                                                }
+                                                                
+                                                                VStack(alignment: .leading, spacing: 2) {  // Fixed text container
+                                                                    Text(exhibition.title)
+                                                                        .font(.caption)
+                                                                        .bold()
+                                                                        .foregroundColor(.white)
+                                                                        .lineLimit(2)
+                                                                        .frame(width: 120, alignment: .leading)  // Match image width
+                                                                    
+                                                                    Text(exhibition.reception)
+                                                                        .font(.caption)
+                                                                        .foregroundColor(.white.opacity(0.7))
+                                                                        .lineLimit(2)
+                                                                        .frame(width: 120, alignment: .leading)  // Match image width
+                                                                }
+                                                                .frame(height: 50)  // Fixed height for text area
                                                             }
-                                                            
-                                                            Text(exhibition.title)
-                                                                .font(.callout)
-                                                                .bold()
-                                                                .foregroundColor(.white)
-                                                                .lineLimit(1)
-                                                            
-                                                            Text(exhibition.reception)
-                                                                .font(.caption)
-                                                                .foregroundColor(.white.opacity(0.7))
+                                                            .frame(width: 120)  // Fixed overall width
+                                                            .id(index)
+                                                            .onTapGesture {
+                                                                selectedExhibition = exhibition
+                                                            }
                                                         }
-                                                        .frame(width: 180)
-                                                        .onTapGesture {
-                                                            selectedExhibition = exhibition
-                                                        }
+                                                        
+                                                        // Add spacer at end for centering
+                                                        Spacer()
+                                                            .frame(width: 120)
+                                                    }
+                                                    .padding(.horizontal, 8)
+                                                }
+                                                .task {
+                                                    // Only scroll once when view first appears
+                                                    if !hasScrolledToInitialPosition {
+                                                        scrollProxy.scrollTo(0, anchor: .center)
+                                                        hasScrolledToInitialPosition = true
                                                     }
                                                 }
-                                                .padding(.horizontal, 8)
+                                                
+                                                // Interactive arrows
+                                                HStack {
+                                                    Button(action: {
+                                                        withAnimation {
+                                                            let currentIndex = getCurrentIndex()
+                                                            let newIndex = max(currentIndex - 1, 0)
+                                                            scrollProxy.scrollTo(newIndex, anchor: .center)
+                                                        }
+                                                    }) {
+                                                        Image(systemName: "chevron.left")
+                                                            .foregroundColor(.white)
+                                                            .padding(12)
+                                                            .background(Color.black.opacity(0.3))
+                                                            .clipShape(Circle())
+                                                    }
+                                                    
+                                                    Spacer()
+                                                    
+                                                    Button(action: {
+                                                        withAnimation {
+                                                            let currentIndex = getCurrentIndex()
+                                                            let newIndex = min(currentIndex + 1, activeExhibitions.count - 1)
+                                                            scrollProxy.scrollTo(newIndex, anchor: .center)
+                                                        }
+                                                    }) {
+                                                        Image(systemName: "chevron.right")
+                                                            .foregroundColor(.white)
+                                                            .padding(12)
+                                                            .background(Color.black.opacity(0.3))
+                                                            .clipShape(Circle())
+                                                    }
+                                                }
+                                                .padding(.horizontal)
                                             }
-                                            
-                                            ScrollArrowIndicators()
                                         }
                                     }
                                     .padding(.vertical, 12)
                                     .padding(.horizontal, 16)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 7)
-                                            .fill(Color.lcvaNavy.opacity(0.6))
-                                            .shadow(radius: 3)
-                                    )
                                     .frame(maxWidth: .infinity)
                                     
                                     // Past Shows Section
@@ -656,6 +709,12 @@ struct ContentView: View {
         
         // Return the second part if it exists, trimmed of extra spaces
         return parts.count > 1 ? parts[1].trimmingCharacters(in: .whitespaces) + ", " + parts[2].trimmingCharacters(in: .whitespaces) : reception
+    }
+
+    private func getCurrentIndex() -> Int {
+        // This is a simple implementation. You might want to add more sophisticated tracking
+        // based on actual scroll position
+        0
     }
 }
 
