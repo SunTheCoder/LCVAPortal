@@ -572,123 +572,12 @@ struct ContentView: View {
                         Label("Home", systemImage: "house.fill")
                     }
                     
-                    // Collection Tab
-                    VStack {
-                        ZStack {
-                            // Background gradient
-                            LinearGradient(
-                                gradient: Gradient(colors: [Color.lcvaBlue, Color.white]),
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                            .ignoresSafeArea()
-                            
-                            // Existing content
-                            VStack {
-                                // Header with title and buttons
-                                HStack {
-                                    // User avatar/profile pic
-                                    Circle()
-                                        .fill(Color.white.opacity(0.3))  // Made lighter
-                                        .frame(width: 35, height: 35)
-                                    
-                                    Text("Collections")
-                                        .font(.title2)
-                                        .bold()
-                                        .foregroundColor(.white)  // Made white
-                                    
-                                    Spacer()
-                                    
-                                    // Search and Add buttons
-                                    Button(action: { /* Search action */ }) {
-                                        Image(systemName: "magnifyingglass")
-                                            .foregroundColor(.white)  // Made white
-                                    }
-                                    .padding(.horizontal, 8)
-                                    
-                                    Button(action: { /* Add to collection action */ }) {
-                                        Image(systemName: "plus")
-                                            .foregroundColor(.white)  // Made white
-                                    }
-                                }
-                                .padding(.horizontal)
-                                
-                                // Filter buttons
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack(spacing: 12) {
-                                        ForEach(["Museum Collection", "Your Collection", "Favorites", "Artists"], id: \.self) { filter in
-                                            Text(filter)
-                                                .font(.subheadline)
-                                                .foregroundColor(.white)  // Made white
-                                                .padding(.horizontal, 16)
-                                                .padding(.vertical, 8)
-                                                .background(Color.white.opacity(0.2))  // Made lighter
-                                                .clipShape(Capsule())
-                                        }
-                                    }
-                                    .padding(.horizontal)
-                                }
-                                
-                                // Recent header with sort/view options
-                                HStack {
-                                    Text("Recents")
-                                        .font(.title3)
-                                        .bold()
-                                        .foregroundColor(.white)  // Made white
-                                    
-                                    Spacer()
-                                    
-                                    // Grid view toggle
-                                    Button(action: { /* Toggle view */ }) {
-                                        Image(systemName: "square.grid.2x2")
-                                            .foregroundColor(.white)  // Made white
-                                    }
-                                }
-                                .padding()
-                                
-                                // Collection items
-                                ScrollView {
-                                    LazyVStack(spacing: 16) {
-                                        ForEach(featuredArtPieces) { artPiece in
-                                            HStack {
-                                                // Artwork image
-                                                AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
-                                                    image
-                                                        .resizable()
-                                                        .aspectRatio(contentMode: .fill)
-                                                        .frame(width: 60, height: 60)
-                                                        .clipShape(RoundedRectangle(cornerRadius: 4))
-                                                } placeholder: {
-                                                    ProgressView()
-                                                        .frame(width: 60, height: 60)
-                                                }
-                                                
-                                                // Artwork info
-                                                VStack(alignment: .leading) {
-                                                    Text(artPiece.title)
-                                                        .font(.headline)
-                                                        .foregroundColor(.white)  // Made white
-                                                    Text("Museum Collection")
-                                                        .font(.subheadline)
-                                                        .foregroundColor(.white.opacity(0.7))  // Made white with opacity
-                                                }
-                                                
-                                                Spacer()
-                                            }
-                                            .padding(.horizontal)
-                                            .onTapGesture {
-                                                selectedArtPiece = artPiece
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                    // Collections Tab
+                    CollectionsView(selectedArtPiece: $selectedArtPiece)
+                        .tabItem {
+                            Label("Collections", systemImage: "line.3.horizontal")
                         }
-                    }
-                    .tag(1)
-                    .tabItem {
-                        Label("Collections", systemImage: "line.3.horizontal")
-                    }
+                        .tag(1)
                     
                     // Settings Tab
                     VStack {
