@@ -7,6 +7,7 @@ struct CollectionsView: View {
     @StateObject private var userCollections = UserCollections()
     @ObservedObject var userManager: UserManager
     @State private var showingAllFilters = true  // New state to track filter view mode
+    @State private var activeOverlayId: Int? = nil  // Track active overlay by art piece ID
     
     // Move enum outside the struct
     private var filterTitle: String {
@@ -157,11 +158,16 @@ struct CollectionsView: View {
                                         items: chunks[index],
                                         onTap: { artPiece in selectedArtPiece = artPiece },
                                         userCollections: userCollections,
-                                        userManager: userManager
+                                        userManager: userManager,
+                                        activeOverlayId: $activeOverlayId
                                     )
                                 }
                             }
                             .padding(.horizontal, 16)
+                            .onChange(of: selectedFilter) { _ in
+                                // Clear active overlay when filter changes
+                                activeOverlayId = nil
+                            }
                         } else {
                             // List Layout
                             LazyVStack(spacing: 16) {
@@ -282,24 +288,26 @@ struct ArtPieceGridItem: View {
     let onTap: () -> Void
     @ObservedObject var userCollections: UserCollections
     let userManager: UserManager
-    @State private var isLongPressed = false
+    @Binding var activeOverlayId: Int?  // Binding to shared state
     @State private var scale: CGFloat = 1.0
-    @State private var shouldNavigate = false  // Add this state
+    @State private var shouldNavigate = false  // Add this back
+    
+    var isLongPressed: Bool {
+        activeOverlayId == artPiece.id
+    }
     
     var body: some View {
         Group {
             if isLongPressed {
-                // When overlay is active, just show the content without navigation
                 contentView
             } else {
-                // When no overlay, wrap in NavigationLink
                 NavigationLink(
                     destination: ArtDetailView(
                         artPiece: artPiece,
                         userManager: userManager,
                         userCollections: userCollections
                     ),
-                    isActive: $shouldNavigate  // Bind to our navigation state
+                    isActive: $shouldNavigate  // Bind to navigation state
                 ) {
                     contentView
                 }
@@ -308,7 +316,6 @@ struct ArtPieceGridItem: View {
         .buttonStyle(PlainButtonStyle())
     }
     
-    // Extract the content view to avoid duplication
     private var contentView: some View {
         VStack(alignment: .leading, spacing: 4) {
             ZStack {
@@ -366,7 +373,11 @@ struct ArtPieceGridItem: View {
             .scaleEffect(scale)
             .onLongPressGesture(minimumDuration: 0.3) {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                    isLongPressed.toggle()
+                    if isLongPressed {
+                        activeOverlayId = nil
+                    } else {
+                        activeOverlayId = artPiece.id
+                    }
                     scale = isLongPressed ? 1.1 : 1.0
                     let impactHeavy = UIImpactFeedbackGenerator(style: .heavy)
                     impactHeavy.impactOccurred()
@@ -385,12 +396,12 @@ struct ArtPieceGridItem: View {
             .onTapGesture {
                 if isLongPressed {
                     withAnimation(.easeInOut(duration: 0.2)) {
-                        isLongPressed = false
+                        activeOverlayId = nil
                         let impactLight = UIImpactFeedbackGenerator(style: .light)
                         impactLight.impactOccurred()
                     }
                 } else {
-                    shouldNavigate = true  // Trigger navigation when not in overlay mode
+                    shouldNavigate = true  // Trigger navigation when no overlay
                 }
             }
             
@@ -423,6 +434,7 @@ struct GridRow: View {
     let onTap: (ArtPiece) -> Void
     let userCollections: UserCollections
     let userManager: UserManager
+    @Binding var activeOverlayId: Int?  // Binding to shared state
     @State private var rowHeight: CGFloat = 0
     
     var body: some View {
@@ -432,7 +444,8 @@ struct GridRow: View {
                     artPiece: artPiece,
                     onTap: { onTap(artPiece) },
                     userCollections: userCollections,
-                    userManager: userManager
+                    userManager: userManager,
+                    activeOverlayId: $activeOverlayId
                 )
                     .background(GeometryReader { geo in
                         Color.clear.preference(
