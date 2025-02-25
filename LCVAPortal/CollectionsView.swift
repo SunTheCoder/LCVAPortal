@@ -8,6 +8,7 @@ struct CollectionsView: View {
     @ObservedObject var userManager: UserManager
     @State private var showingAllFilters = true  // New state to track filter view mode
     @State private var activeOverlayId: Int? = nil  // Track active overlay by art piece ID
+    @Namespace private var filterAnimation  // Add this for matched geometry effect
     
     // Move enum outside the struct
     private var filterTitle: String {
@@ -77,11 +78,11 @@ struct CollectionsView: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
                             if !showingAllFilters {
-                                // Close button with fade animation
+                                // Close button fades in
                                 Button(action: {
                                     withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                         showingAllFilters = true
-                                        selectedFilter = .museum  // Reset to default museum collection
+                                        selectedFilter = .museum
                                     }
                                 }) {
                                     Image(systemName: "xmark.circle.fill")
@@ -91,19 +92,16 @@ struct CollectionsView: View {
                                 .padding(.leading)
                                 .transition(.opacity.combined(with: .scale))
                                 
-                                // Selected filter with slide animation
+                                // Selected filter with matched geometry
                                 FilterButton(
                                     title: filterTitle,
                                     isSelected: true
                                 ) {
                                     // Already selected, do nothing
                                 }
-                                .transition(.asymmetric(
-                                    insertion: .move(edge: .trailing).combined(with: .opacity),
-                                    removal: .move(edge: .leading).combined(with: .opacity)
-                                ))
+                                .matchedGeometryEffect(id: selectedFilter, in: filterAnimation)
                             } else {
-                                // All filter options with fade animations
+                                // All filter options with matched geometry
                                 ForEach([
                                     ("Museum Collection", CollectionFilter.museum),
                                     ("Your Collection", CollectionFilter.personal),
@@ -119,7 +117,8 @@ struct CollectionsView: View {
                                             showingAllFilters = false
                                         }
                                     }
-                                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
+                                    .matchedGeometryEffect(id: filter, in: filterAnimation)
+                                    .transition(.opacity)
                                 }
                             }
                         }
