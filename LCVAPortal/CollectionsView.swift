@@ -9,6 +9,8 @@ struct CollectionsView: View {
     @State private var showingAllFilters = true  // New state to track filter view mode
     @State private var activeOverlayId: Int? = nil  // Track active overlay by art piece ID
     @Namespace private var filterAnimation  // Add this for matched geometry effect
+    @State private var selectedSubFilter: SubFilter? = nil
+    @Namespace private var subFilterAnimation
     
     // Move enum outside the struct
     private var filterTitle: String {
@@ -16,7 +18,6 @@ struct CollectionsView: View {
         case .museum: return "Museum Collection"
         case .personal: return "Your Collection"
         case .favorites: return "Favorites"
-        case .artists: return "Artists"
         }
     }
     
@@ -28,8 +29,6 @@ struct CollectionsView: View {
             return userCollections.personalCollection
         case .favorites:
             return userCollections.favorites
-        case .artists:
-            return []  // TODO: Add artist pieces
         }
     }
     
@@ -78,12 +77,15 @@ struct CollectionsView: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
                             if !showingAllFilters {
-                                // Close button fades in
+                                // Close button
                                 Button(action: {
                                     withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                         showingAllFilters = true
                                         selectedFilter = .museum
+                                        selectedSubFilter = nil  // Reset sub-filter
                                     }
+                                    let impactLight = UIImpactFeedbackGenerator(style: .light)
+                                    impactLight.impactOccurred()
                                 }) {
                                     Image(systemName: "xmark.circle.fill")
                                         .font(.title2)
@@ -92,7 +94,7 @@ struct CollectionsView: View {
                                 .padding(.leading)
                                 .transition(.opacity.combined(with: .scale))
                                 
-                                // Selected filter with matched geometry
+                                // Selected filter
                                 FilterButton(
                                     title: filterTitle,
                                     isSelected: true
@@ -100,13 +102,35 @@ struct CollectionsView: View {
                                     // Already selected, do nothing
                                 }
                                 .matchedGeometryEffect(id: selectedFilter, in: filterAnimation)
+                                
+                                // Sub-filters appear after selected filter
+                                ForEach([SubFilter.artist, SubFilter.medium], id: \.self) { filter in
+                                    FilterButton(
+                                        title: filter.title,
+                                        isSelected: selectedSubFilter == filter
+                                    ) {
+                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                            if selectedSubFilter == filter {
+                                                selectedSubFilter = nil
+                                            } else {
+                                                selectedSubFilter = filter
+                                            }
+                                        }
+                                        let impactLight = UIImpactFeedbackGenerator(style: .light)
+                                        impactLight.impactOccurred()
+                                    }
+                                    .matchedGeometryEffect(id: filter, in: subFilterAnimation)
+                                    .transition(.asymmetric(
+                                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                                        removal: .move(edge: .trailing).combined(with: .opacity)
+                                    ))
+                                }
                             } else {
-                                // All filter options with matched geometry
+                                // Main filter options
                                 ForEach([
                                     ("Museum Collection", CollectionFilter.museum),
                                     ("Your Collection", CollectionFilter.personal),
-                                    ("Favorites", CollectionFilter.favorites),
-                                    ("Artists", CollectionFilter.artists)
+                                    ("Favorites", CollectionFilter.favorites)
                                 ], id: \.0) { title, filter in
                                     FilterButton(
                                         title: title,
@@ -115,7 +139,10 @@ struct CollectionsView: View {
                                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                             selectedFilter = filter
                                             showingAllFilters = false
+                                            selectedSubFilter = nil  // Reset sub-filter when main filter changes
                                         }
+                                        let impactMedium = UIImpactFeedbackGenerator(style: .medium)
+                                        impactMedium.impactOccurred()
                                     }
                                     .matchedGeometryEffect(id: filter, in: filterAnimation)
                                     .transition(.opacity)
@@ -126,6 +153,7 @@ struct CollectionsView: View {
                     }
                     .padding(.horizontal)
                     .animation(.spring(response: 0.4, dampingFraction: 0.8), value: showingAllFilters)
+                    .animation(.spring(response: 0.4, dampingFraction: 0.8), value: selectedSubFilter)
                     
                     // Updated Recent header with functional grid toggle
                     HStack {
@@ -480,5 +508,16 @@ extension Array {
 
 // Define enum at file level
 enum CollectionFilter {
-    case museum, personal, favorites, artists
+    case museum, personal, favorites  // Remove artists case
+}
+
+enum SubFilter {
+    case artist, medium
+    
+    var title: String {
+        switch self {
+        case .artist: return "Artist"
+        case .medium: return "Medium"
+        }
+    }
 } 
