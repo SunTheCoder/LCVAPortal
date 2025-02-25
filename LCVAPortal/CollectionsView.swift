@@ -6,9 +6,16 @@ struct CollectionsView: View {
     @State private var isGridView = false  // Add this to track view mode
     @StateObject private var userCollections = UserCollections()
     @ObservedObject var userManager: UserManager
+    @State private var showingAllFilters = true  // New state to track filter view mode
     
-    enum CollectionFilter {
-        case museum, personal, favorites, artists
+    // Move enum outside the struct
+    private var filterTitle: String {
+        switch selectedFilter {
+        case .museum: return "Museum Collection"
+        case .personal: return "Your Collection"
+        case .favorites: return "Favorites"
+        case .artists: return "Artists"
+        }
     }
     
     var filteredArtPieces: [ArtPiece] {
@@ -65,24 +72,63 @@ struct CollectionsView: View {
                     }
                     .padding(.horizontal)
                     
-                    // Updated filter buttons with selection
+                    // Updated filter buttons with animation
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
-                            FilterButton(title: "Museum Collection", 
-                                       isSelected: selectedFilter == .museum) {
-                                selectedFilter = .museum
-                            }
-                            FilterButton(title: "Your Collection", 
-                                       isSelected: selectedFilter == .personal) {
-                                selectedFilter = .personal
-                            }
-                            FilterButton(title: "Favorites", 
-                                       isSelected: selectedFilter == .favorites) {
-                                selectedFilter = .favorites
-                            }
-                            FilterButton(title: "Artists", 
-                                       isSelected: selectedFilter == .artists) {
-                                selectedFilter = .artists
+                            if !showingAllFilters {
+                                // Close button
+                                Button(action: {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                        showingAllFilters = true
+                                        selectedFilter = .museum  // Reset to default filter
+                                    }
+                                }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .font(.title2)
+                                        .foregroundColor(.white.opacity(0.7))
+                                }
+                                .padding(.leading)
+                                
+                                // Selected filter - using direct string based on selected state
+                                FilterButton(
+                                    title: filterTitle,
+                                    isSelected: true
+                                ) {
+                                    // Already selected, do nothing
+                                }
+                            } else {
+                                // Show all filter options
+                                FilterButton(title: "Museum Collection", 
+                                           isSelected: selectedFilter == .museum) {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                        selectedFilter = .museum
+                                        showingAllFilters = false
+                                    }
+                                }
+                                
+                                FilterButton(title: "Your Collection", 
+                                           isSelected: selectedFilter == .personal) {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                        selectedFilter = .personal
+                                        showingAllFilters = false
+                                    }
+                                }
+                                
+                                FilterButton(title: "Favorites", 
+                                           isSelected: selectedFilter == .favorites) {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                        selectedFilter = .favorites
+                                        showingAllFilters = false
+                                    }
+                                }
+                                
+                                FilterButton(title: "Artists", 
+                                           isSelected: selectedFilter == .artists) {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                        selectedFilter = .artists
+                                        showingAllFilters = false
+                                    }
+                                }
                             }
                         }
                         .padding(.horizontal)
@@ -90,7 +136,7 @@ struct CollectionsView: View {
                     
                     // Updated Recent header with functional grid toggle
                     HStack {
-                        Text("Recents")
+                        Text("Artifacts")
                             .font(.title3)
                             .bold()
                             .foregroundColor(.white)
@@ -153,11 +199,18 @@ struct FilterButton: View {
         Button(action: action) {
             Text(title)
                 .font(.subheadline)
+                .fontWeight(isSelected ? .bold : .regular)
                 .foregroundColor(.white)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
-                .background(isSelected ? Color.white.opacity(0.3) : Color.white.opacity(0.2))
-                .clipShape(Capsule())
+                .background(
+                    Capsule()
+                        .fill(isSelected ? 
+                            Color.white.opacity(0.3) : 
+                            Color.black.opacity(0.2)
+                        )
+                )
+                .animation(.easeInOut, value: isSelected)
         }
     }
 }
@@ -399,4 +452,9 @@ extension Array {
             Array(self[$0 ..< Swift.min($0 + size, count)])
         }
     }
+}
+
+// Define enum at file level
+enum CollectionFilter {
+    case museum, personal, favorites, artists
 } 
