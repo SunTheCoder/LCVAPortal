@@ -573,7 +573,7 @@ struct ContentView: View {
                     }
                     
                     // Collections Tab
-                    CollectionsView(selectedArtPiece: $selectedArtPiece)
+                    CollectionsView(selectedArtPiece: $selectedArtPiece, userManager: userManager)
                         .tabItem {
                             Label("Collections", systemImage: "line.3.horizontal")
                         }

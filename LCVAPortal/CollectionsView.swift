@@ -4,6 +4,8 @@ struct CollectionsView: View {
     @Binding var selectedArtPiece: ArtPiece?
     @State private var selectedFilter: CollectionFilter = .museum
     @State private var isGridView = false  // Add this to track view mode
+    @StateObject private var userCollections = UserCollections()
+    @ObservedObject var userManager: UserManager
     
     enum CollectionFilter {
         case museum, personal, favorites, artists
@@ -14,9 +16,9 @@ struct CollectionsView: View {
         case .museum:
             return featuredArtPieces  // This is our museum collection from ArtPiece.swift
         case .personal:
-            return []  // TODO: Add personal collection
+            return userCollections.personalCollection
         case .favorites:
-            return []  // TODO: Add favorites
+            return userCollections.favorites
         case .artists:
             return []  // TODO: Add artist pieces
         }
@@ -27,7 +29,7 @@ struct CollectionsView: View {
             ZStack {
                 // Background gradient
                 LinearGradient(
-                    gradient: Gradient(colors: [Color.lcvaBlue, Color.white]),
+                    gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaBlue.opacity(0.4)]),
                     startPoint: .top,
                     endPoint: .bottom
                 )
@@ -112,9 +114,12 @@ struct CollectionsView: View {
                             LazyVStack(spacing: 12) {
                                 let chunks = filteredArtPieces.chunked(into: 3)
                                 ForEach(0..<chunks.count, id: \.self) { index in
-                                    GridRow(items: chunks[index]) { artPiece in
-                                        selectedArtPiece = artPiece
-                                    }
+                                    GridRow(
+                                        items: chunks[index],
+                                        onTap: { artPiece in selectedArtPiece = artPiece },
+                                        userCollections: userCollections,
+                                        userManager: userManager
+                                    )
                                 }
                             }
                             .padding(.horizontal, 16)
@@ -122,9 +127,12 @@ struct CollectionsView: View {
                             // List Layout
                             LazyVStack(spacing: 16) {
                                 ForEach(filteredArtPieces) { artPiece in
-                                    ArtPieceRow(artPiece: artPiece) {
-                                        selectedArtPiece = artPiece
-                                    }
+                                    ArtPieceRow(
+                                        artPiece: artPiece,
+                                        onTap: { selectedArtPiece = artPiece },
+                                        userCollections: userCollections,
+                                        userManager: userManager
+                                    )
                                 }
                             }
                         }
@@ -158,6 +166,8 @@ struct FilterButton: View {
 struct ArtPieceRow: View {
     let artPiece: ArtPiece
     let onTap: () -> Void
+    @ObservedObject var userCollections: UserCollections
+    let userManager: UserManager
     
     var body: some View {
         HStack {
@@ -182,6 +192,32 @@ struct ArtPieceRow: View {
             }
             
             Spacer()
+            
+            // Collection and favorite buttons
+            HStack(spacing: 12) {
+                Button(action: {
+                    if userCollections.isInCollection(artPiece) {
+                        userCollections.removeFromCollection(artPiece)
+                    } else {
+                        userCollections.addToCollection(artPiece)
+                    }
+                }) {
+                    Image(systemName: userCollections.isInCollection(artPiece) ? "minus.circle.fill" : "plus.circle.fill")
+                        .foregroundColor(.white)
+                }
+                
+                Button(action: {
+                    userCollections.toggleFavorite(artPiece)
+                }) {
+                    Image(systemName: userCollections.isFavorite(artPiece) ? "heart.fill" : "heart")
+                        .foregroundColor(userCollections.isFavorite(artPiece) ? .red : .white)
+                }
+            }
+            
+            NavigationLink(destination: ChatView(artPieceID: artPiece.id, userManager: userManager)) {
+                Image(systemName: "bubble.left.fill")
+                    .foregroundColor(.white)
+            }
         }
         .padding(.horizontal)
         .onTapGesture(perform: onTap)
@@ -192,19 +228,104 @@ struct ArtPieceRow: View {
 struct ArtPieceGridItem: View {
     let artPiece: ArtPiece
     let onTap: () -> Void
+    @ObservedObject var userCollections: UserCollections
+    let userManager: UserManager
+    @State private var isLongPressed = false
+    @State private var scale: CGFloat = 1.0  // For scale animation
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            // Image container with fixed width
-            AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 100, height: 100)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-            } placeholder: {
-                ProgressView()
-                    .frame(width: 100, height: 100)
+            ZStack {
+                // Image container
+                AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 100, height: 100)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                } placeholder: {
+                    ProgressView()
+                        .frame(width: 100, height: 100)
+                }
+                
+                // Long press overlay
+                if isLongPressed {
+                    Color.black.opacity(0.5)
+                        .frame(width: 100, height: 100)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    
+                    VStack(spacing: 12) {
+                        Button(action: {
+                            if userCollections.isInCollection(artPiece) {
+                                userCollections.removeFromCollection(artPiece)
+                            } else {
+                                userCollections.addToCollection(artPiece)
+                            }
+                            
+                            // Add haptic feedback for confirmation
+                            let impact = UIImpactFeedbackGenerator(style: .medium)
+                            impact.impactOccurred()
+                        }) {
+                            Image(systemName: userCollections.isInCollection(artPiece) ? "minus.circle.fill" : "plus.circle.fill")
+                                .foregroundColor(.white)
+                                .font(.title2)
+                        }
+                        
+                        Button(action: {
+                            userCollections.toggleFavorite(artPiece)
+                            
+                            // Add haptic feedback for confirmation
+                            let impact = UIImpactFeedbackGenerator(style: .medium)
+                            impact.impactOccurred()
+                        }) {
+                            Image(systemName: userCollections.isFavorite(artPiece) ? "heart.fill" : "heart")
+                                .foregroundColor(userCollections.isFavorite(artPiece) ? .red : .white)
+                                .font(.title2)
+                        }
+                        
+                        NavigationLink(destination: ChatView(artPieceID: artPiece.id, userManager: userManager)) {
+                            Image(systemName: "bubble.left.fill")
+                                .foregroundColor(.white)
+                                .font(.title2)
+                        }
+                    }
+                }
+            }
+            .scaleEffect(scale)  // Apply scale animation
+            .onLongPressGesture(minimumDuration: 0.3) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                    // Toggle the overlay
+                    isLongPressed.toggle()
+                    scale = isLongPressed ? 1.1 : 1.0
+                    
+                    // Haptic feedback
+                    let impactHeavy = UIImpactFeedbackGenerator(style: .heavy)
+                    impactHeavy.impactOccurred()
+                }
+                
+                if !isLongPressed {
+                    // Reset scale immediately if dismissing
+                    scale = 1.0
+                } else {
+                    // Reset scale after a brief delay if showing
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                            scale = 1.0
+                        }
+                    }
+                }
+            }
+            .onTapGesture {
+                if isLongPressed {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        isLongPressed = false
+                        // Light haptic feedback when dismissing
+                        let impactLight = UIImpactFeedbackGenerator(style: .light)
+                        impactLight.impactOccurred()
+                    }
+                } else {
+                    onTap()
+                }
             }
             
             // Text container with same width as image
@@ -221,7 +342,6 @@ struct ArtPieceGridItem: View {
             .frame(width: 100)  // Match image width
         }
         .frame(maxWidth: .infinity, alignment: .center)  // Center in available space
-        .onTapGesture(perform: onTap)
     }
 }
 
@@ -236,12 +356,19 @@ struct HeightPreferenceKey: PreferenceKey {
 struct GridRow: View {
     let items: [ArtPiece]
     let onTap: (ArtPiece) -> Void
+    let userCollections: UserCollections
+    let userManager: UserManager
     @State private var rowHeight: CGFloat = 0
     
     var body: some View {
         HStack(spacing: 12) {
             ForEach(items) { artPiece in
-                ArtPieceGridItem(artPiece: artPiece, onTap: { onTap(artPiece) })
+                ArtPieceGridItem(
+                    artPiece: artPiece,
+                    onTap: { onTap(artPiece) },
+                    userCollections: userCollections,
+                    userManager: userManager
+                )
                     .background(GeometryReader { geo in
                         Color.clear.preference(
                             key: HeightPreferenceKey.self,
