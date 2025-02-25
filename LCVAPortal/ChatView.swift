@@ -24,6 +24,27 @@ struct ChatView: View {
             VStack {
                 ScrollViewReader { scrollViewProxy in
                     ScrollView {
+                        if messages.isEmpty {
+                            VStack(spacing: 12) {
+                                Image(systemName: "bubble.left.and.bubble.right")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(.white.opacity(0.6))
+                                    .padding(.bottom, 4)
+                                
+                                Text("Start a conversation about this art piece!")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                
+                                Text("Share your thoughts, ask questions, or discuss what this piece means to you.")
+                                    .font(.subheadline)
+                                    .foregroundColor(.white.opacity(0.7))
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal)
+                            }
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .padding()
+                        }
+
                         VStack(alignment: .leading, spacing: 12) {
                             ForEach(messages) { message in
                                 MessageView(
