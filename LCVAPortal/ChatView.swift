@@ -11,60 +11,82 @@ struct ChatView: View {
     private let dateFormatter = DateFormatter.shortDateTimeFormatter()
 
     var body: some View {
-        VStack {
-            ScrollViewReader { scrollViewProxy in
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 12) {
-                        ForEach(messages) { message in
-                            MessageView(
-                                message: message,
-                                isFromCurrentUser: message.username == userManager.currentUser?.displayName,
-                                dateFormatter: dateFormatter,
-                                deleteAction: {
-                                    if let messageID = message.id {
-                                        deleteMessage(messageID: messageID)
+        ZStack {
+            // Background gradient
+            LinearGradient(
+                gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaBlue.opacity(0.4)]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+            
+            // Existing chat view content
+            VStack {
+                ScrollViewReader { scrollViewProxy in
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 12) {
+                            ForEach(messages) { message in
+                                MessageView(
+                                    message: message,
+                                    isFromCurrentUser: message.username == userManager.currentUser?.displayName,
+                                    dateFormatter: dateFormatter,
+                                    deleteAction: {
+                                        if let messageID = message.id {
+                                            deleteMessage(messageID: messageID)
+                                        }
                                     }
-                                }
-                            )
-                            .id(message.id)
+                                )
+                                .id(message.id)
+                            }
                         }
+                        .padding()
+                    }
+                    .onChange(of: messages) { _, _ in
+                        scrollToBottom(proxy: scrollViewProxy)
+                    }
+
+                    HStack {
+                        TextField("Enter message...", text: $newMessage)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding(.horizontal)
+
+                        Button(action: {
+                            sendMessage()
+                            if let lastMessageID = messages.last?.id {
+                                withAnimation {
+                                    scrollViewProxy.scrollTo(lastMessageID, anchor: .bottom)
+                                }
+                            }
+                        }) {
+                            Text("Send")
+                                .font(.system(size: 16))
+                                .foregroundColor(.white)
+                                .padding(4)
+                                .padding(.horizontal, 2)
+                                
+                                .background(Color.primary.opacity(0.2))
+                                
+                                .cornerRadius(7)
+                                .shadow(radius: 2)
+                        }
+                        .disabled(newMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
                     .padding()
                 }
-                .onChange(of: messages) { _, _ in
-                    scrollToBottom(proxy: scrollViewProxy)
-                }
-
-                HStack {
-                    TextField("Enter message...", text: $newMessage)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
-
-                    Button(action: {
-                        sendMessage()
-                        if let lastMessageID = messages.last?.id {
-                            withAnimation {
-                                scrollViewProxy.scrollTo(lastMessageID, anchor: .bottom)
-                            }
-                        }
-                    }) {
-                        Text("Send")
-                            .font(.system(size: 16))
-                            .foregroundColor(.white)
-                            .padding(4)
-                            .padding(.horizontal, 2)
-                            
-                            .background(Color.primary.opacity(0.2))
-                            
-                            .cornerRadius(7)
-                            .shadow(radius: 2)
-                    }
-                    .disabled(newMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
-                .padding()
             }
         }
         .onAppear(perform: loadMessages)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(
+            LinearGradient(
+                gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaBlue.opacity(0.4)]),
+                startPoint: .top,
+                endPoint: .bottom
+            ),
+            for: .navigationBar
+        )
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
     }
 
     func scrollToBottom(proxy: ScrollViewProxy) {

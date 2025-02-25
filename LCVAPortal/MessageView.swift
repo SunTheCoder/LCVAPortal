@@ -14,17 +14,20 @@ struct MessageView: View {
             VStack(alignment: isFromCurrentUser ? .trailing : .leading, spacing: 4) {
                 Text(message.username ?? "Anonymous")
                     .font(.subheadline)
-                    .foregroundColor(.blue)
+                    .foregroundColor(.white)
 
                 Text(message.text)
                     .padding(8)
-                    .background(isFromCurrentUser ? Color.blue.opacity(0.2) : Color.gray.opacity(0.2))
+                    .background(isFromCurrentUser ? 
+                        Color.white.opacity(0.25) : 
+                        Color.black.opacity(0.25))
                     .cornerRadius(8)
+                    .foregroundColor(.white)
                     .frame(maxWidth: 250, alignment: isFromCurrentUser ? .trailing : .leading)
 
                 Text(dateFormatter.string(from: message.timestamp.dateValue()))
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(.white.opacity(0.7))
                     .padding(isFromCurrentUser ? .trailing : .leading, 8)
             }
 
@@ -32,14 +35,14 @@ struct MessageView: View {
         }
         .padding(isFromCurrentUser ? .leading : .trailing, 50)
         .frame(maxWidth: .infinity, alignment: isFromCurrentUser ? .trailing : .leading)
-           }
-       }
+    }
+}
 
-       extension DateFormatter {
-           static func shortDateTimeFormatter() -> DateFormatter {
-               let formatter = DateFormatter()
-               formatter.dateStyle = .short
-               formatter.timeStyle = .short
-               return formatter
-           }
-       }
+extension DateFormatter {
+    static func shortDateTimeFormatter() -> DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .short
+        return formatter
+    }
+}
