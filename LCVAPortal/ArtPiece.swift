@@ -19,11 +19,53 @@ struct ArtPiece: Identifiable, Decodable {
     let era: String
     let origin: String
     let lore: String
-
- 
-
+    
+    // New accessibility and language materials
+    var translations: [Translation]?
+    var audioTour: AudioGuide?
+    var brailleLabel: BrailleLabel?
+    var adaAccessibility: ADAInfo?
 }
 
+// Supporting types for accessibility features
+struct Translation: Identifiable, Decodable {
+    let id = UUID()
+    let language: String
+    let title: String
+    let description: String
+    let material: String
+    let era: String
+    let origin: String
+    let lore: String
+}
+
+struct AudioGuide: Identifiable, Decodable {
+    let id = UUID()
+    let title: String
+    let audioUrl: String  // URL to hosted audio file
+    let duration: TimeInterval
+    let language: String
+}
+
+struct BrailleLabel: Identifiable, Decodable {
+    let id = UUID()
+    let documentUrl: String  // URL to printable braille document
+    let status: BrailleStatus
+    
+    enum BrailleStatus: String, Decodable {
+        case available
+        case requestable
+        case inProgress
+    }
+}
+
+struct ADAInfo: Identifiable, Decodable {
+    let id = UUID()
+    let isWheelchairAccessible: Bool
+    let hasAudioDescription: Bool
+    let hasTactileElements: Bool
+    let additionalNotes: String?
+}
 
 let featuredArtPieces = [
     ArtPiece(
@@ -37,7 +79,34 @@ let featuredArtPieces = [
         material: "Steel",
         era: "19th Century",
         origin: "United States",
-        lore: "This sculpture was commissioned by the Longwood College Foundation in 19 to commemorate the 100th anniversary of the college."
+        lore: "This sculpture was commissioned by the Longwood College Foundation in 19 to commemorate the 100th anniversary of the college.",
+        translations: [
+            Translation(
+                language: "Español",
+                title: "Stoned Joanie (Joanie la Pétrea)",
+                description: "Una hermosa escultura ubicada en la plaza central. ¡Por favor no tocar!",
+                material: "Acero",
+                era: "Siglo XIX",
+                origin: "Estados Unidos",
+                lore: "Esta escultura fue encargada por la Fundación de Longwood College para conmemorar el centenario de la universidad."
+            )
+        ],
+        audioTour: AudioGuide(
+            title: "Stoned Joanie Audio Tour",
+            audioUrl: "https://lcva.longwood.edu/audio/stoned_joanie_tour.mp3",
+            duration: 180, // 3 minutes
+            language: "English"
+        ),
+        brailleLabel: BrailleLabel(
+            documentUrl: "https://lcva.longwood.edu/braille/stoned_joanie_label.pdf",
+            status: .available
+        ),
+        adaAccessibility: ADAInfo(
+            isWheelchairAccessible: true,
+            hasAudioDescription: true,
+            hasTactileElements: false,
+            additionalNotes: "Located in an open plaza with smooth, paved access."
+        )
     ),
     ArtPiece(
         id: 2,

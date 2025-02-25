@@ -579,16 +579,6 @@ struct ContentView: View {
                         }
                         .tag(1)
                     
-                    // Update the Tours & Education tab
-                    ToursEducationView(userManager: userManager)
-                        .tabItem {
-                            VStack {
-                                Image(systemName: "book.fill")
-                                Text("Tours & Edu")
-                            }
-                        }
-                        .tag(2)
-                    
                     // Settings Tab
                     VStack {
                         ZStack {
