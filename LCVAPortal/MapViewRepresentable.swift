@@ -7,12 +7,31 @@ struct MapViewRepresentable: UIViewRepresentable {
     func makeUIView(context: Context) -> MKMapView {
         let mapView = MKMapView()
         mapView.delegate = context.coordinator
-        updateMapView(mapView)
+        
+        // Configure map
+        mapView.mapType = .standard
+        mapView.isZoomEnabled = true
+        mapView.isScrollEnabled = true
+        
+        // Add annotation immediately
+        let coordinate = CLLocationCoordinate2D(latitude: artPiece.latitude, longitude: artPiece.longitude)
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = coordinate
+        annotation.title = artPiece.title
+        mapView.addAnnotation(annotation)
+        
+        // Set initial region
+        let region = MKCoordinateRegion(
+            center: coordinate,
+            span: MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
+        )
+        mapView.setRegion(region, animated: false)
+        
         return mapView
     }
 
     func updateUIView(_ uiView: MKMapView, context: Context) {
-        updateMapView(uiView)
+        // Only update if needed
     }
     
     private func updateMapView(_ mapView: MKMapView) {

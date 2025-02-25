@@ -3,13 +3,13 @@ import MapKit
 
 struct MapModalView: View {
     let artPiece: ArtPiece
-    @ObservedObject var userManager: UserManager // Add userManager parameter
-
-    @State private var shouldReloadMap = false
+    @ObservedObject var userManager: UserManager
+    @Environment(\.dismiss) var dismiss
+    @State private var shouldReloadMap = true  // Set to true by default
 
     var body: some View {
-       
-            ScrollView { // Wrap content in a ScrollView
+        NavigationView {
+            ScrollView {
                 VStack(alignment: .center, spacing: 16) {
                     // Display the art piece image
                     AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
@@ -28,36 +28,37 @@ struct MapModalView: View {
                         .font(.system(size: 14))
                         .padding()
 
-                    // Display the map view
-                    if shouldReloadMap {
-                        MapViewRepresentable(artPiece: artPiece)
-                            .frame(width: 250, height: 250)
-                            .clipShape(RoundedRectangle(cornerRadius: 4))
-                            .shadow(radius: 3)
-                            .padding()
-                    }
+                    // Map view without conditional rendering
+                    MapViewRepresentable(artPiece: artPiece)
+                        .frame(height: 300)  // Made map taller
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .shadow(radius: 3)
+                        .padding()
 
-                    Divider()
-                        .padding(.horizontal)
+//                    Divider()
+//                        .padding(.horizontal)
 
                     // Display chat view
-                    Text("Share your thoughts with your peers:")
-                        .font(.system(size: 12))
-                        .padding(2)
+//                    Text("Share your thoughts with your peers:")
+//                        .font(.system(size: 12))
+//                        .padding(2)
 
-                    ChatView(artPieceID: artPiece.id, userManager: userManager)
-                        .frame(maxHeight: 380)
-                        .padding(.horizontal)
+//                    ChatView(artPieceID: artPiece.id, userManager: userManager)
+//                        .frame(maxHeight: 380)
+//                        .padding(.horizontal)
                 }
                 .padding()
             }
             .navigationTitle(artPiece.title)
             .navigationBarTitleDisplayMode(.inline)
-            .onAppear {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    shouldReloadMap = true
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
                 }
             }
         }
     }
+}
 
