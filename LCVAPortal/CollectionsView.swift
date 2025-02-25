@@ -61,15 +61,20 @@ struct CollectionsView: View {
                         
                         // Search and Add buttons
                         Button(action: { /* Search action */ }) {
-                            Image(systemName: "magnifyingglass")
-                                .foregroundColor(.white)
+                            NavigationLink(destination: SearchView(
+                                artPieces: featuredArtPieces,
+                                userCollections: userCollections,
+                                userManager: userManager
+                            )) {
+                                Image(systemName: "magnifyingglass")
+                                    .foregroundColor(.white)
+                            }
                         }
-                        .padding(.horizontal, 8)
                         
-                        Button(action: { /* Add to collection action */ }) {
-                            Image(systemName: "plus")
-                                .foregroundColor(.white)
-                        }
+                        // Button(action: { /* Add to collection action */ }) {
+                        //     Image(systemName: "plus")
+                        //         .foregroundColor(.white)
+                        // }
                     }
                     .padding(.horizontal)
                     
