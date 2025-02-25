@@ -579,6 +579,16 @@ struct ContentView: View {
                         }
                         .tag(1)
                     
+                    // Update the Tours & Education tab
+                    ToursEducationView(userManager: userManager)
+                        .tabItem {
+                            VStack {
+                                Image(systemName: "book.fill")
+                                Text("Tours & Edu")
+                            }
+                        }
+                        .tag(2)
+                    
                     // Settings Tab
                     VStack {
                         ZStack {
@@ -1344,5 +1354,30 @@ struct ScrollArrowIndicators: View {
     }
 }
 
+//// Create a placeholder view for Tours & Education
+//struct ToursEducationView: View {
+//    var body: some View {
+//        NavigationView {
+//            ZStack {
+//                // Use the same gradient background as Collections
+//                LinearGradient(
+//                    gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaBlue.opacity(0.4)]),
+//                    startPoint: .top,
+//                    endPoint: .bottom
+//                )
+//                .ignoresSafeArea()
+//                
+//                VStack {
+//                    Text("Tours & Education")
+//                        .font(.title)
+//                        .foregroundColor(.white)
+//                    Text("Coming Soon")
+//                        .foregroundColor(.white.opacity(0.7))
+//                }
+//            }
+//        }
+//    }
+//}
+//
 
 
