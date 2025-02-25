@@ -283,124 +283,130 @@ struct ArtPieceGridItem: View {
     @ObservedObject var userCollections: UserCollections
     let userManager: UserManager
     @State private var isLongPressed = false
-    @State private var scale: CGFloat = 1.0  // For scale animation
+    @State private var scale: CGFloat = 1.0
+    @State private var shouldNavigate = false  // Add this state
     
     var body: some View {
-        NavigationLink(destination: ArtDetailView(
-            artPiece: artPiece,
-            userManager: userManager,
-            userCollections: userCollections
-        )) {
-            VStack(alignment: .leading, spacing: 4) {
-                ZStack {
-                    // Image container
-                    AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 100, height: 100)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                    } placeholder: {
-                        ProgressView()
-                            .frame(width: 100, height: 100)
-                    }
-                    
-                    // Long press overlay
-                    if isLongPressed {
-                        Color.black.opacity(0.5)
-                            .frame(width: 100, height: 100)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                        
-                        VStack(spacing: 12) {
-                            Button(action: {
-                                if userCollections.isInCollection(artPiece) {
-                                    userCollections.removeFromCollection(artPiece)
-                                } else {
-                                    userCollections.addToCollection(artPiece)
-                                }
-                                
-                                // Add haptic feedback for confirmation
-                                let impact = UIImpactFeedbackGenerator(style: .medium)
-                                impact.impactOccurred()
-                            }) {
-                                Image(systemName: userCollections.isInCollection(artPiece) ? "minus.circle.fill" : "plus.circle.fill")
-                                    .foregroundColor(.white)
-                                    .font(.title2)
-                            }
-                            
-                            Button(action: {
-                                userCollections.toggleFavorite(artPiece)
-                                
-                                // Add haptic feedback for confirmation
-                                let impact = UIImpactFeedbackGenerator(style: .medium)
-                                impact.impactOccurred()
-                            }) {
-                                Image(systemName: userCollections.isFavorite(artPiece) ? "heart.fill" : "heart")
-                                    .foregroundColor(userCollections.isFavorite(artPiece) ? .red : .white)
-                                    .font(.title2)
-                            }
-                            
-                            NavigationLink(destination: ChatView(artPieceID: artPiece.id, userManager: userManager)) {
-                                Image(systemName: "bubble.left.fill")
-                                    .foregroundColor(.white)
-                                    .font(.title2)
-                            }
-                        }
-                    }
+        Group {
+            if isLongPressed {
+                // When overlay is active, just show the content without navigation
+                contentView
+            } else {
+                // When no overlay, wrap in NavigationLink
+                NavigationLink(
+                    destination: ArtDetailView(
+                        artPiece: artPiece,
+                        userManager: userManager,
+                        userCollections: userCollections
+                    ),
+                    isActive: $shouldNavigate  // Bind to our navigation state
+                ) {
+                    contentView
                 }
-                .scaleEffect(scale)  // Apply scale animation
-                .onLongPressGesture(minimumDuration: 0.3) {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                        // Toggle the overlay
-                        isLongPressed.toggle()
-                        scale = isLongPressed ? 1.1 : 1.0
-                        
-                        // Haptic feedback
-                        let impactHeavy = UIImpactFeedbackGenerator(style: .heavy)
-                        impactHeavy.impactOccurred()
-                    }
-                    
-                    if !isLongPressed {
-                        // Reset scale immediately if dismissing
-                        scale = 1.0
-                    } else {
-                        // Reset scale after a brief delay if showing
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                                scale = 1.0
-                            }
-                        }
-                    }
-                }
-                .onTapGesture {
-                    if isLongPressed {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            isLongPressed = false
-                            // Light haptic feedback when dismissing
-                            let impactLight = UIImpactFeedbackGenerator(style: .light)
-                            impactLight.impactOccurred()
-                        }
-                    } else {
-                        onTap()
-                    }
+            }
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+    // Extract the content view to avoid duplication
+    private var contentView: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            ZStack {
+                // Image container
+                AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 100, height: 100)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                } placeholder: {
+                    ProgressView()
+                        .frame(width: 100, height: 100)
                 }
                 
-                // Text container with same width as image
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(artPiece.title)
-                        .font(.caption)
-                        .foregroundColor(.white)
-                        .lineLimit(2)
+                // Long press overlay
+                if isLongPressed {
+                    Color.black.opacity(0.5)
+                        .frame(width: 100, height: 100)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
                     
-                    Text("Museum Collection")
-                        .font(.caption2)
-                        .foregroundColor(.white.opacity(0.7))
+                    VStack(spacing: 12) {
+                        Button(action: {
+                            if userCollections.isInCollection(artPiece) {
+                                userCollections.removeFromCollection(artPiece)
+                            } else {
+                                userCollections.addToCollection(artPiece)
+                            }
+                            let impact = UIImpactFeedbackGenerator(style: .medium)
+                            impact.impactOccurred()
+                        }) {
+                            Image(systemName: userCollections.isInCollection(artPiece) ? "minus.circle.fill" : "plus.circle.fill")
+                                .foregroundColor(.white)
+                                .font(.title2)
+                        }
+                        
+                        Button(action: {
+                            userCollections.toggleFavorite(artPiece)
+                            let impact = UIImpactFeedbackGenerator(style: .medium)
+                            impact.impactOccurred()
+                        }) {
+                            Image(systemName: userCollections.isFavorite(artPiece) ? "heart.fill" : "heart")
+                                .foregroundColor(userCollections.isFavorite(artPiece) ? .red : .white)
+                                .font(.title2)
+                        }
+                        
+                        NavigationLink(destination: ChatView(artPieceID: artPiece.id, userManager: userManager)) {
+                            Image(systemName: "bubble.left.fill")
+                                .foregroundColor(.white)
+                                .font(.title2)
+                        }
+                    }
                 }
-                .frame(width: 100)  // Match image width
             }
-            .frame(maxWidth: .infinity, alignment: .center)  // Center in available space
+            .scaleEffect(scale)
+            .onLongPressGesture(minimumDuration: 0.3) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                    isLongPressed.toggle()
+                    scale = isLongPressed ? 1.1 : 1.0
+                    let impactHeavy = UIImpactFeedbackGenerator(style: .heavy)
+                    impactHeavy.impactOccurred()
+                }
+                
+                if !isLongPressed {
+                    scale = 1.0
+                } else {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                            scale = 1.0
+                        }
+                    }
+                }
+            }
+            .onTapGesture {
+                if isLongPressed {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        isLongPressed = false
+                        let impactLight = UIImpactFeedbackGenerator(style: .light)
+                        impactLight.impactOccurred()
+                    }
+                } else {
+                    shouldNavigate = true  // Trigger navigation when not in overlay mode
+                }
+            }
+            
+            // Text container
+            VStack(alignment: .leading, spacing: 2) {
+                Text(artPiece.title)
+                    .font(.caption)
+                    .foregroundColor(.white)
+                    .lineLimit(2)
+                
+                Text("Museum Collection")
+                    .font(.caption2)
+                    .foregroundColor(.white.opacity(0.7))
+            }
+            .frame(width: 100)
         }
-        .buttonStyle(PlainButtonStyle()) // This preserves the grid item styling
     }
 }
 
