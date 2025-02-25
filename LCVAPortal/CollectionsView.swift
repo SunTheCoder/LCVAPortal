@@ -76,11 +76,11 @@ struct CollectionsView: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
                             if !showingAllFilters {
-                                // Close button
+                                // Close button with fade animation
                                 Button(action: {
                                     withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                         showingAllFilters = true
-                                        selectedFilter = .museum  // Reset to default filter
+                                        selectedFilter = .museum  // Reset to default museum collection
                                     }
                                 }) {
                                     Image(systemName: "xmark.circle.fill")
@@ -88,51 +88,44 @@ struct CollectionsView: View {
                                         .foregroundColor(.white.opacity(0.7))
                                 }
                                 .padding(.leading)
+                                .transition(.opacity.combined(with: .scale))
                                 
-                                // Selected filter - using direct string based on selected state
+                                // Selected filter with slide animation
                                 FilterButton(
                                     title: filterTitle,
                                     isSelected: true
                                 ) {
                                     // Already selected, do nothing
                                 }
+                                .transition(.asymmetric(
+                                    insertion: .move(edge: .trailing).combined(with: .opacity),
+                                    removal: .move(edge: .leading).combined(with: .opacity)
+                                ))
                             } else {
-                                // Show all filter options
-                                FilterButton(title: "Museum Collection", 
-                                           isSelected: selectedFilter == .museum) {
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                        selectedFilter = .museum
-                                        showingAllFilters = false
+                                // All filter options with fade animations
+                                ForEach([
+                                    ("Museum Collection", CollectionFilter.museum),
+                                    ("Your Collection", CollectionFilter.personal),
+                                    ("Favorites", CollectionFilter.favorites),
+                                    ("Artists", CollectionFilter.artists)
+                                ], id: \.0) { title, filter in
+                                    FilterButton(
+                                        title: title,
+                                        isSelected: selectedFilter == filter
+                                    ) {
+                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                            selectedFilter = filter
+                                            showingAllFilters = false
+                                        }
                                     }
-                                }
-                                
-                                FilterButton(title: "Your Collection", 
-                                           isSelected: selectedFilter == .personal) {
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                        selectedFilter = .personal
-                                        showingAllFilters = false
-                                    }
-                                }
-                                
-                                FilterButton(title: "Favorites", 
-                                           isSelected: selectedFilter == .favorites) {
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                        selectedFilter = .favorites
-                                        showingAllFilters = false
-                                    }
-                                }
-                                
-                                FilterButton(title: "Artists", 
-                                           isSelected: selectedFilter == .artists) {
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                        selectedFilter = .artists
-                                        showingAllFilters = false
-                                    }
+                                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
                                 }
                             }
                         }
                         .padding(.horizontal)
                     }
+                    .padding(.horizontal)
+                    .animation(.spring(response: 0.4, dampingFraction: 0.8), value: showingAllFilters)
                     
                     // Updated Recent header with functional grid toggle
                     HStack {
@@ -198,11 +191,11 @@ struct FilterButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.subheadline)
-                .fontWeight(isSelected ? .bold : .regular)
+                .font(.caption)  // Smaller text
+                .fontWeight(isSelected ? .semibold : .regular)
                 .foregroundColor(.white)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+                .padding(.horizontal, 12)  // Reduced horizontal padding
+                .padding(.vertical, 6)     // Reduced vertical padding
                 .background(
                     Capsule()
                         .fill(isSelected ? 
