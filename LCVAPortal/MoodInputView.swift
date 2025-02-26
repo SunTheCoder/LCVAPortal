@@ -19,6 +19,9 @@ struct MoodInputView: View {
             TextField("(e.g., happy, calm, great class, hard test)", text: $mood)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding(.horizontal)
+                .environment(\.colorScheme, .light)  // Force light mode style for the TextField
+                // Or alternatively:
+                .preferredColorScheme(.light)  // This will keep the TextField in light mode
             Text("We'll suggest campus art pieces that match your mood")
                 .font(.caption)
                 .foregroundColor(.white)
