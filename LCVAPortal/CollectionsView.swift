@@ -1,4 +1,5 @@
 import SwiftUI
+import FirebaseFirestore
 
 struct CollectionsView: View {
     @Binding var selectedArtPiece: ArtPiece?
@@ -11,6 +12,7 @@ struct CollectionsView: View {
     @Namespace private var filterAnimation  // Add this for matched geometry effect
     @State private var selectedSubFilter: SubFilter? = nil
     @Namespace private var subFilterAnimation
+    @State private var userAvatar: String? = nil
     
     // Move enum outside the struct
     private var filterTitle: String {
@@ -44,6 +46,25 @@ struct CollectionsView: View {
         }
     }
     
+    private func fetchUserAvatar() {
+        guard let uid = userManager.currentUser?.uid else { return }
+        
+        // Get user document directly from Firestore
+        let db = Firestore.firestore()
+        db.collection("users").document(uid).getDocument { document, error in
+            if let error = error {
+                print("Error fetching user:", error)
+                return
+            }
+            
+            if let document = document, document.exists {
+                DispatchQueue.main.async {
+                    self.userAvatar = document.data()?["avatar"] as? String
+                }
+            }
+        }
+    }
+    
     var body: some View {
         VStack {
             ZStack {
@@ -60,9 +81,23 @@ struct CollectionsView: View {
                     // Header with title and buttons
                     HStack {
                         // User avatar/profile pic
-                        Circle()
-                            .fill(Color.white.opacity(0.3))
-                            .frame(width: 35, height: 35)
+                        if let avatarUrl = userAvatar {
+                            AsyncImage(url: URL(string: avatarUrl)) { image in
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 35, height: 35)
+                                    .clipShape(Circle())
+                            } placeholder: {
+                                Circle()
+                                    .fill(Color.white.opacity(0.3))
+                                    .frame(width: 35, height: 35)
+                            }
+                        } else {
+                            Circle()
+                                .fill(Color.white.opacity(0.3))
+                                .frame(width: 35, height: 35)
+                        }
                         
                         Text("Collections")
                             .font(.title2)
@@ -279,6 +314,9 @@ struct CollectionsView: View {
                     }
                 }
             }
+        }
+        .onAppear {
+            fetchUserAvatar()
         }
     }
 }
