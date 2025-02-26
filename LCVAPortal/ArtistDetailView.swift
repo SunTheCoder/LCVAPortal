@@ -6,52 +6,88 @@
 //
 
 import SwiftUI
-
+import AVKit
 
 struct ArtistDetailView: View {
     let artist: Artist
     
     var body: some View {
         ScrollView {
-            VStack(alignment: .center, spacing: 20) {
-                Text(artist.name)
-                    .font(.title)
-                    .bold()
-                    .padding(.top)
+            VStack(alignment: .leading) {
+                // Hero Image Section
+                if let firstImage = artist.imageUrls.first {
+                    Image(firstImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(maxHeight: 300)
+                        .clipped()
+                }
                 
-                Text(artist.bio)
-                    .font(.body)
-                    .padding(.bottom)
-                
-                Text("Artwork")
-                    .font(.headline)
-                
-                ForEach(artist.videos.prefix(3), id: \.self) { video in
-                   
-                        VideoPlayerView(videoName: video)
-                            .frame(width: 300, height: 250)
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                            .padding(.vertical, 10)
+                VStack(alignment: .leading, spacing: 20) {
+                    // Artist Info
+                    Text(artist.name)
+                        .font(.title)
+                        .bold()
+                        .foregroundColor(.white)
+                    
+                    Text(artist.medium)
+                        .font(.subheadline)
+                        .foregroundColor(.white.opacity(0.7))
+                    
+                    Text(artist.bio)
+                        .font(.body)
+                        .foregroundColor(.white)
+                        .padding(.top, 8)
+                    
+                    // Videos Section
+                    if !artist.videos.isEmpty {
+                        Text("Videos")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding(.top)
+                        
+                        ForEach(artist.videos.prefix(3), id: \.self) { video in
+                            VideoPlayerView(videoName: video)
+                                .frame(height: 200)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
                     }
                     
-                
-                ForEach(artist.imageUrls, id: \.self) { imageUrl in
+                    // Gallery Section
+                    Text("Gallery")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding(.top)
                     
-                        
-                            Image(imageUrl)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 400, height: 400)  // Set the size as desired
-                                .clipShape(RoundedRectangle(cornerRadius: 10))  // Optional: Rounded corners
-                                .padding(.vertical, 10)  // Vertical padding to center the images in the ScrollView
-                        }
-                
-                
+                    ForEach(artist.imageUrls, id: \.self) { imageUrl in
+                        Image(imageUrl)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(maxHeight: 300)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+                }
+                .padding()
             }
-            .padding()
-            
         }
-        .navigationTitle("Featured Artist")
-        .frame(maxWidth: .infinity, alignment: .center)
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaBlue.opacity(0.4)]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+        )
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(
+            LinearGradient(
+                gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaBlue.opacity(0.4)]),
+                startPoint: .top,
+                endPoint: .bottom
+            ),
+            for: .navigationBar
+        )
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
     }
 }

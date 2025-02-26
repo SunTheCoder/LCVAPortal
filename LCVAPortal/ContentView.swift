@@ -83,6 +83,7 @@ struct ContentView: View {
     @State private var selectedArtPiece: ArtPiece? = nil
     @State private var isAnimating = false
     @StateObject private var userManager = UserManager()
+    @StateObject private var userCollections = UserCollections()
     @State private var recommendedArt: [ArtPiece] = [] // State to store mood-based recommendations
     @State private var selectedTab = 0
 
@@ -161,12 +162,14 @@ struct ContentView: View {
                                                         ForEach(Array(activeExhibitions.enumerated()), id: \.element.id) { index, exhibition in
                                                             VStack(alignment: .leading, spacing: 4) {  // Reduced spacing
                                                                 AsyncImage(url: URL(string: exhibition.imageUrl)) { image in
-                                                                    image
-                                                                        .resizable()
-                                                                        .scaledToFill()
-                                                                        .frame(width: 120, height: 120)
-                                                                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                                        .shadow(radius: 2)
+                                                                    NavigationLink(destination: ExhibitionView(exhibition: exhibition)) {
+                                                                        image
+                                                                            .resizable()
+                                                                            .scaledToFill()
+                                                                            .frame(width: 120, height: 120)
+                                                                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                                            .shadow(radius: 2)
+                                                                    }
                                                                 } placeholder: {
                                                                     ProgressView()
                                                                         .frame(width: 120, height: 120)
@@ -192,9 +195,6 @@ struct ContentView: View {
                                                             }
                                                             .frame(width: 120)
                                                             .id(index)
-                                                            .onTapGesture {
-                                                                selectedExhibition = exhibition
-                                                            }
                                                         }
                                                         
                                                         Spacer()
@@ -263,30 +263,18 @@ struct ContentView: View {
                                                         
                                                         ForEach(Array(pastExhibitions.enumerated()), id: \.element.id) { index, exhibition in
                                                             VStack(alignment: .leading, spacing: 4) {
-                                                                ZStack {
-                                                                    // Show video if available, otherwise show image
-                                                                    if let videoName = exhibition.videoPreview {
-                                                                        VideoPreview(
-                                                                            videoName: videoName,
-                                                                            title: "",
-                                                                            subtitle: ""
-                                                                        )
-                                                                        .frame(width: 120, height: 120)
-                                                                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                                        .shadow(radius: 2)
-                                                                    } else {
-                                                                        AsyncImage(url: URL(string: exhibition.imageUrl)) { image in
-                                                                            image
-                                                                                .resizable()
-                                                                                .scaledToFill()
-                                                                                .frame(width: 120, height: 120)
-                                                                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                                                .shadow(radius: 2)
-                                                                        } placeholder: {
-                                                                            ProgressView()
-                                                                                .frame(width: 120, height: 120)
-                                                                        }
+                                                                AsyncImage(url: URL(string: exhibition.imageUrl)) { image in
+                                                                    NavigationLink(destination: ExhibitionView(exhibition: exhibition)) {
+                                                                        image
+                                                                            .resizable()
+                                                                            .scaledToFill()
+                                                                            .frame(width: 120, height: 120)
+                                                                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                                            .shadow(radius: 2)
                                                                     }
+                                                                } placeholder: {
+                                                                    ProgressView()
+                                                                        .frame(width: 120, height: 120)
                                                                 }
                                                                 
                                                                 VStack(alignment: .leading, spacing: 2) {
@@ -309,9 +297,6 @@ struct ContentView: View {
                                                             }
                                                             .frame(width: 120)
                                                             .id(index)
-                                                            .onTapGesture {
-                                                                selectedExhibition = exhibition
-                                                            }
                                                         }
                                                         
                                                         Spacer()
@@ -380,12 +365,14 @@ struct ContentView: View {
                                                         
                                                         ForEach(Array(sampleArtist.imageUrls.enumerated()), id: \.element) { index, imageUrl in
                                                             VStack(alignment: .leading, spacing: 4) {
-                                                                Image(imageUrl)
-                                                                    .resizable()
-                                                                    .scaledToFill()
-                                                                    .frame(width: 120, height: 120)
-                                                                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                                    .shadow(radius: 2)
+                                                                NavigationLink(destination: ArtistDetailView(artist: sampleArtist)) {
+                                                                    Image(imageUrl)
+                                                                        .resizable()
+                                                                        .scaledToFill()
+                                                                        .frame(width: 120, height: 120)
+                                                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                                        .shadow(radius: 2)
+                                                                }
                                                                 
                                                                 VStack(alignment: .leading, spacing: 2) {
                                                                     Text(sampleArtist.name)
@@ -403,7 +390,7 @@ struct ContentView: View {
                                                                         .frame(width: 120, alignment: .leading)
                                                                         .fixedSize(horizontal: false, vertical: true)
                                                                 }
-                                                                .frame(height: 60)
+                                                                .frame(height: 70)
                                                             }
                                                             .frame(width: 120)
                                                             .id(index)
@@ -485,12 +472,18 @@ struct ContentView: View {
                                                         ForEach(Array(featuredArtPieces.enumerated()), id: \.element.id) { index, artPiece in
                                                             VStack(alignment: .leading, spacing: 4) {
                                                                 AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
-                                                                    image
-                                                                        .resizable()
-                                                                        .scaledToFill()
-                                                                        .frame(width: 120, height: 120)
-                                                                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                                        .shadow(radius: 2)
+                                                                    NavigationLink(destination: ArtDetailView(
+                                                                        artPiece: artPiece,
+                                                                        userManager: userManager,
+                                                                        userCollections: userCollections
+                                                                    )) {
+                                                                        image
+                                                                            .resizable()
+                                                                            .scaledToFill()
+                                                                            .frame(width: 120, height: 120)
+                                                                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                                            .shadow(radius: 2)
+                                                                    }
                                                                 } placeholder: {
                                                                     ProgressView()
                                                                         .frame(width: 120, height: 120)
@@ -516,9 +509,6 @@ struct ContentView: View {
                                                             }
                                                             .frame(width: 120)
                                                             .id(index)
-                                                            .onTapGesture {
-                                                                selectedArtPiece = artPiece
-                                                            }
                                                         }
                                                         
                                                         Spacer()

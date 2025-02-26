@@ -32,6 +32,18 @@ struct CollectionsView: View {
         }
     }
     
+    // Add computed property for displayed art
+    var displayedArtPieces: [ArtPiece] {
+        switch selectedFilter {
+        case .museum:
+            return featuredArtPieces.prefix(5).map { $0 }  // Just show first 5 for now
+        case .personal:
+            return userCollections.personalCollection.prefix(5).map { $0 }
+        case .favorites:
+            return userCollections.favorites.prefix(5).map { $0 }
+        }
+    }
+    
     var body: some View {
         VStack {
             ZStack {
@@ -159,6 +171,57 @@ struct CollectionsView: View {
                     .padding(.horizontal)
                     .animation(.spring(response: 0.4, dampingFraction: 0.8), value: showingAllFilters)
                     .animation(.spring(response: 0.4, dampingFraction: 0.8), value: selectedSubFilter)
+                    
+                    // On Display Section
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("On Display")
+                            .font(.title3)
+                            .bold()
+                            .foregroundColor(.white)
+                            .padding(.horizontal)
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 16) {
+                                ForEach(displayedArtPieces) { artPiece in
+                                    NavigationLink(destination: ArtDetailView(
+                                        artPiece: artPiece,
+                                        userManager: userManager,
+                                        userCollections: userCollections
+                                    )) {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
+                                                image
+                                                    .resizable()
+                                                    .aspectRatio(contentMode: .fill)
+                                                    .frame(width: 160, height: 160)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                                            } placeholder: {
+                                                ProgressView()
+                                                    .frame(width: 160, height: 160)
+                                            }
+                                            
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                Text(artPiece.title)
+                                                    .font(.headline)
+                                                    .foregroundColor(.white)
+                                                    .lineLimit(1)
+                                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                                Text(artPiece.material)
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.white.opacity(0.7))
+                                                    .lineLimit(1)
+                                            }
+                                            .frame(height: 50)
+                                            .padding(.horizontal, 4)
+                                        }
+                                        .frame(width: 160)
+                                    }
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                    }
+                    .padding(.vertical)
                     
                     // Updated Recent header with functional grid toggle
                     HStack {
