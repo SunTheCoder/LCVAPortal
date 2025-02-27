@@ -156,7 +156,11 @@ struct CollectionsView: View {
                                 .matchedGeometryEffect(id: selectedFilter, in: filterAnimation)
                                 
                                 // Sub-filters appear after selected filter
-                                ForEach([SubFilter.artist, SubFilter.medium], id: \.self) { filter in
+                                ForEach([
+                                    SubFilter.african, .american, .chinese,
+                                    .childrenLit, .civilRights, .contemporary,
+                                    .decorative, .folkArt, .virginia
+                                ], id: \.self) { filter in
                                     FilterButton(
                                         title: filter.title,
                                         isSelected: selectedSubFilter == filter
@@ -618,12 +622,21 @@ enum CollectionFilter {
 }
 
 enum SubFilter {
-    case artist, medium
+    case african, american, chinese
+    case childrenLit, civilRights, contemporary
+    case decorative, folkArt, virginia
     
     var title: String {
         switch self {
-        case .artist: return "Artist"
-        case .medium: return "Medium"
+        case .african: return "African Art"
+        case .american: return "American Art"
+        case .chinese: return "Chinese Art"
+        case .childrenLit: return "Children's Lit"
+        case .civilRights: return "Civil & Human Rights"
+        case .contemporary: return "Contemporary Art"
+        case .decorative: return "Decorative Art"
+        case .folkArt: return "Folk Art"
+        case .virginia: return "Virginia Artists"
         }
     }
 } 
