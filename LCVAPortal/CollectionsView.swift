@@ -68,7 +68,9 @@ struct CollectionsView: View {
     var displayedArtPieces: [ArtPiece] {
         switch selectedFilter {
         case .museum:
-            return artifacts.prefix(5).map(convertToArtPiece)  // Use Supabase artifacts
+            return artifacts
+                .filter { $0.on_display }  // Only show artifacts that are on display
+                .map(convertToArtPiece)
         case .personal:
             return userCollections.personalCollection.prefix(5).map { $0 }
         case .favorites:

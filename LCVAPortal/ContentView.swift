@@ -99,6 +99,56 @@ struct ContentView: View {
     
     @State private var longPressedExhibitionId: UUID? = nil
     
+    // Add state for Supabase data
+    @State private var artifacts: [Artifact] = []
+    @State private var isLoading = false
+    @State private var error: String?
+    
+    // Convert Supabase Artifact to ArtPiece
+    private func convertToArtPiece(_ artifact: Artifact) -> ArtPiece {
+        ArtPiece(
+            id: Int(abs(artifact.id.hashValue)),
+            title: artifact.title,
+            description: artifact.description ?? "",
+            imageUrl: artifact.image_url ?? "",
+            latitude: 0.0,
+            longitude: 0.0,
+            material: artifact.gallery ?? "Unknown",
+            era: "",
+            origin: "",
+            lore: "",
+            translations: nil,
+            audioTour: nil,
+            brailleLabel: nil,
+            adaAccessibility: nil
+        )
+    }
+    
+    // Get featured artifacts
+    var featuredArtPieces: [ArtPiece] {
+        artifacts
+            .filter { $0.featured }  // Use the featured column
+            .map(convertToArtPiece)
+    }
+    
+    private func fetchArtifacts() {
+        Task {
+            isLoading = true
+            do {
+                let fetchedArtifacts = try await SupabaseClient.shared.fetchArtifacts()
+                await MainActor.run {
+                    self.artifacts = fetchedArtifacts
+                    self.isLoading = false
+                }
+            } catch {
+                await MainActor.run {
+                    self.error = error.localizedDescription
+                    self.isLoading = false
+                }
+            }
+        }
+    }
+    
     var body: some View {
         ZStack {
             NavigationView {
@@ -743,6 +793,9 @@ struct ContentView: View {
                     set: { if !$0 { selectedExhibition = nil } }
                 )
             )
+        }
+        .onAppear {
+            fetchArtifacts()
         }
     }
 

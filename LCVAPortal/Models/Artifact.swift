@@ -12,6 +12,8 @@ struct Artifact: Identifiable, Codable {
     let created_at: String?
     let image_url: String?
     let location: String? // We can enhance this later for proper geography type
+    let on_display: Bool
+    let featured: Bool
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -25,6 +27,8 @@ struct Artifact: Identifiable, Codable {
         case created_at
         case image_url
         case location
+        case on_display = "on_display"
+        case featured
     }
     
     init(from decoder: Decoder) throws {
@@ -41,5 +45,7 @@ struct Artifact: Identifiable, Codable {
         created_at = try container.decodeIfPresent(String.self, forKey: .created_at)
         image_url = try container.decodeIfPresent(String.self, forKey: .image_url)
         location = try container.decodeIfPresent(String.self, forKey: .location)
+        on_display = try container.decode(Bool.self, forKey: .on_display)
+        featured = try container.decode(Bool.self, forKey: .featured)
     }
 } 
