@@ -665,11 +665,16 @@ struct ContentView: View {
 
                                                 Button("Sign Up") {
                                                     Task {
-                                                        await userManager.signUp(email: email, password: password, name: name, preferences: preferences)
-                                                        // Clear fields after successful signup
-                                                        email = ""
-                                                        password = ""
-                                                        name = ""
+                                                        do {
+                                                            // Clear fields after successful signup
+                                                            try await userManager.signUp(email: email, password: password, name: name, preferences: preferences)
+                                                            email = ""
+                                                            password = ""
+                                                            name = ""
+                                                        } catch {
+                                                            // Handle error - you might want to show this to the user
+                                                            print("Sign up error:", error.localizedDescription)
+                                                        }
                                                     }
                                                 }
                                                 .font(.system(size: 16))
@@ -1215,11 +1220,16 @@ struct UserAuthenticationView: View {
 
                     Button("Sign Up") {
                         Task {
-                            await userManager.signUp(email: email, password: password, name: name, preferences: preferences)
-                            // Clear fields after successful signup
-                            email = ""
-                            password = ""
-                            name = ""
+                            do {
+                                // Clear fields after successful signup
+                                try await userManager.signUp(email: email, password: password, name: name, preferences: preferences)
+                                email = ""
+                                password = ""
+                                name = ""
+                            } catch {
+                                // Handle error - you might want to show this to the user
+                                print("Sign up error:", error.localizedDescription)
+                            }
                         }
                     }
                     .font(.system(size: 16))

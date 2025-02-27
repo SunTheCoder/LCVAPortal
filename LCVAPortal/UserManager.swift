@@ -8,6 +8,7 @@
 import Foundation
 import FirebaseAuth
 import FirebaseFirestore
+import FirebaseCore
 
 class UserManager: ObservableObject {
     @Published var isLoggedIn = false
@@ -30,23 +31,25 @@ class UserManager: ObservableObject {
         }
     }
 
-    func signUp(email: String, password: String, name: String, preferences: [String]) async {
+    func signUp(email: String, password: String, name: String, preferences: [String]) async throws {
         do {
-            // Create user
+            // 1. Create Firebase user
             let authResult = try await Auth.auth().createUser(withEmail: email, password: password)
             
-            // Set display name
+            // 2. Set display name
             let changeRequest = authResult.user.createProfileChangeRequest()
             changeRequest.displayName = name
             try await changeRequest.commitChanges()
             
-            // Update UI on main thread
+            // 3. Update UI on main thread
             await MainActor.run {
                 self.currentUser = authResult.user
                 self.isLoggedIn = true
             }
 
-            // Prepare user profile data for Firestore
+            print("📝 Creating user documents...")
+
+            // 4. Create Firestore document FIRST (since we need this for app functionality)
             let userProfile = [
                 "name": name,
                 "email": email,
@@ -54,16 +57,28 @@ class UserManager: ObservableObject {
                 "role": "user"
             ] as [String: Any]
 
-            // Save profile data to Firestore
-            self.db.collection("users").document(authResult.user.uid).setData(userProfile) { error in
-                if let error = error {
-                    print("Error saving user profile: \(error.localizedDescription)")
-                } else {
-                    print("User profile saved successfully!")
-                }
-            }
+            try await self.db.collection("users")
+                .document(authResult.user.uid)
+                .setData(userProfile)
+            
+            print("✅ Firestore document created")
+
+            // 5. Create user in Supabase (as backup/secondary storage)
+            let supabaseUser = SupabaseUser(
+                id: authResult.user.uid,
+                email: email,
+                name: name,
+                created_at: Date()
+            )
+            
+            try await SupabaseClient.shared.createUser(supabaseUser)
+            print("✅ Supabase user created")
+            
+            print("✨ User profile saved successfully in both Firestore and Supabase!")
+            
         } catch {
-            print("Error: \(error.localizedDescription)")
+            print("❌ Error during sign up: \(error.localizedDescription)")
+            throw error
         }
     }
 

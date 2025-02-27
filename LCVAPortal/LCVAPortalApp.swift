@@ -42,6 +42,10 @@ struct LCVAPortalApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @AppStorage("isDarkMode") private var isDarkMode = false
     
+    init() {
+        SupabaseConfig.setupEnvironment()
+    }
+    
     var body: some Scene {
         WindowGroup {
             NavigationView {
