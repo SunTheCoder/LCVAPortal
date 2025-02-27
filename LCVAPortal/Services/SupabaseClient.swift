@@ -75,4 +75,49 @@ class SupabaseClient {
             body: jsonData
         )
     }
+    
+    func fetchArtifacts() async throws -> [Artifact] {
+        let data = try await makeRequestWithResponse(
+            endpoint: "artifacts",
+            method: "GET"
+        )
+        return try JSONDecoder().decode([Artifact].self, from: data)
+    }
+    
+    func fetchCollections() async throws -> [Collection] {
+        let data = try await makeRequestWithResponse(
+            endpoint: "collections",
+            method: "GET"
+        )
+        return try JSONDecoder().decode([Collection].self, from: data)
+    }
+    
+    // Add a method that returns data for decoding
+    private func makeRequestWithResponse(
+        endpoint: String,
+        method: String = "GET",
+        body: Data? = nil
+    ) async throws -> Data {
+        guard let url = URL(string: "\(supabaseUrl)/rest/v1/\(endpoint)") else {
+            print("❌ Invalid URL: \(supabaseUrl)/rest/v1/\(endpoint)")
+            throw URLError(.badURL)
+        }
+        
+        print("🔍 Making request to: \(url.absoluteString)")
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.allHTTPHeaderFields = createHeaders()
+        request.httpBody = body
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            print("❌ Bad status code: \((response as? HTTPURLResponse)?.statusCode ?? -1)")
+            throw URLError(.badServerResponse)
+        }
+        
+        return data
+    }
 } 

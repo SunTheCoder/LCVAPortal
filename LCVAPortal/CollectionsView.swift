@@ -14,6 +14,12 @@ struct CollectionsView: View {
     @Namespace private var subFilterAnimation
     @State private var userAvatar: String? = nil
     
+    // Add Supabase data states
+    @State private var artifacts: [Artifact] = []
+    @State private var collections: [Collection] = []
+    @State private var isLoading = false
+    @State private var error: String?
+    
     // Move enum outside the struct
     private var filterTitle: String {
         switch selectedFilter {
@@ -23,10 +29,34 @@ struct CollectionsView: View {
         }
     }
     
+    // Convert Supabase Artifact to ArtPiece for now (we'll phase this out later)
+    private func convertToArtPiece(_ artifact: Artifact) -> ArtPiece {
+        print("🔄 Converting artifact:", artifact)
+        let artPiece = ArtPiece(
+            id: Int(abs(artifact.id.hashValue)),
+            title: artifact.title,
+            description: artifact.description ?? "",
+            imageUrl: artifact.image_url ?? "",
+            latitude: 0.0,  // Default values for now
+            longitude: 0.0,
+            material: artifact.gallery ?? "Unknown",
+            era: "",        // Default empty string
+            origin: "",     // Default empty string
+            lore: "",      // Default empty string
+            translations: nil,
+            audioTour: nil,
+            brailleLabel: nil,
+            adaAccessibility: nil
+        )
+        print("✨ Converted to ArtPiece:", artPiece)
+        return artPiece
+    }
+    
+    // Update filteredArtPieces to use Supabase data
     var filteredArtPieces: [ArtPiece] {
         switch selectedFilter {
         case .museum:
-            return featuredArtPieces  // This is our museum collection from ArtPiece.swift
+            return artifacts.map(convertToArtPiece)  // Use Supabase artifacts
         case .personal:
             return userCollections.personalCollection
         case .favorites:
@@ -34,11 +64,11 @@ struct CollectionsView: View {
         }
     }
     
-    // Add computed property for displayed art
+    // Update displayedArtPieces to use Supabase data
     var displayedArtPieces: [ArtPiece] {
         switch selectedFilter {
         case .museum:
-            return featuredArtPieces.prefix(5).map { $0 }  // Just show first 5 for now
+            return artifacts.prefix(5).map(convertToArtPiece)  // Use Supabase artifacts
         case .personal:
             return userCollections.personalCollection.prefix(5).map { $0 }
         case .favorites:
@@ -60,6 +90,31 @@ struct CollectionsView: View {
             if let document = document, document.exists {
                 DispatchQueue.main.async {
                     self.userAvatar = document.data()?["avatar"] as? String
+                }
+            }
+        }
+    }
+    
+    private func fetchArtifacts() {
+        Task {
+            isLoading = true
+            error = nil
+            
+            do {
+                print("🔍 Fetching artifacts...")
+                let fetchedArtifacts = try await SupabaseClient.shared.fetchArtifacts()
+                print("📦 Fetched artifacts:", fetchedArtifacts)
+                
+                await MainActor.run {
+                    self.artifacts = fetchedArtifacts
+                    print("✅ Set artifacts:", self.artifacts)
+                    self.isLoading = false
+                }
+            } catch {
+                print("❌ Fetch error:", error)
+                await MainActor.run {
+                    self.error = error.localizedDescription
+                    self.isLoading = false
                 }
             }
         }
@@ -109,7 +164,7 @@ struct CollectionsView: View {
                         // Search and Add buttons
                         Button(action: { /* Search action */ }) {
                             NavigationLink(destination: SearchView(
-                                artPieces: featuredArtPieces,
+                                artPieces: artifacts.map(convertToArtPiece),  // Convert artifacts to ArtPieces
                                 userCollections: userCollections,
                                 userManager: userManager
                             )) {
@@ -221,39 +276,80 @@ struct CollectionsView: View {
                         
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 16) {
-                                ForEach(displayedArtPieces) { artPiece in
-                                    NavigationLink(destination: ArtDetailView(
-                                        artPiece: artPiece,
-                                        userManager: userManager,
-                                        userCollections: userCollections
-                                    )) {
+                                if isLoading {
+                                    // Show loading indicators with the same styling
+                                    ForEach(0..<3) { _ in
                                         VStack(alignment: .leading, spacing: 4) {
-                                            AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
-                                                image
-                                                    .resizable()
-                                                    .aspectRatio(contentMode: .fill)
-                                                    .frame(width: 160, height: 160)
-                                                    .clipShape(RoundedRectangle(cornerRadius: 4))
-                                            } placeholder: {
-                                                ProgressView()
-                                                    .frame(width: 160, height: 160)
-                                            }
+                                            RoundedRectangle(cornerRadius: 4)
+                                                .fill(Color.white.opacity(0.2))
+                                                .frame(width: 160, height: 160)
+                                                .overlay(ProgressView())
                                             
                                             VStack(alignment: .leading, spacing: 4) {
-                                                Text(artPiece.title)
-                                                    .font(.headline)
-                                                    .foregroundColor(.white)
-                                                    .lineLimit(1)
-                                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                                Text(artPiece.material)
-                                                    .font(.subheadline)
-                                                    .foregroundColor(.white.opacity(0.7))
-                                                    .lineLimit(1)
+                                                RoundedRectangle(cornerRadius: 2)
+                                                    .fill(Color.white.opacity(0.2))
+                                                    .frame(height: 16)
+                                                RoundedRectangle(cornerRadius: 2)
+                                                    .fill(Color.white.opacity(0.2))
+                                                    .frame(height: 12)
                                             }
-                                            .frame(height: 50)
                                             .padding(.horizontal, 4)
                                         }
                                         .frame(width: 160)
+                                    }
+                                } else if let error = error {
+                                    // Show error with existing styling
+                                    VStack(alignment: .center) {
+                                        Image(systemName: "exclamationmark.triangle")
+                                            .foregroundColor(.white)
+                                            .font(.largeTitle)
+                                        Text(error)
+                                            .foregroundColor(.white)
+                                            .multilineTextAlignment(.center)
+                                        Button("Retry") {
+                                            fetchArtifacts()
+                                        }
+                                        .foregroundColor(.white)
+                                        .padding(.top)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                } else {
+                                    // Existing ForEach with displayedArtPieces
+                                    ForEach(displayedArtPieces) { artPiece in
+                                        NavigationLink(destination: ArtDetailView(
+                                            artPiece: artPiece,
+                                            userManager: userManager,
+                                            userCollections: userCollections
+                                        )) {
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
+                                                    image
+                                                        .resizable()
+                                                        .aspectRatio(contentMode: .fill)
+                                                        .frame(width: 160, height: 160)
+                                                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                                                } placeholder: {
+                                                    ProgressView()
+                                                        .frame(width: 160, height: 160)
+                                                }
+                                                
+                                                VStack(alignment: .leading, spacing: 4) {
+                                                    Text(artPiece.title)
+                                                        .font(.headline)
+                                                        .foregroundColor(.white)
+                                                        .lineLimit(1)
+                                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                                    Text(artPiece.material)
+                                                        .font(.subheadline)
+                                                        .foregroundColor(.white.opacity(0.7))
+                                                        .lineLimit(1)
+                                                }
+                                                .frame(height: 50)
+                                                .padding(.horizontal, 4)
+                                            }
+                                            .frame(width: 160)
+                                        }
                                     }
                                 }
                             }
@@ -284,34 +380,106 @@ struct CollectionsView: View {
                     
                     // Updated collection items with grid/list toggle
                     ScrollView {
-                        if isGridView {
-                            LazyVStack(spacing: 12) {
-                                let chunks = filteredArtPieces.chunked(into: 3)
-                                ForEach(0..<chunks.count, id: \.self) { index in
-                                    GridRow(
-                                        items: chunks[index],
-                                        onTap: { artPiece in selectedArtPiece = artPiece },
-                                        userCollections: userCollections,
-                                        userManager: userManager,
-                                        activeOverlayId: $activeOverlayId
-                                    )
+                        if isLoading {
+                            if isGridView {
+                                // Grid loading state
+                                LazyVStack(spacing: 12) {
+                                    ForEach(0..<3) { _ in
+                                        HStack(spacing: 12) {
+                                            ForEach(0..<3) { _ in
+                                                VStack(alignment: .leading, spacing: 4) {
+                                                    RoundedRectangle(cornerRadius: 4)
+                                                        .fill(Color.white.opacity(0.2))
+                                                        .frame(width: 100, height: 100)
+                                                        .overlay(ProgressView())
+                                                    
+                                                    VStack(alignment: .leading, spacing: 2) {
+                                                        RoundedRectangle(cornerRadius: 2)
+                                                            .fill(Color.white.opacity(0.2))
+                                                            .frame(height: 12)
+                                                        RoundedRectangle(cornerRadius: 2)
+                                                            .fill(Color.white.opacity(0.2))
+                                                            .frame(height: 8)
+                                                    }
+                                                    .frame(width: 100)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal, 16)
+                            } else {
+                                // List loading state
+                                LazyVStack(spacing: 16) {
+                                    ForEach(0..<5) { _ in
+                                        HStack {
+                                            RoundedRectangle(cornerRadius: 4)
+                                                .fill(Color.white.opacity(0.2))
+                                                .frame(width: 60, height: 60)
+                                                .overlay(ProgressView())
+                                            
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                RoundedRectangle(cornerRadius: 2)
+                                                    .fill(Color.white.opacity(0.2))
+                                                    .frame(height: 16)
+                                                RoundedRectangle(cornerRadius: 2)
+                                                    .fill(Color.white.opacity(0.2))
+                                                    .frame(height: 12)
+                                            }
+                                            .padding(.horizontal)
+                                            
+                                            Spacer()
+                                        }
+                                        .padding(.horizontal)
+                                    }
                                 }
                             }
-                            .padding(.horizontal, 16)
-                            .onChange(of: selectedFilter) { _ in
-                                // Clear active overlay when filter changes
-                                activeOverlayId = nil
+                        } else if let error = error {
+                            // Error state
+                            VStack(spacing: 16) {
+                                Image(systemName: "exclamationmark.triangle")
+                                    .font(.largeTitle)
+                                    .foregroundColor(.white)
+                                Text(error)
+                                    .foregroundColor(.white)
+                                    .multilineTextAlignment(.center)
+                                Button("Retry") {
+                                    fetchArtifacts()
+                                }
+                                .foregroundColor(.white)
                             }
+                            .padding()
                         } else {
-                            // List Layout
-                            LazyVStack(spacing: 16) {
-                                ForEach(filteredArtPieces) { artPiece in
-                                    ArtPieceRow(
-                                        artPiece: artPiece,
-                                        onTap: { selectedArtPiece = artPiece },
-                                        userCollections: userCollections,
-                                        userManager: userManager
-                                    )
+                            // Existing grid/list view code
+                            if isGridView {
+                                LazyVStack(spacing: 12) {
+                                    let chunks = filteredArtPieces.chunked(into: 3)
+                                    ForEach(0..<chunks.count, id: \.self) { index in
+                                        GridRow(
+                                            items: chunks[index],
+                                            onTap: { artPiece in selectedArtPiece = artPiece },
+                                            userCollections: userCollections,
+                                            userManager: userManager,
+                                            activeOverlayId: $activeOverlayId
+                                        )
+                                    }
+                                }
+                                .padding(.horizontal, 16)
+                                .onChange(of: selectedFilter) { _ in
+                                    // Clear active overlay when filter changes
+                                    activeOverlayId = nil
+                                }
+                            } else {
+                                // List Layout
+                                LazyVStack(spacing: 16) {
+                                    ForEach(filteredArtPieces) { artPiece in
+                                        ArtPieceRow(
+                                            artPiece: artPiece,
+                                            onTap: { selectedArtPiece = artPiece },
+                                            userCollections: userCollections,
+                                            userManager: userManager
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -321,6 +489,7 @@ struct CollectionsView: View {
         }
         .onAppear {
             fetchUserAvatar()
+            fetchArtifacts()
         }
     }
 }
