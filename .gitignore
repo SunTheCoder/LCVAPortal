@@ -2,7 +2,7 @@ GoogleService-Info.plist
 GoogleService-Info.plist
 GoogleService-Info.plist
 .env
-<<<<<<< HEAD
 firebase-debug.log
-=======
->>>>>>> c814233 (ai recommendations working. need training)
+
+NOTES
+notes.md
