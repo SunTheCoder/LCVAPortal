@@ -173,7 +173,9 @@ struct ContentView: View {
                                 
                                 // Info Accordion
                                 InfoAccordionView()
-                                    .padding(.bottom, 24)  // Add padding below Info Accordion
+                                    .padding(.bottom, 12)  // Reduced padding between accordions
+                                
+                            
                                 
                                 // First row: Exhibitions
                                 VStack(spacing: 24) {  // Increased spacing between sections
@@ -406,6 +408,9 @@ struct ContentView: View {
                                 
                                 // Login at the bottom
                                 UserAuthenticationView(userManager: userManager)
+
+                                MuseumInfoAccordionView()
+                                    .padding(.vertical)
                             }
                         }
                     }
@@ -1073,7 +1078,7 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
-
+ 
 
     // Separate view for VideoPlayer to manage AVPlayer setup
     struct VideoPlayerView: View {
