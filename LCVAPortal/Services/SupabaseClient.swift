@@ -181,4 +181,23 @@ class SupabaseClient {
             body: body
         )
     }
+    
+    func fetchArtifactsByCollection(collectionName: String) async throws -> [Artifact] {
+        // URL encode the collection name to handle spaces and special characters
+        guard let encodedCollection = collectionName
+            .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)?
+            .replacingOccurrences(of: "&", with: "%26") else {
+            throw URLError(.badURL)
+        }
+        
+        let endpoint = "artifacts?collection=eq.\(encodedCollection)"
+        print("🔍 Making collection request to: \(endpoint)")  // Debug print
+        
+        let data = try await makeRequestWithResponse(
+            endpoint: endpoint,
+            method: "GET"
+        )
+        
+        return try JSONDecoder().decode([Artifact].self, from: data)
+    }
 } 

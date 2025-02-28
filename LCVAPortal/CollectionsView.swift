@@ -104,13 +104,28 @@ struct CollectionsView: View {
             
             do {
                 print("🔍 Fetching artifacts...")
-                let fetchedArtifacts = try await SupabaseClient.shared.fetchArtifacts()
-                print("📦 Fetched artifacts:", fetchedArtifacts)
-                
-                await MainActor.run {
-                    self.artifacts = fetchedArtifacts
-                    print("✅ Set artifacts:", self.artifacts)
-                    self.isLoading = false
+                if let subFilter = selectedSubFilter {
+                    // Fetch filtered artifacts
+                    print("📦 Fetching artifacts for collection: \(subFilter.collectionName)")
+                    let fetchedArtifacts = try await SupabaseClient.shared.fetchArtifactsByCollection(
+                        collectionName: subFilter.collectionName
+                    )
+                    print("📦 Fetched filtered artifacts count:", fetchedArtifacts.count)
+                    
+                    await MainActor.run {
+                        self.artifacts = fetchedArtifacts
+                        self.isLoading = false
+                    }
+                } else {
+                    // Fetch all artifacts when no filter is selected
+                    print("📦 Fetching all artifacts")
+                    let fetchedArtifacts = try await SupabaseClient.shared.fetchArtifacts()
+                    print("📦 Fetched all artifacts count:", fetchedArtifacts.count)
+                    
+                    await MainActor.run {
+                        self.artifacts = fetchedArtifacts
+                        self.isLoading = false
+                    }
                 }
             } catch {
                 print("❌ Fetch error:", error)
@@ -192,6 +207,7 @@ struct CollectionsView: View {
                                         showingAllFilters = true
                                         selectedFilter = .museum
                                         selectedSubFilter = nil  // Reset sub-filter
+                                        fetchArtifacts()  // Add this to fetch all artifacts when closing
                                     }
                                     let impactLight = UIImpactFeedbackGenerator(style: .light)
                                     impactLight.impactOccurred()
@@ -225,8 +241,10 @@ struct CollectionsView: View {
                                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                             if selectedSubFilter == filter {
                                                 selectedSubFilter = nil
+                                                fetchArtifacts()
                                             } else {
                                                 selectedSubFilter = filter
+                                                fetchArtifacts()
                                             }
                                         }
                                         let impactLight = UIImpactFeedbackGenerator(style: .light)
@@ -252,7 +270,8 @@ struct CollectionsView: View {
                                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                             selectedFilter = filter
                                             showingAllFilters = false
-                                            selectedSubFilter = nil  // Reset sub-filter when main filter changes
+                                            selectedSubFilter = nil  // Reset sub-filter
+                                            fetchArtifacts()  // Add this to fetch all artifacts when changing main filter
                                         }
                                         let impactMedium = UIImpactFeedbackGenerator(style: .medium)
                                         impactMedium.impactOccurred()
@@ -798,6 +817,20 @@ enum SubFilter {
     case decorative, folkArt, virginia
     
     var title: String {
+        switch self {
+        case .african: return "African Art"
+        case .american: return "American Art"
+        case .chinese: return "Chinese Art"
+        case .childrenLit: return "Children's Lit"
+        case .civilRights: return "Civil & Human Rights"
+        case .contemporary: return "Contemporary Art"
+        case .decorative: return "Decorative Art"
+        case .folkArt: return "Folk Art"
+        case .virginia: return "Virginia Artists"
+        }
+    }
+    
+    var collectionName: String {
         switch self {
         case .african: return "African Art"
         case .american: return "American Art"
