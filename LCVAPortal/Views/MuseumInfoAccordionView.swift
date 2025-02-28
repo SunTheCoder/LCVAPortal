@@ -78,6 +78,101 @@ struct MuseumInfoAccordionView: View {
                     content: "Your support helps us continue to provide free admission and educational programs to our community."
                 )
             ]
+        ),
+        AccordionSection(
+            title: "Advisory Board",
+            subsections: [
+                SubSection(
+                    title: "Overview",
+                    content: """
+                    The LCVA Advisory Board is a group of volunteers elected to further the LCVA's mission to explore of visual art and its relevance to everyday life. They promote the LCVA's understanding that works of art are essential records of human history and can influence and enrich every aspect of living. Advisory board members not only further these ideas through service to the LCVA, but they also serve as examples through their own day-to-day lives.
+
+                    President | Kristin Gee
+                    """
+                ),
+                SubSection(
+                    title: "Collections Committee",
+                    content: """
+                    • David Whaley, Chair
+                    • Thomas Brumfield
+                    • Pam Butler
+                    • Susan Jamison
+                    • Bernice Rowe
+                    • Lester VanWinkle
+                    • Shannon Friedman
+                    • Ray Kass
+                    • Mary Prevo
+                    • Ray Thompson
+
+                    Consulting Members
+                    • Maurice Beane
+                    • Thomas Brumfield
+                    • Kerri Cushman
+                    • Neal Guma
+                    • Susan Jamison
+                    • Bernice Rowe '70
+                    """
+                ),
+                SubSection(
+                    title: "Development Committee",
+                    content: """
+                    • Anne Tyler Paulek, Chair
+                    • Lonnie Calhoun
+                    • Kristin Gee
+                    • Lisa Tharpe
+                    • Rob Wade
+                    • Linda Cheyne
+                    • Joni Beachly
+
+                    Consulting Members
+                    • Lauren Irby '12
+                    • Laura Keohane
+                    • Anne-Latane Saunders
+                    • Rucker Snead
+                    • Cheryl Yancey
+                    """
+                ),
+                SubSection(
+                    title: "Marketing Committee",
+                    content: """
+                    • Jill Ahmad, Chair
+                    • Taikein Cooper
+                    • Dr. Richard McClintock
+                    • Sabrina Brown
+                    • Jennifer Wall
+                    • Kay Woodson
+                    • Anastasiia Cifers
+
+                    Consulting Members
+                    • Sabrina Brown
+                    • Angie Clements
+                    • I.B. Dent
+                    • Brandon Hennessey
+                    • Dr. Richard McClintock
+                    """
+                ),
+                SubSection(
+                    title: "Programming Committee",
+                    content: """
+                    • Mindy Osborn, Chair
+                    • Julie Dixon
+                    • Juanita Giles
+                    • Harlan Horton
+                    • Dr. Jess Simmons
+                    • Cainan Townsend '15
+                    • Patricia Smith
+                    • Ed Helton
+                    • Joy Utzinger
+                    • Harriet Taylor Vincent
+
+                    Consulting Members
+                    • Kalimah Carter
+                    • Ed Helton
+                    • Mindy Osborn
+                    • Sherry Swinson '77
+                    """
+                )
+            ]
         )
     ]
     
