@@ -409,7 +409,7 @@ struct ContentView: View {
                                 // Login at the bottom
                                 UserAuthenticationView(userManager: userManager)
 
-                                MuseumInfoAccordionView()
+                                MuseumInfoAccordionView(userManager: userManager)
                                     .padding(.vertical)
                             }
                         }

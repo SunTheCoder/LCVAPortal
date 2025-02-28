@@ -167,4 +167,18 @@ class SupabaseClient {
         
         return data
     }
+    
+    func submitContactForm(_ submission: ContactFormSubmission) async throws {
+        let endpoint = "contact_form_submissions"
+        
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let body = try encoder.encode(submission)
+        
+        try await makeRequest(
+            endpoint: endpoint,
+            method: "POST",
+            body: body
+        )
+    }
 } 

@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct MuseumInfoAccordionView: View {
+    @ObservedObject var userManager: UserManager
     @State private var expandedSection: String?
     @State private var expandedSubSection: String?
     
@@ -229,7 +230,7 @@ struct MuseumInfoAccordionView: View {
                                     // Subsection content
                                     if expandedSubSection == subsection.title {
                                         if subsection.isContactForm {
-                                            ContactFormView()
+                                            ContactFormView(userManager: userManager)
                                                 .padding(.horizontal, 32)
                                                 .padding(.vertical, 12)
                                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -301,6 +302,7 @@ struct SubSection {
 
 // Add this struct for the contact form
 struct ContactFormView: View {
+    @ObservedObject var userManager: UserManager
     @State private var firstName = ""
     @State private var lastName = ""
     @State private var email = ""
@@ -308,6 +310,8 @@ struct ContactFormView: View {
     @State private var category = "General Inquiries"
     @State private var message = ""
     @State private var showingAlert = false
+    @State private var isSubmitting = false
+    @State private var errorMessage: String?
     
     let categories = [
         "General Inquiries",
@@ -380,24 +384,26 @@ struct ContactFormView: View {
                 .foregroundColor(.white.opacity(0.6))
             
             // Submit Button
-            Button(action: {
-                // Here you would implement sending the message
-                showingAlert = true
-                // Reset form
-                firstName = ""
-                lastName = ""
-                email = ""
-                phone = ""
-                category = "General Inquiries"
-                message = ""
-            }) {
-                Text("SUBMIT")
-                    .fontWeight(.semibold)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(Color.lcvaNavy)
-                    .cornerRadius(8)
+            Button(action: submitForm) {
+                if isSubmitting {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                } else {
+                    Text("SUBMIT")
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.lcvaNavy)
+                        .cornerRadius(8)
+                }
+            }
+            .disabled(isSubmitting || !isValidForm)
+            
+            if let error = errorMessage {
+                Text(error)
+                    .foregroundColor(.red)
+                    .font(.caption)
             }
         }
         .padding(.vertical, 8)
@@ -407,11 +413,58 @@ struct ContactFormView: View {
             Text("Thank you for your message. We'll get back to you soon!")
         }
     }
+    
+    private var isValidForm: Bool {
+        !firstName.isEmpty &&
+        !lastName.isEmpty &&
+        !email.isEmpty &&
+        email.contains("@") &&
+        !message.isEmpty &&
+        message.count <= 1000
+    }
+    
+    private func submitForm() {
+        Task {
+            isSubmitting = true
+            errorMessage = nil
+            
+            do {
+                let submission = ContactFormSubmission(
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email,
+                    phone: phone.isEmpty ? nil : phone,
+                    category: category,
+                    message: message,
+                    userId: userManager.currentUser?.uid
+                )
+                
+                try await SupabaseClient.shared.submitContactForm(submission)
+                
+                await MainActor.run {
+                    // Reset form
+                    firstName = ""
+                    lastName = ""
+                    email = ""
+                    phone = ""
+                    category = "General Inquiries"
+                    message = ""
+                    showingAlert = true
+                    isSubmitting = false
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = "Failed to submit form. Please try again."
+                    isSubmitting = false
+                }
+            }
+        }
+    }
 }
 
 #Preview {
     ZStack {
         Color.black.opacity(0.9).edgesIgnoringSafeArea(.all)
-        MuseumInfoAccordionView()
+        MuseumInfoAccordionView(userManager: UserManager())
     }
 } 
