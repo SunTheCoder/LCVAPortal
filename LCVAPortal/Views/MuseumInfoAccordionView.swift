@@ -9,6 +9,14 @@ struct MuseumInfoAccordionView: View {
             title: "About LCVA",
             subsections: [
                 SubSection(
+                    title: "Welcome",
+                    content: """
+                    The LCVA is the art museum of Longwood University. Located in downtown Farmville, the LCVA serves as a physical, intellectual, and cultural bridge between the university and our community at large. Longwood University's mission, "to transform capable men and women into citizen leaders, fully engaged in the world around them," forms the foundation of our mission and values.
+
+                    The Longwood Center for the Visual Arts is the only museum of its kind, scope, and size in the area surrounding our home base: Farmville, Virginia, and Prince Edward County. Our commitment to improving the quality of life in the region by providing full access to the visual arts is the heart of our mission. At the LCVA, we believe there should be no barriers to exploration of the visual arts. Admission to the LCVA and its programs is – and always has been – free for everyone.
+                    """
+                ),
+                SubSection(
                     title: "Mission",
                     content: "To enrich lives by sharing transformative experiences in the visual arts with our community."
                 ),
@@ -198,22 +206,69 @@ struct SubSection {
 
 // Add this struct for the contact form
 struct ContactFormView: View {
-    @State private var name = ""
+    @State private var firstName = ""
+    @State private var lastName = ""
     @State private var email = ""
+    @State private var phone = ""
+    @State private var category = "General Inquiries"
     @State private var message = ""
     @State private var showingAlert = false
     
+    let categories = [
+        "General Inquiries",
+        "Membership",
+        "Donations",
+        "Volunteering",
+        "Events",
+        "Education Programs"
+    ]
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            TextField("Name", text: $name)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .foregroundColor(.black)
+            // Name Fields
+            Text("Name").foregroundColor(.white.opacity(0.7))
+            HStack(spacing: 12) {
+                VStack(alignment: .leading) {
+                    TextField("First", text: $firstName)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .foregroundColor(.black)
+                }
+                
+                VStack(alignment: .leading) {
+                    TextField("Last", text: $lastName)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .foregroundColor(.black)
+                }
+            }
             
+            // Email
+            Text("Email").foregroundColor(.white.opacity(0.7))
             TextField("Email", text: $email)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .foregroundColor(.black)
                 .keyboardType(.emailAddress)
             
+            // Phone
+            Text("Phone").foregroundColor(.white.opacity(0.7))
+            TextField("Phone", text: $phone)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .foregroundColor(.black)
+                .keyboardType(.phonePad)
+            
+            // Category
+            Text("Category").foregroundColor(.white.opacity(0.7))
+            Picker("Category", selection: $category) {
+                ForEach(categories, id: \.self) { category in
+                    Text(category).tag(category)
+                }
+            }
+            .pickerStyle(MenuPickerStyle())
+            .accentColor(.white)
+            .background(Color.white.opacity(0.1))
+            .cornerRadius(8)
+            
+            // Message
+            Text("What can we help you with?").foregroundColor(.white.opacity(0.7))
             TextEditor(text: $message)
                 .frame(height: 100)
                 .cornerRadius(4)
@@ -222,20 +277,31 @@ struct ContactFormView: View {
                         .stroke(Color.gray.opacity(0.2), lineWidth: 1)
                 )
                 .foregroundColor(.black)
+                .background(Color.white)
             
+            // Character count
+            Text("\(message.count) of 1000 max characters")
+                .font(.caption)
+                .foregroundColor(.white.opacity(0.6))
+            
+            // Submit Button
             Button(action: {
                 // Here you would implement sending the message
                 showingAlert = true
                 // Reset form
-                name = ""
+                firstName = ""
+                lastName = ""
                 email = ""
+                phone = ""
+                category = "General Inquiries"
                 message = ""
             }) {
-                Text("Send Message")
+                Text("SUBMIT")
+                    .fontWeight(.semibold)
                     .foregroundColor(.white)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 10)
-                    .background(Color.lcvaBlue)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(Color.lcvaNavy)
                     .cornerRadius(8)
             }
         }
