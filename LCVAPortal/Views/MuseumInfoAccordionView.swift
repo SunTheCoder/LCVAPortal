@@ -59,7 +59,8 @@ struct MuseumInfoAccordionView: View {
                 ),
                 SubSection(
                     title: "Accessibility",
-                    content: "The LCVA is fully accessible to all visitors. Wheelchair access is available at our Main Street entrance."
+                    content: "The LCVA is fully accessible to all visitors. Wheelchair access is available at our Main Street entrance.",
+                    hasAccessibilityForm: true
                 )
             ]
         ),
@@ -236,6 +237,19 @@ struct MuseumInfoAccordionView: View {
                                                 .frame(maxWidth: .infinity, alignment: .leading)
                                                 .background(Color.white.opacity(0.03))
                                                 .transition(.opacity.combined(with: .move(edge: .top)))
+                                        } else if subsection.hasAccessibilityForm {
+                                            VStack(alignment: .leading, spacing: 8) {
+                                                Text(subsection.content)
+                                                    .font(.system(size: 14))
+                                                    .foregroundColor(.white.opacity(0.8))
+                                                
+                                                AccessibilityContactForm(userManager: userManager)
+                                            }
+                                            .padding(.horizontal, 32)
+                                            .padding(.vertical, 12)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .background(Color.white.opacity(0.03))
+                                            .transition(.opacity.combined(with: .move(edge: .top)))
                                         } else {
                                             VStack(alignment: .leading, spacing: 8) {
                                                 if subsection.title == "Values" {
@@ -292,11 +306,13 @@ struct SubSection {
     let title: String
     let content: String
     var isContactForm: Bool = false
+    var hasAccessibilityForm: Bool = false
     
-    init(title: String, content: String = "", isContactForm: Bool = false) {
+    init(title: String, content: String = "", isContactForm: Bool = false, hasAccessibilityForm: Bool = false) {
         self.title = title
         self.content = content
         self.isContactForm = isContactForm
+        self.hasAccessibilityForm = hasAccessibilityForm
     }
 }
 
@@ -315,6 +331,7 @@ struct ContactFormView: View {
     
     let categories = [
         "General Inquiries",
+        "Accessibility",
         "Membership",
         "Donations",
         "Volunteering",
@@ -455,6 +472,129 @@ struct ContactFormView: View {
             } catch {
                 await MainActor.run {
                     errorMessage = "Failed to submit form. Please try again."
+                    isSubmitting = false
+                }
+            }
+        }
+    }
+}
+
+// Add this new form component
+struct AccessibilityContactForm: View {
+    @ObservedObject var userManager: UserManager
+    @State private var firstName = ""
+    @State private var lastName = ""
+    @State private var email = ""
+    @State private var message = ""
+    @State private var showingAlert = false
+    @State private var isSubmitting = false
+    @State private var errorMessage: String?
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Request Accessibility Accommodations")
+                .font(.headline)
+                .foregroundColor(.white)
+            
+            Text("Name").foregroundColor(.white.opacity(0.7))
+            HStack(spacing: 12) {
+                VStack(alignment: .leading) {
+                    TextField("First", text: $firstName)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .foregroundColor(.black)
+                }
+                
+                VStack(alignment: .leading) {
+                    TextField("Last", text: $lastName)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .foregroundColor(.black)
+                }
+            }
+            
+            TextField("Email", text: $email)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .foregroundColor(.black)
+                .keyboardType(.emailAddress)
+            
+            Text("How can we assist you?").foregroundColor(.white.opacity(0.7))
+            TextEditor(text: $message)
+                .frame(height: 100)
+                .cornerRadius(4)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 4)
+                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                )
+                .foregroundColor(.black)
+                .background(Color.white)
+            
+            Button(action: submitForm) {
+                if isSubmitting {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                } else {
+                    Text("SUBMIT REQUEST")
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.lcvaNavy)
+                        .cornerRadius(8)
+                }
+            }
+            .disabled(isSubmitting || !isValidForm)
+            
+            if let error = errorMessage {
+                Text(error)
+                    .foregroundColor(.red)
+                    .font(.caption)
+            }
+        }
+        .padding(.vertical, 8)
+        .alert("Request Sent", isPresented: $showingAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Thank you for your request. We'll be in touch soon to discuss accommodations.")
+        }
+    }
+    
+    private var isValidForm: Bool {
+        !firstName.isEmpty &&
+        !lastName.isEmpty &&
+        !email.isEmpty &&
+        email.contains("@") &&
+        !message.isEmpty
+    }
+    
+    private func submitForm() {
+        Task {
+            isSubmitting = true
+            errorMessage = nil
+            
+            do {
+                let submission = ContactFormSubmission(
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email,
+                    phone: nil,
+                    category: "Accessibility",
+                    message: message,
+                    userId: userManager.currentUser?.uid
+                )
+                
+                try await SupabaseClient.shared.submitContactForm(submission)
+                
+                await MainActor.run {
+                    // Reset form
+                    firstName = ""
+                    lastName = ""
+                    email = ""
+                    message = ""
+                    showingAlert = true
+                    isSubmitting = false
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = "Failed to submit request. Please try again."
                     isSubmitting = false
                 }
             }
