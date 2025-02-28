@@ -62,8 +62,6 @@ struct SplashView: View {
 }
 
 struct ContentView: View {
-    let pastExhibitions = sampleExhibitions
-    let activeExhibitions = currentExhibitions
     let sampleArtist = Artist(
         name: "Sun English Jr.",
         medium: "Sculpture",
@@ -179,209 +177,13 @@ struct ContentView: View {
                                 
                                 // First row: Exhibitions
                                 VStack(spacing: 24) {  // Increased spacing between sections
-                                    // Current Shows Section
-                                    VStack(alignment: .leading, spacing: 12) {
-                                        Text("Current Shows")
-                                            .font(.system(size: 18))
-                                            .bold()
-                                            .foregroundColor(.white)
-                                        
-                                        ScrollViewReader { scrollProxy in
-                                            HStack(spacing: 16) {  // Container for arrows and content
-                                                // Left arrow
-                                                Button(action: {
-                                                    withAnimation {
-                                                        let currentIndex = getCurrentIndex()
-                                                        let newIndex = max(currentIndex - 1, 0)
-                                                        scrollProxy.scrollTo(newIndex, anchor: .center)
-                                                    }
-                                                }) {
-                                                    Image(systemName: "chevron.left")
-                                                        .foregroundColor(.white)
-                                                        .padding(8)
-                                                        .background(Color.black.opacity(0.3))
-                                                        .clipShape(Circle())
-                                                }
-                                                
-                                                // ScrollView content
-                                                ScrollView(.horizontal, showsIndicators: false) {
-                                                    HStack(spacing: 32) {
-                                                        Spacer()
-                                                            .frame(width: 120)
-                                                        
-                                                        ForEach(Array(activeExhibitions.enumerated()), id: \.element.id) { index, exhibition in
-                                                            VStack(alignment: .leading, spacing: 4) {  // Reduced spacing
-                                                                AsyncImage(url: URL(string: exhibition.imageUrl)) { image in
-                                                                    NavigationLink(destination: ExhibitionView(exhibition: exhibition)) {
-                                                                        image
-                                                                            .resizable()
-                                                                            .scaledToFill()
-                                                                            .frame(width: 120, height: 120)
-                                                                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                                            .shadow(radius: 2)
-                                                                    }
-                                                                } placeholder: {
-                                                                    ProgressView()
-                                                                        .frame(width: 120, height: 120)
-                                                                }
-                                                                
-                                                                VStack(alignment: .leading, spacing: 2) {  // Fixed text container
-                                                                    Text(exhibition.title)
-                                                                        .font(.caption)
-                                                                        .bold()
-                                                                        .foregroundColor(.white)
-                                                                        .lineLimit(3)
-                                                                        .frame(width: 120, alignment: .leading)
-                                                                        .fixedSize(horizontal: false, vertical: true)
-                                                                    
-                                                                    Text(exhibition.artist.count > 1 ? "Various Artists" : exhibition.artist[0])
-                                                                        .font(.caption)
-                                                                        .foregroundColor(.white.opacity(0.7))
-                                                                        .lineLimit(3)
-                                                                        .frame(width: 120, alignment: .leading)
-                                                                        .fixedSize(horizontal: false, vertical: true)
-                                                                }
-                                                                .frame(height: 70)
-                                                            }
-                                                            .frame(width: 120)
-                                                            .id(index)
-                                                        }
-                                                        
-                                                        Spacer()
-                                                            .frame(width: 120)
-                                                    }
-                                                    .padding(.horizontal, 8)
-                                                }
-                                                .task {
-                                                    if !hasScrolledToInitialPositionCurrent {
-                                                        try? await Task.sleep(nanoseconds: 100_000_000)
-                                                        withAnimation(.easeOut(duration: 0.3)) {
-                                                            scrollProxy.scrollTo(0, anchor: .leading)
-                                                        }
-                                                        hasScrolledToInitialPositionCurrent = true
-                                                    }
-                                                }
-                                                
-                                                // Right arrow
-                                                Button(action: {
-                                                    withAnimation {
-                                                        let currentIndex = getCurrentIndex()
-                                                        let newIndex = min(currentIndex + 1, activeExhibitions.count - 1)
-                                                        scrollProxy.scrollTo(newIndex, anchor: .center)
-                                                    }
-                                                }) {
-                                                    Image(systemName: "chevron.right")
-                                                        .foregroundColor(.white)
-                                                        .padding(8)
-                                                        .background(Color.black.opacity(0.3))
-                                                        .clipShape(Circle())
-                                                }
-                                            }
-                                        }
-                                    }
-                                    .padding(.horizontal, 16)
+                                    CurrentShowsView(
+                                        hasScrolledToInitialPositionCurrent: $hasScrolledToInitialPositionCurrent
+                                    )
                                     
-                                    // Past Shows Section
-                                    VStack(alignment: .leading, spacing: 12) {
-                                        Text("Past Shows")
-                                            .font(.system(size: 18))
-                                            .bold()
-                                            .foregroundColor(.white)
-                                        
-                                        ScrollViewReader { scrollProxy in
-                                            HStack(spacing: 16) {  // Container for arrows and content
-                                                // Left arrow
-                                                Button(action: {
-                                                    withAnimation {
-                                                        let currentIndex = getCurrentIndex()
-                                                        let newIndex = max(currentIndex - 1, 0)
-                                                        scrollProxy.scrollTo(newIndex, anchor: .center)
-                                                    }
-                                                }) {
-                                                    Image(systemName: "chevron.left")
-                                                        .foregroundColor(.white)
-                                                        .padding(8)
-                                                        .background(Color.black.opacity(0.3))
-                                                        .clipShape(Circle())
-                                                }
-                                                
-                                                // ScrollView content
-                                                ScrollView(.horizontal, showsIndicators: false) {
-                                                    HStack(spacing: 32) {
-                                                        Spacer()
-                                                            .frame(width: 120)
-                                                        
-                                                        ForEach(Array(pastExhibitions.enumerated()), id: \.element.id) { index, exhibition in
-                                                            VStack(alignment: .leading, spacing: 4) {
-                                                                AsyncImage(url: URL(string: exhibition.imageUrl)) { image in
-                                                                    NavigationLink(destination: ExhibitionView(exhibition: exhibition)) {
-                                                                        image
-                                                                            .resizable()
-                                                                            .scaledToFill()
-                                                                            .frame(width: 120, height: 120)
-                                                                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                                            .shadow(radius: 2)
-                                                                    }
-                                                                } placeholder: {
-                                                                    ProgressView()
-                                                                        .frame(width: 120, height: 120)
-                                                                }
-                                                                
-                                                                VStack(alignment: .leading, spacing: 2) {
-                                                                    Text(exhibition.title)
-                                                                        .font(.caption)
-                                                                        .bold()
-                                                                        .foregroundColor(.white)
-                                                                        .lineLimit(3)
-                                                                        .frame(width: 120, alignment: .leading)
-                                                                        .fixedSize(horizontal: false, vertical: true)
-                                                                    
-                                                                    Text(exhibition.artist.count > 1 ? "Various Artists" : exhibition.artist[0])
-                                                                        .font(.caption)
-                                                                        .foregroundColor(.white.opacity(0.7))
-                                                                        .lineLimit(3)
-                                                                        .frame(width: 120, alignment: .leading)
-                                                                        .fixedSize(horizontal: false, vertical: true)
-                                                                }
-                                                                .frame(height: 70)
-                                                            }
-                                                            .frame(width: 120)
-                                                            .id(index)
-                                                        }
-                                                        
-                                                        Spacer()
-                                                            .frame(width: 120)
-                                                    }
-                                                    .padding(.horizontal, 8)
-                                                }
-                                                .task {
-                                                    if !hasScrolledToInitialPositionPast {
-                                                        try? await Task.sleep(nanoseconds: 100_000_000)
-                                                        withAnimation(.easeOut(duration: 0.3)) {
-                                                            scrollProxy.scrollTo(0, anchor: .leading)
-                                                        }
-                                                        hasScrolledToInitialPositionPast = true
-                                                    }
-                                                }
-                                                
-                                                // Right arrow
-                                                Button(action: {
-                                                    withAnimation {
-                                                        let currentIndex = getCurrentIndex()
-                                                        let newIndex = min(currentIndex + 1, pastExhibitions.count - 1)
-                                                        scrollProxy.scrollTo(newIndex, anchor: .center)
-                                                    }
-                                                }) {
-                                                    Image(systemName: "chevron.right")
-                                                        .foregroundColor(.white)
-                                                        .padding(8)
-                                                        .background(Color.black.opacity(0.3))
-                                                        .clipShape(Circle())
-                                                }
-                                            }
-                                        }
-                                    }
-                                    .padding(.horizontal, 16)
+                                    PastShowsView(
+                                        hasScrolledToInitialPositionPast: $hasScrolledToInitialPositionPast
+                                    )
                                     
                                     // Artist Spotlight Section
                                     VStack(alignment: .leading, spacing: 12) {
@@ -786,12 +588,8 @@ struct ContentView: View {
             }
         }
         .sheet(item: $selectedExhibition) { exhibition in
-            ExhibitionDetailModalView(
-                exhibition: exhibition,
-                isPresented: Binding(
-                    get: { selectedExhibition != nil },
-                    set: { if !$0 { selectedExhibition = nil } }
-                )
+            ExhibitionDetailView(
+                exhibition: exhibition
             )
         }
         .onAppear {
@@ -851,13 +649,13 @@ struct HeaderView: View {
 struct CurrentExhibitionsView: View {
     let exhibitions: [Exhibition]
     let colorScheme: ColorScheme
-
-    @State private var slideInIndices: Set<Int> = [] // Track indices for sliding in
-    @State private var loadedIndices: Set<Int> = [] // Track indices where images are loaded
+    
+    @State private var slideInIndices: Set<Int> = []
+    @State private var loadedIndices: Set<Int> = []
     @State private var proxyExhibition: Exhibition? = nil
-    @State private var selectedExhibition: Exhibition? // Track the selected exhibition
-    @State private var isExhibitionDetailPresented = false // State to control modal presentation
-
+    @State private var selectedExhibition: Exhibition? 
+    @State private var isExhibitionDetailPresented = false
+    
     var body: some View {
         VStack(alignment: .center, spacing: 16) {
             Text("Current Exhibitions")
@@ -865,7 +663,7 @@ struct CurrentExhibitionsView: View {
                 .italic()
                 .foregroundColor(.secondary)
                 .padding(.bottom, 8)
-
+            
             ForEach(Array(exhibitions.enumerated()), id: \.1.id) { index, exhibition in
                 Button(action: {
                     proxyExhibition = exhibition
@@ -875,7 +673,7 @@ struct CurrentExhibitionsView: View {
                     }
                 }) {
                     HStack(spacing: 16) {
-                        AsyncImage(url: URL(string: exhibition.imageUrl)) { image in
+                        AsyncImage(url: URL(string: exhibition.image_url ?? "")) { image in
                             image
                                 .resizable()
                                 .scaledToFill()
@@ -883,60 +681,55 @@ struct CurrentExhibitionsView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 7))
                                 .shadow(radius: 3)
                                 .onAppear {
-                                    loadedIndices.insert(index) // Mark this image as loaded
-                                    triggerSlideIn(index) // Start slide-in if image is loaded
+                                    loadedIndices.insert(index)
+                                    triggerSlideIn(index)
                                 }
                         } placeholder: {
                             ProgressView()
                         }
-
+                        
                         VStack(alignment: .center, spacing: 4) {
-                            Text(exhibition.title)
+                            Text(exhibition.name)
                                 .font(.headline)
                                 .padding(.bottom, 4)
-
+                            
                             Text(exhibition.artist.joined(separator: ", "))
                                 .font(.subheadline)
                                 .italic()
                                 .bold()
-
+                            
                             Text("Reception:")
                                 .font(.caption)
                                 .padding(.top, 6)
                                 .bold()
-                                .accessibilityLabel(Text("Reception: \(exhibition.reception)"))
-                            Text(formatDate(exhibition.reception))
+                            Text(exhibition.start_date)
                                 .font(.caption)
-                                
-                                
-                                .accessibilityLabel(Text("Reception: \(exhibition.reception)"))
-                            Text(formatTime(exhibition.reception))
+                                .accessibilityLabel(Text("Reception: \(exhibition.start_date)"))
+                            
+                            Text(exhibition.start_date)
                                 .font(.caption)
-
-
+                            
                             Text("Closing:")
                                 .font(.caption)
-                                
                                 .bold()
-                                .accessibilityLabel(Text("Reception: \(exhibition.closing)"))
-                            Text(formatDate(exhibition.closing))
+                            Text(exhibition.end_date)
                                 .font(.caption)
-                                
-                                .accessibilityLabel(Text("Closing: \(exhibition.closing)"))
+                                .accessibilityLabel(Text("Closing: \(exhibition.end_date)"))
                             
-                            Text(formatTime(exhibition.closing))
+                            Text(exhibition.end_date)
                                 .font(.caption)
                                 .padding(.bottom, 8)
-                                .accessibilityLabel(Text("Closing: \(exhibition.closing)"))
-
-                            Link("Survey Link", destination: URL(string: exhibition.surveyUrl)!)
-                                .font(.caption)
-                                .padding(2)
-                                .padding(.horizontal, 2)
-                                .background(Color.primary.opacity(0.2))
-                                .foregroundColor(.white)
-                                .cornerRadius(3)
-                                .shadow(radius: 2)
+                            
+                            if let surveyUrl = exhibition.survey_url, let url = URL(string: surveyUrl) {
+                                Link("Survey Link", destination: url)
+                                    .font(.caption)
+                                    .padding(2)
+                                    .padding(.horizontal, 2)
+                                    .background(Color.primary.opacity(0.2))
+                                    .foregroundColor(.white)
+                                    .cornerRadius(3)
+                                    .shadow(radius: 2)
+                            }
                         }
                         .frame(width: 190)
                     }
@@ -947,7 +740,7 @@ struct CurrentExhibitionsView: View {
                             .fill(colorScheme == .dark ? Color.lcvaNavy.opacity(0.9) : .white)
                             .shadow(radius: 3)
                     )
-                    .offset(x: slideInIndices.contains(index) ? 0 : -UIScreen.main.bounds.width) // Slide-in from left
+                    .offset(x: slideInIndices.contains(index) ? 0 : -UIScreen.main.bounds.width)
                     .animation(.easeOut(duration: 0.8).delay(Double(index) * 0.2), value: slideInIndices)
                 }
             }
@@ -961,41 +754,14 @@ struct CurrentExhibitionsView: View {
             }
         )) {
             if let exhibition = selectedExhibition {
-                ExhibitionDetailModalView(exhibition: exhibition, isPresented: Binding(
-                    get: { selectedExhibition != nil },
-                    set: { newValue in
-                        if !newValue { selectedExhibition = nil }
-                    }
-                ))
-//                .presentationDetents([.medium]) // Ensure compact modal style
-//                .presentationDragIndicator(.visible)
+                ExhibitionDetailView(exhibition: exhibition)
             }
         }
     }
     
-    private func formatDate(_ reception: String) -> String {
-        // Split the string by commas
-        let parts = reception.split(separator: ",")
-        
-        // Return the second part if it exists, trimmed of extra spaces
-        return parts.count > 1 ? parts[1].trimmingCharacters(in: .whitespaces) + ", " + parts[2].trimmingCharacters(in: .whitespaces) : reception
-    }
 
-    private func formatTime(_ reception: String) -> String {
-        // Split by commas and safely handle the parts
-        let parts = reception.split(separator: ",")
-        
-        // If we have enough parts, get the time portion
-        if parts.count >= 2 {
-            // Get the last part which should contain the time
-            let timePart = parts.last?.trimmingCharacters(in: .whitespaces) ?? ""
-            return timePart
-        }
-        
-        // If we can't parse it, return the original string
-        return reception
-    }
-    /// Trigger slide-in animation only if the image has loaded
+   
+    
     private func triggerSlideIn(_ index: Int) {
         if loadedIndices.contains(index) {
             DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 0.2) {

@@ -12,82 +12,65 @@ import MapKit
 struct ExhibitionDetailView: View {
     let exhibition: Exhibition
     
-    
     var body: some View {
-        
-        
-        ScrollView {
-            VStack(alignment: .leading) {
-                AsyncImage(url: URL(string: exhibition.imageUrl)) { image in
-                    image
-                        .resizable()
-                        .scaledToFit()
-                        .accessibilityLabel(Text("Image of \(exhibition.title)"))
-                } placeholder: {
-                    ProgressView()
-                        .accessibilityHidden(true) // Hide loading indicator from VoiceOver
-                }
-                .frame(maxHeight: 300)
-                
-                VStack {
-                    Text(exhibition.title)
-                        .font(.largeTitle)
-                        .bold()
-                        .padding(.vertical)
-                        .accessibilityAddTraits(.isHeader)
-                        .multilineTextAlignment(.center) // Center-align text content within the Text view
-                        .frame(maxWidth: .infinity, alignment: .center) // Center horizontally within VStack
-                    // Other views
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center) // Center VStack within parent view
-                Text("Reception:\n\(exhibition.reception)")
-                    .font(.body)
-                    .padding(.vertical)
-                    .accessibilityLabel(Text("Reception: \(exhibition.reception)"))
-                Text("Closing:\n\(exhibition.closing)")
-                    .font(.body)
-                    .padding(.vertical)
-                    .accessibilityLabel(Text("Closing: \(exhibition.closing)"))
-                
-                Link("Survey Link", destination: URL(string: exhibition.surveyUrl)!)
+        VStack(alignment: .leading, spacing: 16) {
+            // Display title
+            Text(exhibition.name)
+                .font(.system(size: 25))
+                .bold()
+                .padding(.vertical)
+                .accessibilityAddTraits(.isHeader)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity, alignment: .center)
+            
+            // Reception, Closing, Description, and Links
+            Text("Reception:")
+                .font(.body)
+                .bold()
+                .accessibilityLabel(Text("Reception: \(exhibition.start_date)"))
+            
+            Text(exhibition.start_date)
+                .font(.body)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityLabel(Text("Reception: \(exhibition.start_date)"))
+            
+            Text("Closing:")
+                .font(.body)
+                .bold()
+                .accessibilityLabel(Text("Closing: \(exhibition.end_date)"))
+            
+            Text(exhibition.end_date)
+                .font(.body)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityLabel(Text("Closing: \(exhibition.end_date)"))
+            
+            Text("About:")
+                .font(.body)
+                .bold()
+                .accessibilityLabel(Text("About"))
+            
+            Text(exhibition.description ?? "")
+                .font(.body)
+                .accessibilityLabel(Text("Description: \(exhibition.description ?? "")"))
+                .frame(maxWidth: .infinity, alignment: .center)
+            
+            if let surveyUrl = exhibition.survey_url, let url = URL(string: surveyUrl) {
+                Link("Survey Link", destination: url)
                     .font(.subheadline)
-                    .foregroundColor(.blue)  // Style the link color
-                                 // Optional: Underline for link appearance
+                    .foregroundColor(.blue)
                     .accessibilityLabel("Open Survey Link")
-                Text(exhibition.description)
-                    .font(.body)
-                    .padding(.vertical)
-                    .accessibilityLabel(Text("Description: \(exhibition.description)"))
-//                Text("Survey:")
-//                    .font(.caption)
-//                    .padding(.bottom, 2)
-
-               
-
-                
+            }
+            
+            if let extraLink = exhibition.extra_link, !extraLink.isEmpty, let url = URL(string: extraLink) {
                 Text("Extra Content:")
                     .font(.headline)
-                    .accessibilityLabel("Interactive Comic Making Game")
+                    .frame(maxWidth: .infinity, alignment: .center)
                 
-                if let extraLink = exhibition.extraLink, !extraLink.isEmpty, let url = URL(string: extraLink) {
-                    Link(extraLink, destination: url)
-                        .font(.caption)
-                        .foregroundColor(.blue)
-                        .underline()
-                        .accessibilityLabel(Text("Visit \(extraLink)"))
-                        
-                } else {
-                    Text("No additional link available")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                }
-                    
-                
+                Link(extraLink, destination: url)
+                    .font(.caption)
+                    .foregroundColor(.blue)
             }
-            .navigationTitle(exhibition.title)
-            .navigationBarTitleDisplayMode(.inline)
         }
-        .frame(maxWidth: 400, maxHeight: .infinity)
-    
+        .padding()
     }
 }

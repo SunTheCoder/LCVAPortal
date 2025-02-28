@@ -92,6 +92,53 @@ class SupabaseClient {
         return try JSONDecoder().decode([Collection].self, from: data)
     }
     
+    func fetchExhibitions() async throws -> [Exhibition] {
+        // First fetch exhibitions
+        let exhibitionsData = try await makeRequestWithResponse(
+            endpoint: "exhibitions?select=*",
+            method: "GET"
+        )
+        
+        // Then fetch exhibition_artists
+        let artistsData = try await makeRequestWithResponse(
+            endpoint: "exhibition_artists?select=*",
+            method: "GET"
+        )
+        
+        let decoder = JSONDecoder()
+        
+        // Decode both sets of data
+        var exhibitions = try decoder.decode([Exhibition].self, from: exhibitionsData)
+        let artists = try decoder.decode([ExhibitionArtist].self, from: artistsData)
+        
+        // Group artists by exhibition_id
+        let artistsByExhibition = Dictionary(grouping: artists) { $0.exhibition_id }
+        
+        // Attach artists to their exhibitions
+        for i in exhibitions.indices {
+            if let exhibitionArtists = artistsByExhibition[exhibitions[i].id] {
+                exhibitions[i].artist = exhibitionArtists.map { $0.artist_name }
+            } else {
+                exhibitions[i].artist = []
+            }
+        }
+        
+        return exhibitions
+    }
+    
+    // Add this struct to decode exhibition_artists
+    struct ExhibitionArtist: Codable {
+        let id: UUID
+        let exhibition_id: UUID
+        let artist_name: String
+        
+        enum CodingKeys: String, CodingKey {
+            case id
+            case exhibition_id
+            case artist_name
+        }
+    }
+    
     // Add a method that returns data for decoding
     private func makeRequestWithResponse(
         endpoint: String,
