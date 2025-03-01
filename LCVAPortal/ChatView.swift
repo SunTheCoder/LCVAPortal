@@ -561,18 +561,15 @@ struct ChatImageView: View {
                 Image(uiImage: image)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 150)
+                    .frame(height: 150)  // Only constrain height
                     .cornerRadius(8)
             } else if isLoading {
                 ProgressView()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 150)
+                    .frame(width: 150, height: 150)  // Square loading indicator
             } else {
                 Image(systemName: "photo.fill")
                     .foregroundColor(.red)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 150)
+                    .frame(width: 150, height: 150)  // Square error state
             }
         }
         .task {
