@@ -96,8 +96,19 @@ enum ChatContent: Identifiable, Equatable {
             return message.timestamp.dateValue()
         case .reflection(let reflection):
             let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
-            return formatter.date(from: reflection.createdAt) ?? Date()
+            formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+            formatter.timeZone = TimeZone(identifier: "UTC")  // Supabase sends UTC
+            
+            if let utcDate = formatter.date(from: reflection.createdAt) {
+                // Convert to Eastern Time
+                let easternFormatter = DateFormatter()
+                easternFormatter.timeZone = TimeZone(identifier: "America/New_York")
+                print("📅 Converting UTC: \(utcDate) to Eastern: \(easternFormatter.string(from: utcDate))")
+                return utcDate
+            }
+            
+            print("⚠️ Failed to parse date: \(reflection.createdAt)")
+            return Date()
         }
     }
     
@@ -231,13 +242,43 @@ struct ChatView: View {
     // Combined and sorted content
     private var sortedContent: [ChatContent] {
         var content: [ChatContent] = []
-        content.append(contentsOf: messages.map { ChatContent.message($0) })
-        content.append(contentsOf: reflectionViewModel.reflections.map { ChatContent.reflection($0) })
-        return content.sorted { item1, item2 in
+        
+        // Convert Firebase timestamps to Date
+        let messageContent = messages.map { message -> ChatContent in
+            let date = message.timestamp.dateValue()
+            print("📱 Message date: \(date), content: \(message.text)")
+            return .message(message)
+        }
+        
+        // Convert Supabase ISO timestamps to Date
+        let reflectionContent = reflectionViewModel.reflections.map { reflection -> ChatContent in
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+            let date = formatter.date(from: reflection.createdAt) ?? Date()
+            print("🎨 Reflection date: \(date), type: \(reflection.reflectionType)")
+            return .reflection(reflection)
+        }
+        
+        // Combine all content
+        content = messageContent + reflectionContent
+        print("📊 Total items to sort: \(content.count)")
+        
+        // Sort by date and ID
+        let sorted = content.sorted { item1, item2 in
             let date1 = item1.date
             let date2 = item2.date
+            print("🔄 Comparing: \(date1) vs \(date2)")
+            
+            if date1 == date2 {
+                // If dates are equal, sort by ID for stability
+                print("📎 Same date, comparing IDs: \(item1.id) vs \(item2.id)")
+                return item1.id < item2.id
+            }
             return date1 < date2
         }
+        
+        print("✅ Final sorted count: \(sorted.count)")
+        return sorted
     }
     
     // Move the messages view to its own component
@@ -446,9 +487,11 @@ struct ReflectionBubble: View {
         let formatter = DateFormatter()
         formatter.dateStyle = .short
         formatter.timeStyle = .short
+        formatter.timeZone = TimeZone(identifier: "America/New_York")
         
         let isoFormatter = DateFormatter()
-        isoFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+        isoFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+        isoFormatter.timeZone = TimeZone(identifier: "UTC")  // Parse as UTC
         
         if let date = isoFormatter.date(from: reflection.createdAt) {
             return formatter.string(from: date)

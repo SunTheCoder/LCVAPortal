@@ -7,7 +7,7 @@ struct ArtifactReflection: Identifiable, Codable, Equatable {
     let reflectionType: String  // Could be "text", "audio", "video" etc.
     let textContent: String
     let mediaUrl: String?
-    let createdAt: String  // Change to String since Supabase returns ISO timestamp
+    let createdAt: String  // This is the ISO timestamp from Supabase
     
     enum CodingKeys: String, CodingKey {
         case id
