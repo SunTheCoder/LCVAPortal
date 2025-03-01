@@ -9,7 +9,7 @@ import Foundation
 import CoreLocation
 
 struct ArtPiece: Identifiable, Decodable {
-    let id: Int
+    let id: UUID
     let title: String
     let description: String
     let imageUrl: String
@@ -69,7 +69,7 @@ struct ADAInfo: Identifiable, Decodable {
 
 let featuredArtPieces = [
     ArtPiece(
-        id: 1,
+        id: UUID(),
         title: "Stoned Joanie",
         description: "A beautiful sculpture located in the central plaza. Stop touching her!!!",
         imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/451624173_1005858958207827_1691580555828386781_n.jpg",
@@ -109,7 +109,7 @@ let featuredArtPieces = [
         )
     ),
     ArtPiece(
-        id: 2,
+        id: UUID(),
         title: "Echoes of the Past",
         description: "A hauntingly beautiful painting depicting an ancient, fog-covered forest with ghostly silhouettes of forgotten travelers. The scene is illuminated by a pale moonlight, casting eerie shadows that dance among the twisted trees.",
         imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/451624173_1005858958207827_1691580555828386781_n.jpg",
@@ -123,7 +123,7 @@ let featuredArtPieces = [
     ),
 
     ArtPiece(
-        id: 3,
+        id: UUID(),
         title: "Celestial Bloom",
         description: "An intricate sculpture crafted from rare crystals and metals, depicting a flower in full bloom, with petals that appear to be made of stardust. The piece shimmers under any light, casting small, colorful reflections that dance across the room.",
         imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/451624173_1005858958207827_1691580555828386781_n.jpg",
@@ -137,7 +137,7 @@ let featuredArtPieces = [
     ),
 
     ArtPiece(
-        id: 4,
+        id: UUID(),
         title: "The Rotunda Guardian",
         description: "A towering bronze sculpture of an abstract figure that seems to shift forms depending on the viewing angle. Located at the entrance of the Rotunda.",
         imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/451624173_1005858958207827_1691580555828386781_n.jpg",
@@ -150,7 +150,7 @@ let featuredArtPieces = [
     ),
     
     ArtPiece(
-        id: 5,
+        id: UUID(),
         title: "Wisdom's Window",
         description: "A stunning stained glass installation depicting scenes from literature and science, filtering sunlight into rainbow patterns across the floor.",
         imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/451624173_1005858958207827_1691580555828386781_n.jpg",
@@ -163,7 +163,7 @@ let featuredArtPieces = [
     ),
     
     ArtPiece(
-        id: 6,
+        id: UUID(),
         title: "Digital Dreams",
         description: "An interactive LED sculpture that responds to movement, creating patterns of light that mirror the viewer's gestures.",
         imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/451624173_1005858958207827_1691580555828386781_n.jpg",
@@ -176,7 +176,7 @@ let featuredArtPieces = [
     ),
     
     ArtPiece(
-        id: 7,
+        id: UUID(),
         title: "Heritage Oak",
         description: "A massive ceramic mural depicting the growth rings of Longwood's oldest oak tree, with historical events marked in metallic glazes.",
         imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/451624173_1005858958207827_1691580555828386781_n.jpg",
@@ -189,7 +189,7 @@ let featuredArtPieces = [
     ),
     
     ArtPiece(
-        id: 8,
+        id: UUID(),
         title: "Quantum Garden",
         description: "A kinetic sculpture garden with metal flowers that move with the wind, creating ever-changing patterns and soft musical tones.",
         imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/451624173_1005858958207827_1691580555828386781_n.jpg",
@@ -202,7 +202,7 @@ let featuredArtPieces = [
     ),
     
     ArtPiece(
-        id: 9,
+        id: UUID(),
         title: "Time Capsule Mosaic",
         description: "A sprawling mosaic made from historical photographs and documents transferred onto ceramic tiles, creating a visual timeline of campus life.",
         imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/451624173_1005858958207827_1691580555828386781_n.jpg",
@@ -215,7 +215,7 @@ let featuredArtPieces = [
     ),
     
     ArtPiece(
-        id: 10,
+        id: UUID(),
         title: "The Scholar's Path",
         description: "A series of carved stone benches forming a meditation path, each featuring quotes from different philosophical traditions.",
         imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/451624173_1005858958207827_1691580555828386781_n.jpg",
@@ -228,7 +228,7 @@ let featuredArtPieces = [
     ),
     
     ArtPiece(
-        id: 11,
+        id: UUID(),
         title: "Echo Chamber",
         description: "A sound sculpture installation that creates harmonic resonances based on the number of people present in the space.",
         imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/451624173_1005858958207827_1691580555828386781_n.jpg",
@@ -241,7 +241,7 @@ let featuredArtPieces = [
     ),
     
     ArtPiece(
-        id: 12,
+        id: UUID(),
         title: "Fibonacci's Dance",
         description: "A series of suspended metal spirals that cast mathematical shadows, aligned with the golden ratio.",
         imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/451624173_1005858958207827_1691580555828386781_n.jpg",
@@ -254,7 +254,7 @@ let featuredArtPieces = [
     ),
     
     ArtPiece(
-        id: 13,
+        id: UUID(),
         title: "Memory Wall",
         description: "An interactive wall where visitors can project their own memories and stories, creating a constantly evolving digital tapestry.",
         imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/451624173_1005858958207827_1691580555828386781_n.jpg",
@@ -267,7 +267,7 @@ let featuredArtPieces = [
     ),
     
     ArtPiece(
-        id: 14,
+        id: UUID(),
         title: "The Librarian's Dream",
         description: "A suspended installation of illuminated books that seem to float in mid-air, their pages gently turning in the breeze.",
         imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/451624173_1005858958207827_1691580555828386781_n.jpg",
@@ -280,7 +280,7 @@ let featuredArtPieces = [
     ),
     
     ArtPiece(
-        id: 15,
+        id: UUID(),
         title: "Periodic Table Garden",
         description: "A garden where each plant species corresponds to a different element on the periodic table, with metallic markers explaining the connections.",
         imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/451624173_1005858958207827_1691580555828386781_n.jpg",

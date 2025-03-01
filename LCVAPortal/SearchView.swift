@@ -3,21 +3,29 @@ import SwiftUI
 struct SearchView: View {
     @State private var searchText = ""
     let artPieces: [ArtPiece]
-    let userCollections: UserCollections
-    let userManager: UserManager
+    @ObservedObject var userCollections: UserCollections
+    @ObservedObject var userManager: UserManager
     
     var filteredArtPieces: [ArtPiece] {
         if searchText.isEmpty {
-            return []
+            return artPieces
         } else {
-            return artPieces.filter { piece in
-                piece.title.localizedCaseInsensitiveContains(searchText) ||
-                piece.description.localizedCaseInsensitiveContains(searchText) ||
-                piece.material.localizedCaseInsensitiveContains(searchText) ||
-                piece.era.localizedCaseInsensitiveContains(searchText) ||
-                piece.origin.localizedCaseInsensitiveContains(searchText)
+            return artPieces.filter { artPiece in
+                artPiece.title.localizedCaseInsensitiveContains(searchText) ||
+                artPiece.description.localizedCaseInsensitiveContains(searchText) ||
+                artPiece.material.localizedCaseInsensitiveContains(searchText) ||
+                artPiece.era.localizedCaseInsensitiveContains(searchText) ||
+                artPiece.origin.localizedCaseInsensitiveContains(searchText)
             }
         }
+    }
+    
+    func isInCollection(_ artPiece: ArtPiece) -> Bool {
+        userCollections.isInCollection(artPiece)
+    }
+    
+    func isFavorite(_ artPiece: ArtPiece) -> Bool {
+        userCollections.isFavorite(artPiece)
     }
     
     var body: some View {
@@ -113,3 +121,4 @@ struct SearchView: View {
         .toolbarBackground(.visible, for: .navigationBar)
     }
 } 
+

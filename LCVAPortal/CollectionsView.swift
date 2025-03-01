@@ -8,7 +8,7 @@ struct CollectionsView: View {
     @StateObject private var userCollections = UserCollections()
     @ObservedObject var userManager: UserManager
     @State private var showingAllFilters = true  // New state to track filter view mode
-    @State private var activeOverlayId: Int? = nil  // Track active overlay by art piece ID
+    @State private var activeOverlayId: UUID? = nil  // Change from Int? to UUID?
     @Namespace private var filterAnimation  // Add this for matched geometry effect
     @State private var selectedSubFilter: SubFilter? = nil
     @Namespace private var subFilterAnimation
@@ -33,7 +33,7 @@ struct CollectionsView: View {
     private func convertToArtPiece(_ artifact: Artifact) -> ArtPiece {
         print("🔄 Converting artifact:", artifact)
         let artPiece = ArtPiece(
-            id: Int(abs(artifact.id.hashValue)),
+            id: artifact.id,
             title: artifact.title,
             description: artifact.description ?? "",
             imageUrl: artifact.image_url ?? "",
@@ -511,6 +511,12 @@ struct CollectionsView: View {
         .onAppear {
             fetchUserAvatar()
             fetchArtifacts()
+            // Add this to load collections when view appears
+            if let userId = userManager.currentUser?.uid {
+                Task {
+                    await userCollections.loadUserCollections(userId: userId)
+                }
+            }
         }
     }
 }
@@ -580,9 +586,12 @@ struct ArtPieceRow: View {
                 // Collection and favorite buttons
                 HStack(spacing: 12) {
                     Button(action: {
+                        print("👆 User tapped + button for art piece: \(artPiece.id)")
                         if userCollections.isInCollection(artPiece) {
+                            print("🗑 Removing from collection")
                             userCollections.removeFromCollection(artPiece)
                         } else {
+                            print("➕ Adding to collection")
                             userCollections.addToCollection(artPiece)
                         }
                     }) {
@@ -615,12 +624,12 @@ struct ArtPieceGridItem: View {
     let onTap: () -> Void
     @ObservedObject var userCollections: UserCollections
     let userManager: UserManager
-    @Binding var activeOverlayId: Int?  // Binding to shared state
+    @Binding var activeOverlayId: UUID?  // Change from Int? to UUID?
     @State private var scale: CGFloat = 1.0
-    @State private var shouldNavigate = false  // Add this back
+    @State private var shouldNavigate = false
     
     var isLongPressed: Bool {
-        activeOverlayId == artPiece.id
+        activeOverlayId == artPiece.id  // This comparison now works with UUIDs
     }
     
     var body: some View {
@@ -666,9 +675,12 @@ struct ArtPieceGridItem: View {
                     
                     VStack(spacing: 12) {
                         Button(action: {
+                            print("👆 User tapped + button for art piece: \(artPiece.id)")
                             if userCollections.isInCollection(artPiece) {
+                                print("🗑 Removing from collection")
                                 userCollections.removeFromCollection(artPiece)
                             } else {
+                                print("➕ Adding to collection")
                                 userCollections.addToCollection(artPiece)
                             }
                             let impact = UIImpactFeedbackGenerator(style: .medium)
@@ -761,7 +773,7 @@ struct GridRow: View {
     let onTap: (ArtPiece) -> Void
     let userCollections: UserCollections
     let userManager: UserManager
-    @Binding var activeOverlayId: Int?  // Binding to shared state
+    @Binding var activeOverlayId: UUID?  // Binding to shared state
     @State private var rowHeight: CGFloat = 0
     
     var body: some View {

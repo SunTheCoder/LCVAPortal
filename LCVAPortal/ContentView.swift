@@ -80,7 +80,7 @@ struct ContentView: View {
 
     @State private var selectedArtPiece: ArtPiece? = nil
     @State private var isAnimating = false
-    @StateObject private var userManager = UserManager()
+    @StateObject private var userManager: UserManager
     @StateObject private var userCollections = UserCollections()
     @State private var recommendedArt: [ArtPiece] = [] // State to store mood-based recommendations
     @State private var selectedTab = 0
@@ -105,7 +105,7 @@ struct ContentView: View {
     // Convert Supabase Artifact to ArtPiece
     private func convertToArtPiece(_ artifact: Artifact) -> ArtPiece {
         ArtPiece(
-            id: Int(abs(artifact.id.hashValue)),
+            id: artifact.id,
             title: artifact.title,
             description: artifact.description ?? "",
             imageUrl: artifact.image_url ?? "",
@@ -145,6 +145,13 @@ struct ContentView: View {
                 }
             }
         }
+    }
+    
+    init() {
+        // Create UserManager with reference to UserCollections
+        let collections = UserCollections()
+        _userCollections = StateObject(wrappedValue: collections)
+        _userManager = StateObject(wrappedValue: UserManager(userCollections: collections))
     }
     
     var body: some View {
@@ -946,7 +953,8 @@ struct FeaturedArtistView: View {
 struct FeaturedArtOnCampusView: View {
     let colorScheme: ColorScheme
     @Binding var selectedArtPiece: ArtPiece?
-
+    let userCollections: UserCollections
+    let userManager: UserManager
     var body: some View {
         VStack(alignment: .center, spacing: 16) {
             Text("Featured Art on Campus")
@@ -974,7 +982,7 @@ struct FeaturedArtOnCampusView: View {
         .padding(.horizontal)
         .sheet(item: $selectedArtPiece) { artPiece in
             NavigationView {
-                MapModalView(artPiece: artPiece, userManager: UserManager())
+                MapModalView(artPiece: artPiece, userManager: userManager, userCollections: userCollections)
             }
         }
     }

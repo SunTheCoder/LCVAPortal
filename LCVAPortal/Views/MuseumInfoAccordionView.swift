@@ -602,9 +602,9 @@ struct AccessibilityContactForm: View {
     }
 }
 
-#Preview {
-    ZStack {
-        Color.black.opacity(0.9).edgesIgnoringSafeArea(.all)
-        MuseumInfoAccordionView(userManager: UserManager())
-    }
-} 
+//#Preview {
+//    ZStack {
+//        Color.black.opacity(0.9).edgesIgnoringSafeArea(.all)
+//        MuseumInfoAccordionView(userManager: UserManager())
+//    }
+//} 

@@ -25,10 +25,11 @@ class SupabaseClient {
     }
     
     // Single makeRequest function that can handle both data and void responses
-    func makeRequest(
+    private func makeRequest(
         endpoint: String,
         method: String = "GET",
-        body: Data? = nil
+        body: Data? = nil,
+        headers: [String: String]? = nil
     ) async throws {
         guard let url = URL(string: "\(supabaseUrl)/rest/v1/\(endpoint)") else {
             print("❌ Invalid URL: \(supabaseUrl)/rest/v1/\(endpoint)")
@@ -39,14 +40,21 @@ class SupabaseClient {
         
         var request = URLRequest(url: url)
         request.httpMethod = method
-        request.allHTTPHeaderFields = createHeaders()
+        
+        // Add base headers
+        var allHeaders = createHeaders()
+        
+        // Add any additional headers
+        headers?.forEach { key, value in
+            allHeaders[key] = value
+        }
+        
+        request.allHTTPHeaderFields = allHeaders
         request.httpBody = body
         
         if let body = body, let bodyString = String(data: body, encoding: .utf8) {
             print("📦 Request body: \(bodyString)")
         }
-        
-        print("🔑 Headers: \(createHeaders())")
         
         let (data, response) = try await URLSession.shared.data(for: request)
         
@@ -54,15 +62,9 @@ class SupabaseClient {
             print("📥 Response: \(responseString)")
         }
         
-        guard let httpResponse = response as? HTTPURLResponse else {
-            print("❌ Invalid response type")
-            throw URLError(.badServerResponse)
-        }
-        
-        print("📊 Status code: \(httpResponse.statusCode)")
-        
-        guard (200...299).contains(httpResponse.statusCode) else {
-            print("❌ Bad status code: \(httpResponse.statusCode)")
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            print("❌ Bad status code: \((response as? HTTPURLResponse)?.statusCode ?? -1)")
             throw URLError(.badServerResponse)
         }
     }
@@ -199,5 +201,107 @@ class SupabaseClient {
         )
         
         return try JSONDecoder().decode([Artifact].self, from: data)
+    }
+    
+    // Fetch user's collections
+    func fetchUserCollections(userId: String) async throws -> [UserCollection] {
+        let endpoint = "user_collections?user_id=eq.\(userId)"
+        let data = try await makeRequestWithResponse(endpoint: endpoint)
+        return try JSONDecoder().decode([UserCollection].self, from: data)
+    }
+    
+    // Fetch artifacts in a collection
+    func fetchCollectionArtifacts(collectionId: UUID) async throws -> [Artifact] {
+        let endpoint = "user_collection_artifacts?collection_id=eq.\(collectionId.uuidString)&select=artifact_id"
+        let data = try await makeRequestWithResponse(endpoint: endpoint)
+        let artifactRefs = try JSONDecoder().decode([ArtifactReference].self, from: data)
+        
+        guard !artifactRefs.isEmpty else {
+            return []
+        }
+        
+        let artifactIds = artifactRefs.map { $0.artifact_id.uuidString }.joined(separator: ",")
+        let artifactsEndpoint = "artifacts?id=in.(\(artifactIds))"
+        let artifactsData = try await makeRequestWithResponse(endpoint: artifactsEndpoint)
+        return try JSONDecoder().decode([Artifact].self, from: artifactsData)
+    }
+    
+    // Helper struct to decode the artifact references
+    private struct ArtifactReference: Codable {
+        let artifact_id: UUID
+    }
+    
+    // Create user collections
+    func createUserCollections(userId: String) async throws -> (personal: UUID, favorites: UUID) {
+        let personal = try await createCollection(
+            userId: userId,
+            name: "Personal",
+            description: "My personal collection"
+        )
+        
+        let favorites = try await createCollection(
+            userId: userId,
+            name: "Favorites",
+            description: "My favorite pieces"
+        )
+        
+        return (personal, favorites)
+    }
+    
+    private func createCollection(userId: String, name: String, description: String) async throws -> UUID {
+        let endpoint = "user_collections"
+        
+        let collection = [
+            "user_id": userId,
+            "name": name,
+            "description": description
+        ]
+        
+        let body = try JSONSerialization.data(withJSONObject: collection)
+        let data = try await makeRequestWithResponse(endpoint: endpoint, method: "POST", body: body)
+        let createdCollection = try JSONDecoder().decode(UserCollection.self, from: data)
+        return createdCollection.id
+    }
+    
+    // Add artifact to collection
+    func addArtifactToCollection(artifactId: UUID, collectionId: UUID) async throws {
+        let endpoint = "user_collection_artifacts"
+        
+        print("🔗 Adding artifact to Supabase")
+        print("📍 Artifact ID: \(artifactId)")
+        print("📍 Collection ID: \(collectionId)")
+        
+        let entry = [
+            "id": UUID().uuidString,
+            "collection_id": collectionId.uuidString,
+            "artifact_id": artifactId.uuidString,
+            "is_favorite": false
+        ] as [String : Any]
+        
+        let body = try JSONSerialization.data(withJSONObject: entry)
+        print("📦 Request body: \(String(data: body, encoding: .utf8) ?? "")")
+        
+        let headers = [
+            "Prefer": "return=representation"
+        ]
+        
+        do {
+            try await makeRequest(
+                endpoint: endpoint,
+                method: "POST",
+                body: body,
+                headers: headers
+            )
+            print("✅ Successfully added to Supabase")
+        } catch {
+            print("❌ Supabase error: \(error)")
+            throw error
+        }
+    }
+    
+    // Remove artifact from collection
+    func removeArtifactFromCollection(artifactId: UUID, collectionId: UUID) async throws {
+        let endpoint = "user_collection_artifacts?collection_id=eq.\(collectionId.uuidString)&artifact_id=eq.\(artifactId.uuidString)"
+        try await makeRequest(endpoint: endpoint, method: "DELETE")
     }
 } 

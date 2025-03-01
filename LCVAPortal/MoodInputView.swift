@@ -203,21 +203,25 @@ struct MoodInputView: View {
                 // If we found a new title, save the previous one
                 if let title = currentTitle {
                     let newArtPiece = ArtPiece(
-                        id: artPieces.count + 1, // Assign incremental ID
+                        id: UUID(),  // Generate new UUID instead of Int
                         title: title,
                         description: currentDescription.trimmingCharacters(in: .whitespacesAndNewlines),
-                        imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/default.jpg", // Placeholder
-                        latitude: 37.2973,  // Default location (update if needed)
-                        longitude: -78.3967, // Default location (update if needed)
+                        imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/default.jpg",
+                        latitude: 37.2973,
+                        longitude: -78.3967,
                         material: "Unknown",
                         era: "Unknown",
                         origin: "Unknown",
-                        lore: "No lore available."
+                        lore: "No lore available.",
+                        translations: nil,
+                        audioTour: nil,
+                        brailleLabel: nil,
+                        adaAccessibility: nil
                     )
                     artPieces.append(newArtPiece)
                 }
                 // Start new entry
-                currentTitle = String(line.dropFirst(3)) // Remove "1. ", "2. "
+                currentTitle = String(line.dropFirst(3))
                 currentDescription = ""
             } else {
                 // It's part of the description
@@ -228,16 +232,20 @@ struct MoodInputView: View {
         // Append the last entry
         if let title = currentTitle {
             let newArtPiece = ArtPiece(
-                id: artPieces.count + 1,
+                id: UUID(),  // Generate new UUID instead of Int
                 title: title,
                 description: currentDescription.trimmingCharacters(in: .whitespacesAndNewlines),
-                imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/default.jpg", // Placeholder
+                imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/default.jpg",
                 latitude: 37.2973,
                 longitude: -78.3967,
                 material: "Unknown",
                 era: "Unknown",
                 origin: "Unknown",
-                lore: "No lore available."
+                lore: "No lore available.",
+                translations: nil,
+                audioTour: nil,
+                brailleLabel: nil,
+                adaAccessibility: nil
             )
             artPieces.append(newArtPiece)
         }

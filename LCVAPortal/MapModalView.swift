@@ -4,6 +4,7 @@ import MapKit
 struct MapModalView: View {
     let artPiece: ArtPiece
     @ObservedObject var userManager: UserManager
+    @ObservedObject var userCollections: UserCollections
     @Environment(\.dismiss) var dismiss
     @State private var shouldReloadMap = true  // Set to true by default
 

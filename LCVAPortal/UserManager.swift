@@ -14,20 +14,30 @@ class UserManager: ObservableObject {
     @Published var isLoggedIn = false
     @Published var currentUser: User?
     private var db = Firestore.firestore()
-    private var authStateListenerHandle: AuthStateDidChangeListenerHandle?
-
-    init() {
-        // Store the auth state listener handle
-        authStateListenerHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
-            self?.isLoggedIn = user != nil
-            self?.currentUser = user
-        }
+    
+    // Reference to UserCollections - will be injected
+    private let userCollections: UserCollections
+    
+    init(userCollections: UserCollections) {
+        self.userCollections = userCollections
+        setupAuthStateListener()
     }
     
-    deinit {
-        // Remove the auth state listener when UserManager is deinitialized
-        if let handle = authStateListenerHandle {
-            Auth.auth().removeStateDidChangeListener(handle)
+    private func setupAuthStateListener() {
+        Auth.auth().addStateDidChangeListener { [weak self] _, user in
+            guard let self = self else { return }
+            
+            Task {
+                await MainActor.run {
+                    self.currentUser = user
+                    self.isLoggedIn = user != nil
+                }
+                
+                // Load collections when user logs in
+                if let userId = user?.uid {
+                    await self.userCollections.loadUserCollections(userId: userId)
+                }
+            }
         }
     }
 

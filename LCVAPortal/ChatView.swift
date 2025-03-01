@@ -2,7 +2,7 @@ import SwiftUI
 import FirebaseFirestore
 
 struct ChatView: View {
-    let artPieceID: Int
+    let artPieceID: UUID
     @StateObject var userManager: UserManager
 
     @State private var newMessage = ""
