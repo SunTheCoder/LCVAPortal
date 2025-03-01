@@ -134,6 +134,7 @@ struct ChatView: View {
     @State private var selectedMediaType: ReflectionMediaType = .text
     @State private var selectedItem: PhotosPickerItem?
     @StateObject private var reflectionViewModel = ReflectionViewModel()
+    @State private var isMediaPickerPresented = false
     
     private let db = Firestore.firestore()
     private let supabase = SupabaseClient.shared
@@ -203,14 +204,16 @@ struct ChatView: View {
                         MessageInputView(newMessage: $newMessage, onSend: sendMessage)
                     case .photo:
                         MediaPickerView(
-                            type: .photo,
+                            type: selectedMediaType,
                             selectedItem: $selectedItem,
+                            isPresented: $isMediaPickerPresented,
                             onSubmit: submitMediaReflection
                         )
                     case .video:
                         MediaPickerView(
-                            type: .video,
+                            type: selectedMediaType,
                             selectedItem: $selectedItem,
+                            isPresented: $isMediaPickerPresented,
                             onSubmit: submitMediaReflection
                         )
                     case .audio:
@@ -387,14 +390,11 @@ struct ChatView: View {
                     type: selectedMediaType,
                     firebaseToken: token
                 )
-                await MainActor.run {
-                    selectedItem = nil
-                }
+                selectedItem = nil
+                isMediaPickerPresented = false
                 print("✅ Upload completed successfully")
             } catch {
                 print("❌ Failed to upload media: \(error)")
-                // Show error to user
-                // TODO: Add error alert
             }
         }
     }
@@ -404,6 +404,7 @@ struct ChatView: View {
 struct MediaPickerView: View {
     let type: ReflectionMediaType
     @Binding var selectedItem: PhotosPickerItem?
+    @Binding var isPresented: Bool
     let onSubmit: () -> Void
     
     var body: some View {
@@ -422,10 +423,9 @@ struct MediaPickerView: View {
                 .background(Color.white.opacity(0.2))
                 .cornerRadius(8)
             }
-            .onChange(of: selectedItem) { _, _ in
-                // Clear selection if user cancels
-                if selectedItem == nil {
-                    print("Selection was cancelled")
+            .onChange(of: selectedItem) { _, newValue in
+                if newValue != nil {
+                    isPresented = true
                 }
             }
             
@@ -518,28 +518,7 @@ struct ReflectionBubble: View {
                     case "image":
                         if let mediaUrl = reflection.mediaUrl,
                            let url = URL(string: mediaUrl) {
-                            AsyncImage(url: url) { phase in
-                                switch phase {
-                                case .empty:
-                                    ProgressView()
-                                        .frame(maxWidth: .infinity)
-                                        .frame(height: 150)
-                                case .success(let image):
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .frame(maxWidth: .infinity)
-                                        .frame(height: 150)
-                                        .cornerRadius(8)
-                                case .failure(_):
-                                    Image(systemName: "photo.fill")
-                                        .foregroundColor(.red)
-                                        .frame(maxWidth: .infinity)
-                                        .frame(height: 150)
-                                @unknown default:
-                                    EmptyView()
-                                }
-                            }
+                            ChatImageView(url: url)
                         }
                         
                     case "video":
@@ -567,5 +546,47 @@ struct ReflectionBubble: View {
             if !isCurrentUser { Spacer() }
         }
         .padding(.horizontal)
+    }
+}
+
+// Add this new view at the top level
+struct ChatImageView: View {
+    let url: URL
+    @State private var image: UIImage?
+    @State private var isLoading = true
+    
+    var body: some View {
+        Group {
+            if let image = image {
+                Image(uiImage: image)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 150)
+                    .cornerRadius(8)
+            } else if isLoading {
+                ProgressView()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 150)
+            } else {
+                Image(systemName: "photo.fill")
+                    .foregroundColor(.red)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 150)
+            }
+        }
+        .task {
+            do {
+                let (data, _) = try await URLSession.shared.data(from: url)
+                if let loadedImage = UIImage(data: data) {
+                    await MainActor.run {
+                        self.image = loadedImage
+                    }
+                }
+            } catch {
+                print("Failed to load image: \(error)")
+            }
+            isLoading = false
+        }
     }
 }
