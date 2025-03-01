@@ -78,10 +78,13 @@ class SupabaseClient {
         )
     }
     
+    // For museum artifacts (rarely changes)
     func fetchArtifacts() async throws -> [Artifact] {
         let data = try await makeRequestWithResponse(
-            endpoint: "artifacts",
-            method: "GET"
+            endpoint: "artifacts?select=*",
+            method: "GET",
+            cachePolicy: .returnCacheDataElseLoad,  // Aggressive caching
+            cacheTime: 604800  // Cache for 1 week (7 * 24 * 60 * 60)
         )
         return try JSONDecoder().decode([Artifact].self, from: data)
     }
@@ -145,7 +148,9 @@ class SupabaseClient {
     private func makeRequestWithResponse(
         endpoint: String,
         method: String = "GET",
-        body: Data? = nil
+        body: Data? = nil,
+        cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy,
+        cacheTime: Int = 3600  // Default 1 hour cache
     ) async throws -> Data {
         guard let url = URL(string: "\(supabaseUrl)/rest/v1/\(endpoint)") else {
             print("❌ Invalid URL: \(supabaseUrl)/rest/v1/\(endpoint)")
@@ -154,10 +159,17 @@ class SupabaseClient {
         
         print("🔍 Making request to: \(url.absoluteString)")
         
-        var request = URLRequest(url: url)
+        var request = URLRequest(
+            url: url,
+            cachePolicy: cachePolicy,
+            timeoutInterval: 30
+        )
         request.httpMethod = method
         request.allHTTPHeaderFields = createHeaders()
         request.httpBody = body
+        
+        // Add cache control header
+        request.addValue("max-age=\(cacheTime)", forHTTPHeaderField: "Cache-Control")
         
         let (data, response) = try await URLSession.shared.data(for: request)
         
@@ -184,8 +196,8 @@ class SupabaseClient {
         )
     }
     
+    // For artifacts by collection (also static)
     func fetchArtifactsByCollection(collectionName: String) async throws -> [Artifact] {
-        // URL encode the collection name to handle spaces and special characters
         guard let encodedCollection = collectionName
             .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)?
             .replacingOccurrences(of: "&", with: "%26") else {
@@ -193,36 +205,48 @@ class SupabaseClient {
         }
         
         let endpoint = "artifacts?collection=eq.\(encodedCollection)"
-        print("🔍 Making collection request to: \(endpoint)")  // Debug print
+        print("🔍 Making collection request to: \(endpoint)")
         
         let data = try await makeRequestWithResponse(
             endpoint: endpoint,
-            method: "GET"
+            method: "GET",
+            cachePolicy: .returnCacheDataElseLoad,
+            cacheTime: 604800  // 1 week cache
         )
         
         return try JSONDecoder().decode([Artifact].self, from: data)
     }
     
-    // Fetch user's collections
+    // For user collections (more dynamic)
     func fetchUserCollections(userId: String) async throws -> [UserCollection] {
         let endpoint = "user_collections?user_id=eq.\(userId)"
-        let data = try await makeRequestWithResponse(endpoint: endpoint)
+        let data = try await makeRequestWithResponse(
+            endpoint: endpoint,
+            cachePolicy: .useProtocolCachePolicy,  // Standard caching
+            cacheTime: 300  // Cache for 5 minutes
+        )
         return try JSONDecoder().decode([UserCollection].self, from: data)
     }
     
-    // Fetch artifacts in a collection
+    // For collection artifacts (moderate caching)
     func fetchCollectionArtifacts(collectionId: UUID) async throws -> [Artifact] {
         let endpoint = "user_collection_artifacts?collection_id=eq.\(collectionId.uuidString)&select=artifact_id"
-        let data = try await makeRequestWithResponse(endpoint: endpoint)
+        let data = try await makeRequestWithResponse(
+            endpoint: endpoint,
+            cachePolicy: .useProtocolCachePolicy,
+            cacheTime: 300  // 5 minutes cache
+        )
         let artifactRefs = try JSONDecoder().decode([ArtifactReference].self, from: data)
         
-        guard !artifactRefs.isEmpty else {
-            return []
-        }
+        guard !artifactRefs.isEmpty else { return [] }
         
         let artifactIds = artifactRefs.map { $0.artifact_id.uuidString }.joined(separator: ",")
         let artifactsEndpoint = "artifacts?id=in.(\(artifactIds))"
-        let artifactsData = try await makeRequestWithResponse(endpoint: artifactsEndpoint)
+        let artifactsData = try await makeRequestWithResponse(
+            endpoint: artifactsEndpoint,
+            cachePolicy: .returnCacheDataElseLoad,  // Aggressive caching for artifact data
+            cacheTime: 604800  // 1 week cache for actual artifact data
+        )
         return try JSONDecoder().decode([Artifact].self, from: artifactsData)
     }
     
@@ -324,11 +348,16 @@ class SupabaseClient {
         print("✅ Successfully updated favorite status")
     }
     
+    // For reflections (frequent updates)
     func fetchReflections(for artifactId: UUID) async throws -> [ArtifactReflection] {
         print("🔍 Fetching reflections for artifact: \(artifactId)")
         let endpoint = "artifact_reflections?artifact_id=eq.\(artifactId.uuidString)"
         
-        let data = try await makeRequestWithResponse(endpoint: endpoint)
+        let data = try await makeRequestWithResponse(
+            endpoint: endpoint,
+            cachePolicy: .useProtocolCachePolicy,
+            cacheTime: 60  // Cache for 1 minute only
+        )
         return try JSONDecoder().decode([ArtifactReflection].self, from: data)
     }
     
