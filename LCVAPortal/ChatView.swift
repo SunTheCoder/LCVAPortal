@@ -522,15 +522,19 @@ struct ReflectionBubble: View {
                                 switch phase {
                                 case .empty:
                                     ProgressView()
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 150)
                                 case .success(let image):
                                     image
                                         .resizable()
                                         .aspectRatio(contentMode: .fit)
-                                        .frame(maxHeight: 150)
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 150)
                                         .cornerRadius(8)
                                 case .failure(_):
                                     Image(systemName: "photo.fill")
                                         .foregroundColor(.red)
+                                        .frame(maxWidth: .infinity)
                                         .frame(height: 150)
                                 @unknown default:
                                     EmptyView()
