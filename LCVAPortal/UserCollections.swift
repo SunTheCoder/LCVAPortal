@@ -98,6 +98,13 @@ class UserCollections: ObservableObject {
     }
     
     func toggleFavorite(_ artPiece: ArtPiece) {
+        // First check if the piece is in the collection
+        guard isInCollection(artPiece) else {
+            print("⚠️ Cannot favorite - art piece must be in collection first")
+            // TODO: Show UI feedback to user
+            return
+        }
+        
         if favorites.contains(where: { $0.id == artPiece.id }) {
             favorites.removeAll { $0.id == artPiece.id }
             // Sync remove favorite
@@ -154,12 +161,16 @@ class UserCollections: ObservableObject {
     }
     
     private func syncAddToFavorites(_ artPiece: ArtPiece) async {
-        guard let collectionId = favoritesCollectionId else { return }
+        guard let collectionId = personalCollectionId else { return }
         
         do {
-            try await supabase.addArtifactToCollection(artifactId: artPiece.id, collectionId: collectionId)
+            try await supabase.updateArtifactFavoriteStatus(
+                artifactId: artPiece.id,
+                collectionId: collectionId,
+                isFavorite: true
+            )
         } catch {
-            print("Failed to sync add to favorites: \(error)")
+            print("❌ Failed to sync add to favorites: \(error)")
             await MainActor.run {
                 favorites.removeAll { $0.id == artPiece.id }
             }
@@ -167,12 +178,16 @@ class UserCollections: ObservableObject {
     }
     
     private func syncRemoveFromFavorites(_ artPiece: ArtPiece) async {
-        guard let collectionId = favoritesCollectionId else { return }
+        guard let collectionId = personalCollectionId else { return }
         
         do {
-            try await supabase.removeArtifactFromCollection(artifactId: artPiece.id, collectionId: collectionId)
+            try await supabase.updateArtifactFavoriteStatus(
+                artifactId: artPiece.id,
+                collectionId: collectionId,
+                isFavorite: false
+            )
         } catch {
-            print("Failed to sync remove from favorites: \(error)")
+            print("❌ Failed to sync remove from favorites: \(error)")
             await MainActor.run {
                 favorites.append(artPiece)
             }

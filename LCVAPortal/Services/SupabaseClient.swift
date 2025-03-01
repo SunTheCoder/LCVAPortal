@@ -304,4 +304,23 @@ class SupabaseClient {
         let endpoint = "user_collection_artifacts?collection_id=eq.\(collectionId.uuidString)&artifact_id=eq.\(artifactId.uuidString)"
         try await makeRequest(endpoint: endpoint, method: "DELETE")
     }
+    
+    // Update favorite status for an artifact in collection
+    func updateArtifactFavoriteStatus(artifactId: UUID, collectionId: UUID, isFavorite: Bool) async throws {
+        print("⭐️ Updating favorite status for artifact \(artifactId)")
+        let endpoint = "user_collection_artifacts?collection_id=eq.\(collectionId.uuidString)&artifact_id=eq.\(artifactId.uuidString)"
+        
+        let entry = [
+            "is_favorite": isFavorite
+        ]
+        
+        let body = try JSONSerialization.data(withJSONObject: entry)
+        
+        try await makeRequest(
+            endpoint: endpoint,
+            method: "PATCH",
+            body: body
+        )
+        print("✅ Successfully updated favorite status")
+    }
 } 
