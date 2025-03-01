@@ -19,22 +19,20 @@ struct MessageView: View {
                 Text(message.text)
                     .padding(8)
                     .background(isFromCurrentUser ? 
-                        Color.white.opacity(0.25) : 
-                        Color.black.opacity(0.25))
-                    .cornerRadius(8)
+                        Color.blue.opacity(0.3) : 
+                        Color.gray.opacity(0.3))
+                    .cornerRadius(12)
                     .foregroundColor(.white)
                     .frame(maxWidth: 250, alignment: isFromCurrentUser ? .trailing : .leading)
 
                 Text(dateFormatter.string(from: message.timestamp.dateValue()))
-                    .font(.caption)
+                    .font(.caption2)
                     .foregroundColor(.white.opacity(0.7))
-                    .padding(isFromCurrentUser ? .trailing : .leading, 8)
             }
 
             if !isFromCurrentUser { Spacer() }
         }
-        .padding(isFromCurrentUser ? .leading : .trailing, 50)
-        .frame(maxWidth: .infinity, alignment: isFromCurrentUser ? .trailing : .leading)
+        .padding(.horizontal)
     }
 }
 

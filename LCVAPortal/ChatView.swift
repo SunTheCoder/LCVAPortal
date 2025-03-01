@@ -506,7 +506,7 @@ struct ReflectionBubble: View {
             VStack(alignment: isCurrentUser ? .trailing : .leading, spacing: 4) {
                 Text(username)
                     .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(.white)
                 
                 VStack(alignment: .leading, spacing: 8) {
                     switch reflection.reflectionType {
