@@ -1,32 +1,32 @@
 import Foundation
 
+// Helper extension for date formatting
+extension ISO8601DateFormatter {
+    static let supabase: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+}
+
 // For Supabase users table
 struct SupabaseUser: Codable {
     let id: String      // UUID from Firebase auth
     let email: String
     let name: String?
-    let created_at: Date?
+    let created_at: String?  // ISO8601 string from Supabase
+    let avatar_url: String?
     
-    enum CodingKeys: String, CodingKey {
-        case id
-        case email
-        case name
-        case created_at
+    init(id: String, email: String, name: String?, created_at: Date?, avatar_url: String? = nil) {
+        self.id = id
+        self.email = email
+        self.name = name
+        self.created_at = created_at.map { ISO8601DateFormatter.supabase.string(from: $0) }
+        self.avatar_url = avatar_url
     }
     
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(id, forKey: .id)
-        try container.encode(email, forKey: .email)
-        try container.encodeIfPresent(name, forKey: .name)
-        
-        // Format the date as ISO8601
-        if let date = created_at {
-            let formatter = ISO8601DateFormatter()
-            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-            let dateString = formatter.string(from: date)
-            try container.encode(dateString, forKey: .created_at)
-        }
+    enum CodingKeys: String, CodingKey {
+        case id, email, name, created_at, avatar_url
     }
 }
 

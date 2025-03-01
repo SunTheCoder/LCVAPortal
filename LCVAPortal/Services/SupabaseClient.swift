@@ -406,4 +406,23 @@ class SupabaseClient {
         // Return the public URL for the uploaded file
         return "\(supabaseUrl)/storage/v1/object/public/artifact_reflections/\(fileName)"
     }
+    
+    // Add this method to SupabaseClient class
+    func fetchUser(id: String) async throws -> SupabaseUser {
+        print("🔍 Fetching user with ID: \(id)")
+        let endpoint = "users?id=eq.\(id)"
+        
+        let data = try await makeRequestWithResponse(endpoint: endpoint)
+        let users = try JSONDecoder().decode([SupabaseUser].self, from: data)
+        
+        guard let user = users.first else {
+            print("❌ No user found with ID: \(id)")
+            throw NSError(domain: "SupabaseError", code: 404, userInfo: [
+                NSLocalizedDescriptionKey: "User not found"
+            ])
+        }
+        
+        print("✅ Successfully fetched user: \(user.email)")
+        return user
+    }
 } 

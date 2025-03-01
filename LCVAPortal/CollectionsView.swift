@@ -20,6 +20,8 @@ struct CollectionsView: View {
     @State private var isLoading = false
     @State private var error: String?
     
+    private let supabase = SupabaseClient.shared  // Add this line
+    
     // Move enum outside the struct
     private var filterTitle: String {
         switch selectedFilter {
@@ -81,18 +83,14 @@ struct CollectionsView: View {
     private func fetchUserAvatar() {
         guard let uid = userManager.currentUser?.uid else { return }
         
-        // Get user document directly from Firestore
-        let db = Firestore.firestore()
-        db.collection("users").document(uid).getDocument { document, error in
-            if let error = error {
-                print("Error fetching user:", error)
-                return
-            }
-            
-            if let document = document, document.exists {
-                DispatchQueue.main.async {
-                    self.userAvatar = document.data()?["avatar"] as? String
+        Task {
+            do {
+                let user = try await supabase.fetchUser(id: uid)
+                await MainActor.run {
+                    self.userAvatar = user.avatar_url
                 }
+            } catch {
+                print("❌ Error fetching user avatar:", error)
             }
         }
     }

@@ -78,7 +78,8 @@ class UserManager: ObservableObject {
                 id: authResult.user.uid,
                 email: email,
                 name: name,
-                created_at: Date()
+                created_at: Date(),
+                avatar_url: nil
             )
             
             try await SupabaseClient.shared.createUser(supabaseUser)
