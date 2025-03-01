@@ -59,3 +59,52 @@ The LCVA Portal is a native iOS application developed for the Longwood Center fo
 © 2024 Sun English and Longwood Center for Visual Arts. All rights reserved.
 This application and its source code are the property of Sun English and LCVA.
 Unauthorized copying, modification, or distribution is prohibited.
+
+## Features
+
+- Firebase Authentication
+- Firestore Database
+- Supabase Integration
+  - Artifact Storage
+  - User Collections
+  - User Profiles
+    - Avatar URLs stored in Supabase users table
+  - Reflections & Media Storage
+- Real-time Chat
+- Media Upload Support
+  - Images
+  - Videos
+  - Text Reflections
+
+## Database Structure
+
+### Supabase Tables
+- `users`
+  - `id` (from Firebase Auth)
+  - `email`
+  - `name`
+  - `created_at`
+  - `avatar_url` - User's profile image URL
+- `artifacts`
+- `collections`
+- `user_collections`
+- `artifact_reflections`
+- `chat_messages`
+
+### Firebase Collections
+- `users` (legacy, migrating to Supabase)
+- `chats`
+
+## Environment Setup
+
+Required environment variables:
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- Firebase configuration
+
+## Migration Notes
+
+The app is gradually migrating user data from Firebase to Supabase:
+- User profiles and avatars now stored in Supabase
+- Chat messages remain in Firebase
+- Media storage handled by Supabase Storage
