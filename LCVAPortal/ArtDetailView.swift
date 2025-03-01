@@ -115,17 +115,33 @@ struct ArtDetailView: View {
                         .cornerRadius(10)
                         
                         // Update chat section styling
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Discussion")
-                                .font(.headline)
-                                .foregroundColor(.white)
-                                .padding(.leading)
+                        VStack(alignment: .leading, spacing: 20) {
+                            // Chat section
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Discussion")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                    .padding(.leading)
+                                
+                                ChatView(artPieceID: artPiece.id, userManager: userManager)
+                                    .frame(height: 300)
+                                    .background(Color.white.opacity(0.1))
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    .shadow(radius: 3)
+                            }
                             
-                            ChatView(artPieceID: artPiece.id, userManager: userManager)
-                                .frame(height: 300)
-                                .background(Color.white.opacity(0.1))
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                                .shadow(radius: 3)
+                            // Reflections section
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Reflections")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                    .padding(.leading)
+                                
+                                ReflectionView(artifactId: artPiece.id, userManager: userManager)
+                                    .background(Color.white.opacity(0.1))
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    .shadow(radius: 3)
+                            }
                         }
                         .padding(.top)
                     }

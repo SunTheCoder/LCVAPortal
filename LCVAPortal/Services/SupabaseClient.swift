@@ -323,4 +323,41 @@ class SupabaseClient {
         )
         print("✅ Successfully updated favorite status")
     }
+    
+    func fetchReflections(for artifactId: UUID) async throws -> [ArtifactReflection] {
+        print("🔍 Fetching reflections for artifact: \(artifactId)")
+        let endpoint = "artifact_reflections?artifact_id=eq.\(artifactId.uuidString)"
+        
+        let data = try await makeRequestWithResponse(endpoint: endpoint)
+        return try JSONDecoder().decode([ArtifactReflection].self, from: data)
+    }
+    
+    func addReflection(
+        artifactId: UUID,
+        userId: String,
+        reflectionType: String = "text",
+        textContent: String,
+        mediaUrl: String? = nil
+    ) async throws {
+        print("📝 Adding reflection for artifact: \(artifactId)")
+        
+        let reflection = [
+            "id": UUID().uuidString,
+            "artifact_id": artifactId.uuidString,
+            "user_id": userId,
+            "reflection_type": reflectionType,
+            "text_content": textContent,
+            "media_url": mediaUrl,
+            "created_at": "NOW()"
+        ] as [String: Any?]
+        
+        let body = try JSONSerialization.data(withJSONObject: reflection.compactMapValues { $0 })
+        
+        try await makeRequest(
+            endpoint: "artifact_reflections",
+            method: "POST",
+            body: body
+        )
+        print("✅ Successfully added reflection")
+    }
 } 
