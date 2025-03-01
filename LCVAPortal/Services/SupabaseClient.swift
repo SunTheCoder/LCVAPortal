@@ -360,4 +360,50 @@ class SupabaseClient {
         )
         print("✅ Successfully added reflection")
     }
+    
+    func uploadReflectionMedia(fileData: Data, fileName: String, fileType: String, firebaseToken: String) async throws -> String {
+        print("📤 Uploading media file: \(fileName)")
+        
+        let endpoint = "storage/v1/object/artifact_reflections/\(fileName)"
+        guard let url = URL(string: "\(supabaseUrl)/storage/v1/object/artifact_reflections/\(fileName)") else {
+            throw URLError(.badURL)
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = fileData
+        
+        // Use Supabase anon key for storage operations
+        var headers = [
+            "apikey": supabaseAnonKey,
+            "Authorization": "Bearer \(supabaseAnonKey)",  // Use Supabase anon key here
+            "Content-Type": fileType,
+            "x-upsert": "true",
+            "x-client-info": "ios",  // Add client info
+            "firebase-token": firebaseToken  // Pass Firebase token as custom header
+        ]
+        request.allHTTPHeaderFields = headers
+        
+        print("📤 Request URL: \(url.absoluteString)")
+        print("📤 Headers: \(headers)")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            print("📤 Response status: \(httpResponse.statusCode)")
+            print("📤 Response headers: \(httpResponse.allHeaderFields)")
+        }
+        
+        if let responseString = String(data: data, encoding: .utf8) {
+            print("📤 Response body: \(responseString)")
+        }
+        
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+        
+        // Return the public URL for the uploaded file
+        return "\(supabaseUrl)/storage/v1/object/public/artifact_reflections/\(fileName)"
+    }
 } 
