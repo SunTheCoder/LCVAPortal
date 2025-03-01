@@ -80,14 +80,17 @@ class ReflectionViewModel: ObservableObject {
             }
         case .video:
             if let data = try await item.loadTransferable(type: Data.self) {
+                print("📼 Video data size: \(data.count) bytes")
                 return (data, "video/mp4")
             }
         default:
             break
         }
         
-        throw NSError(domain: "ReflectionError", code: -1, userInfo: [
-            NSLocalizedDescriptionKey: "Failed to load media data"
-        ])
+        throw NSError(
+            domain: "ReflectionError",
+            code: -1,
+            userInfo: [NSLocalizedDescriptionKey: "Failed to load \(type.rawValue) data"]
+        )
     }
 } 
