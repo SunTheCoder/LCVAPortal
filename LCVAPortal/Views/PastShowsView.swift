@@ -42,6 +42,7 @@ struct PastShowsView: View {
                         }) {
                             Image(systemName: "chevron.left")
                                 .foregroundColor(.white)
+                                .opacity(pastShowIndex == 0 ? 0.3 : 1)
                                 .padding(8)
                                 .background(Color.black.opacity(0.3))
                                 .clipShape(Circle())
@@ -107,6 +108,7 @@ struct PastShowsView: View {
                         }) {
                             Image(systemName: "chevron.right")
                                 .foregroundColor(.white)
+                                .opacity(pastShowIndex == exhibitions.filter { $0.past }.count - 1 ? 0.3 : 1)
                                 .padding(8)
                                 .background(Color.black.opacity(0.3))
                                 .clipShape(Circle())

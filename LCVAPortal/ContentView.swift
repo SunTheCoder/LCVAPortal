@@ -195,101 +195,10 @@ struct ContentView: View {
                                     )
                                     
                                     // Artist Spotlight Section
-                                    VStack(alignment: .leading, spacing: 12) {
-                                        Text("Artist Spotlight")
-                                            .font(.system(size: 18))
-                                            .bold()
-                                            .foregroundColor(.white)
-                                        
-                                        ScrollViewReader { scrollProxy in
-                                            HStack(spacing: 16) {  // Container for arrows and content
-                                                // Left arrow
-                                                Button(action: {
-                                                    withAnimation {
-                                                        let currentIndex = getCurrentIndex()
-                                                        let newIndex = max(currentIndex - 1, 0)
-                                                        scrollProxy.scrollTo(newIndex, anchor: .center)
-                                                    }
-                                                }) {
-                                                    Image(systemName: "chevron.left")
-                                                        .foregroundColor(.white)
-                                                        .padding(8)
-                                                        .background(Color.black.opacity(0.3))
-                                                        .clipShape(Circle())
-                                                }
-                                                
-                                                // ScrollView content
-                                                ScrollView(.horizontal, showsIndicators: false) {
-                                                    HStack(spacing: 32) {
-                                                        ForEach(Array(sampleArtist.imageUrls.enumerated()), id: \.element) { index, imageUrl in
-                                                            VStack(alignment: .leading, spacing: 4) {
-                                                                NavigationLink(destination: ArtistDetailView(artist: sampleArtist)) {
-                                                                    Image(imageUrl)
-                                                                        .resizable()
-                                                                        .scaledToFill()
-                                                                        .frame(width: 120, height: 120)
-                                                                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                                        .shadow(radius: 2)
-                                                                }
-                                                                
-                                                                VStack(alignment: .leading, spacing: 2) {
-                                                                    Text(sampleArtist.name)
-                                                                        .font(.caption)
-                                                                        .bold()
-                                                                        .foregroundColor(.white)
-                                                                        .lineLimit(2)
-                                                                        .frame(width: 120, alignment: .leading)
-                                                                        .fixedSize(horizontal: false, vertical: true)
-                                                                    
-                                                                    Text(sampleArtist.medium)
-                                                                        .font(.caption)
-                                                                        .foregroundColor(.white.opacity(0.7))
-                                                                        .lineLimit(2)
-                                                                        .frame(width: 120, alignment: .leading)
-                                                                        .fixedSize(horizontal: false, vertical: true)
-                                                                }
-                                                                .frame(height: 70)
-                                                            }
-                                                            .frame(width: 120)
-                                                            .id(index)
-                                                        }
-                                                    }
-                                                    .padding(.horizontal, 8)
-                                                }
-                                                .task {
-                                                    if !hasScrolledToInitialPositionArtist {
-                                                        try? await Task.sleep(nanoseconds: 100_000_000)
-                                                        withAnimation(.easeOut(duration: 0.3)) {
-                                                            scrollProxy.scrollTo(0, anchor: .leading)
-                                                        }
-                                                        hasScrolledToInitialPositionArtist = true
-                                                    }
-                                                }
-                                                
-                                                // Right arrow
-                                                Button(action: {
-                                                    withAnimation {
-                                                        let currentIndex = getCurrentIndex()
-                                                        let newIndex = min(currentIndex + 1, sampleArtist.imageUrls.count - 1)
-                                                        scrollProxy.scrollTo(newIndex, anchor: .center)
-                                                    }
-                                                }) {
-                                                    Image(systemName: "chevron.right")
-                                                        .foregroundColor(.white)
-                                                        .padding(8)
-                                                        .background(Color.black.opacity(0.3))
-                                                        .clipShape(Circle())
-                                                }
-                                            }
-                                        }
-                                    }
-                                    .padding(.horizontal, 16)
-                                    .frame(maxWidth: .infinity)
-                                    .onTapGesture {
-                                        isArtistDetailPresented = true
-                                    }
-                                    .contentShape(Rectangle())
-                                    .buttonStyle(PlainButtonStyle())
+                                    ArtistSpotlightSection(
+                                        sampleArtist: sampleArtist,
+                                        isArtistDetailPresented: $isArtistDetailPresented
+                                    )
                                     .sheet(isPresented: $isArtistDetailPresented) {
                                         ArtistDetailModalView(artist: sampleArtist, isPresented: $isArtistDetailPresented)
                                     }
@@ -1121,6 +1030,7 @@ struct FeaturedArtSection: View {  // Create a separate view
                     }) {
                         Image(systemName: "chevron.left")
                             .foregroundColor(.white)
+                            .opacity(featuredArtIndex == 0 ? 0.3 : 1)  // Fade when disabled
                             .padding(8)
                             .background(Color.black.opacity(0.3))
                             .clipShape(Circle())
@@ -1190,11 +1100,111 @@ struct FeaturedArtSection: View {  // Create a separate view
                     }) {
                         Image(systemName: "chevron.right")
                             .foregroundColor(.white)
+                            .opacity(featuredArtIndex == featuredArtPieces.count - 1 ? 0.3 : 1)  // Fade when disabled
                             .padding(8)
                             .background(Color.black.opacity(0.3))
                             .clipShape(Circle())
                     }
                     .disabled(featuredArtIndex == featuredArtPieces.count - 1)
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .frame(maxWidth: .infinity)
+    }
+}
+
+// Artist Spotlight Section
+struct ArtistSpotlightSection: View {
+    @State private var artistSpotlightIndex = 0
+    let sampleArtist: Artist
+    @Binding var isArtistDetailPresented: Bool
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Artist Spotlight")
+                .font(.system(size: 18))
+                .bold()
+                .foregroundColor(.white)
+            
+            ScrollViewReader { scrollProxy in
+                HStack(spacing: 16) {
+                    // Left arrow
+                    Button(action: {
+                        withAnimation {
+                            artistSpotlightIndex = max(artistSpotlightIndex - 1, 0)
+                            scrollProxy.scrollTo(artistSpotlightIndex, anchor: .center)
+                        }
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.white)
+                            .opacity(artistSpotlightIndex == 0 ? 0.3 : 1)  // Fade when disabled
+                            .padding(8)
+                            .background(Color.black.opacity(0.3))
+                            .clipShape(Circle())
+                    }
+                    .disabled(artistSpotlightIndex == 0)
+                    
+                    // ScrollView content
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 32) {
+                            ForEach(Array(sampleArtist.imageUrls.enumerated()), id: \.element) { index, imageUrl in
+                                VStack(alignment: .leading, spacing: 4) {
+                                    NavigationLink(destination: ArtistDetailView(artist: sampleArtist)) {
+                                        Image(imageUrl)
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 120, height: 120)
+                                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                                            .shadow(radius: 2)
+                                    }
+                                    
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(sampleArtist.name)
+                                            .font(.caption)
+                                            .bold()
+                                            .foregroundColor(.white)
+                                            .lineLimit(2)
+                                            .frame(width: 120, alignment: .leading)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                        
+                                        Text(sampleArtist.medium)
+                                            .font(.caption)
+                                            .foregroundColor(.white.opacity(0.7))
+                                            .lineLimit(2)
+                                            .frame(width: 120, alignment: .leading)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
+                                    .frame(height: 70)
+                                }
+                                .frame(width: 120)
+                                .id(index)
+                            }
+                        }
+                        .padding(.horizontal, 8)
+                    }
+                    .onChange(of: artistSpotlightIndex) { newIndex in
+                        withAnimation {
+                            scrollProxy.scrollTo(newIndex, anchor: .center)
+                        }
+                    }
+                    
+                    // Right arrow
+                    Button(action: {
+                        withAnimation {
+                            let maxIndex = sampleArtist.imageUrls.count - 1
+                            artistSpotlightIndex = min(artistSpotlightIndex + 1, maxIndex)
+                            scrollProxy.scrollTo(artistSpotlightIndex, anchor: .center)
+                        }
+                    }) {
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.white)
+                            .opacity(artistSpotlightIndex == sampleArtist.imageUrls.count - 1 ? 0.3 : 1)  // Fade when disabled
+                            .padding(8)
+                            .background(Color.black.opacity(0.3))
+                            .clipShape(Circle())
+                    }
+                    .disabled(artistSpotlightIndex == sampleArtist.imageUrls.count - 1)
                 }
             }
         }

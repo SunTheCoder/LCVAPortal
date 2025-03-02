@@ -42,11 +42,12 @@ struct CurrentShowsView: View {
                         }) {
                             Image(systemName: "chevron.left")
                                 .foregroundColor(.white)
+                                .opacity(currentIndex == 0 ? 0.3 : 1)
                                 .padding(8)
                                 .background(Color.black.opacity(0.3))
                                 .clipShape(Circle())
                         }
-                        .disabled(currentIndex == 0)  // Disable when at start
+                        .disabled(currentIndex == 0)
                         
                         // ScrollView content
                         ScrollView(.horizontal, showsIndicators: false) {
@@ -107,11 +108,12 @@ struct CurrentShowsView: View {
                         }) {
                             Image(systemName: "chevron.right")
                                 .foregroundColor(.white)
+                                .opacity(currentIndex == exhibitions.filter { $0.current }.count - 1 ? 0.3 : 1)
                                 .padding(8)
                                 .background(Color.black.opacity(0.3))
                                 .clipShape(Circle())
                         }
-                        .disabled(currentIndex == exhibitions.filter { $0.current }.count - 1)  // Disable when at end
+                        .disabled(currentIndex == exhibitions.filter { $0.current }.count - 1)
                     }
                 }
             }
