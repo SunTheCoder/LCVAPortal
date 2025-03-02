@@ -15,10 +15,7 @@ struct CollectionsView: View {
     @State private var userAvatar: String? = nil
     
     // Add Supabase data states
-    @State private var artifacts: [Artifact] = []
-    @State private var collections: [Collection] = []
-    @State private var isLoading = false
-    @State private var error: String?
+    @EnvironmentObject var artifactManager: ArtifactManager
     
     private let supabase = SupabaseClient.shared  // Add this line
     private let artifactService = ArtifactService.shared
@@ -59,7 +56,7 @@ struct CollectionsView: View {
     var filteredArtPieces: [ArtPiece] {
         switch selectedFilter {
         case .museum:
-            return artifacts.map(convertToArtPiece)  // Use Supabase artifacts
+            return artifactManager.artifacts.map(convertToArtPiece)  // Use Supabase artifacts
         case .personal:
             return userCollections.personalCollection
         case .favorites:
@@ -71,7 +68,7 @@ struct CollectionsView: View {
     var displayedArtPieces: [ArtPiece] {
         switch selectedFilter {
         case .museum:
-            return artifacts
+            return artifactManager.artifacts
                 .filter { $0.on_display }  // Only show artifacts that are on display
                 .map(convertToArtPiece)
         case .personal:
@@ -92,46 +89,6 @@ struct CollectionsView: View {
                 }
             } catch {
                 print("❌ Error fetching user avatar:", error)
-            }
-        }
-    }
-    
-    private func fetchArtifacts() {
-        Task {
-            isLoading = true
-            error = nil
-            
-            do {
-                print("🔍 Fetching artifacts...")
-                if let subFilter = selectedSubFilter {
-                    // Fetch filtered artifacts
-                    print("📦 Fetching artifacts for collection: \(subFilter.collectionName)")
-                    let fetchedArtifacts = try await artifactService.fetchArtifactsByCollection(
-                        collectionName: subFilter.collectionName
-                    )
-                    print("📦 Fetched filtered artifacts count:", fetchedArtifacts.count)
-                    
-                    await MainActor.run {
-                        self.artifacts = fetchedArtifacts
-                        self.isLoading = false
-                    }
-                } else {
-                    // Fetch all artifacts when no filter is selected
-                    print("📦 Fetching all artifacts")
-                    let fetchedArtifacts = try await artifactService.fetchAllArtifacts()
-                    print("📦 Fetched all artifacts count:", fetchedArtifacts.count)
-                    
-                    await MainActor.run {
-                        self.artifacts = fetchedArtifacts
-                        self.isLoading = false
-                    }
-                }
-            } catch {
-                print("❌ Fetch error:", error)
-                await MainActor.run {
-                    self.error = error.localizedDescription
-                    self.isLoading = false
-                }
             }
         }
     }
@@ -180,7 +137,7 @@ struct CollectionsView: View {
                         // Search and Add buttons
                         Button(action: { /* Search action */ }) {
                             NavigationLink(destination: SearchView(
-                                artPieces: artifacts.map(convertToArtPiece),  // Convert artifacts to ArtPieces
+                                artPieces: artifactManager.artifacts.map(convertToArtPiece),  // Use artifactManager
                                 userCollections: userCollections,
                                 userManager: userManager
                             )) {
@@ -206,7 +163,6 @@ struct CollectionsView: View {
                                         showingAllFilters = true
                                         selectedFilter = .museum
                                         selectedSubFilter = nil  // Reset sub-filter
-                                        fetchArtifacts()  // Add this to fetch all artifacts when closing
                                     }
                                     let impactLight = UIImpactFeedbackGenerator(style: .light)
                                     impactLight.impactOccurred()
@@ -240,10 +196,8 @@ struct CollectionsView: View {
                                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                             if selectedSubFilter == filter {
                                                 selectedSubFilter = nil
-                                                fetchArtifacts()
                                             } else {
                                                 selectedSubFilter = filter
-                                                fetchArtifacts()
                                             }
                                         }
                                         let impactLight = UIImpactFeedbackGenerator(style: .light)
@@ -270,7 +224,6 @@ struct CollectionsView: View {
                                             selectedFilter = filter
                                             showingAllFilters = false
                                             selectedSubFilter = nil  // Reset sub-filter
-                                            fetchArtifacts()  // Add this to fetch all artifacts when changing main filter
                                         }
                                         let impactMedium = UIImpactFeedbackGenerator(style: .medium)
                                         impactMedium.impactOccurred()
@@ -296,7 +249,7 @@ struct CollectionsView: View {
                         
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 16) {
-                                if isLoading {
+                                if artifactManager.isLoading {
                                     // Show loading indicators with the same styling
                                     ForEach(0..<3) { _ in
                                         VStack(alignment: .leading, spacing: 4) {
@@ -317,7 +270,7 @@ struct CollectionsView: View {
                                         }
                                         .frame(width: 160)
                                     }
-                                } else if let error = error {
+                                } else if let error = artifactManager.error {
                                     // Show error with existing styling
                                     VStack(alignment: .center) {
                                         Image(systemName: "exclamationmark.triangle")
@@ -327,7 +280,9 @@ struct CollectionsView: View {
                                             .foregroundColor(.white)
                                             .multilineTextAlignment(.center)
                                         Button("Retry") {
-                                            fetchArtifacts()
+                                            Task {
+                                                await artifactManager.preloadArtifacts()
+                                            }
                                         }
                                         .foregroundColor(.white)
                                         .padding(.top)
@@ -400,7 +355,7 @@ struct CollectionsView: View {
                     
                     // Updated collection items with grid/list toggle
                     ScrollView {
-                        if isLoading {
+                        if artifactManager.isLoading {
                             if isGridView {
                                 // Grid loading state
                                 LazyVStack(spacing: 12) {
@@ -454,7 +409,7 @@ struct CollectionsView: View {
                                     }
                                 }
                             }
-                        } else if let error = error {
+                        } else if let error = artifactManager.error {
                             // Error state
                             VStack(spacing: 16) {
                                 Image(systemName: "exclamationmark.triangle")
@@ -464,7 +419,9 @@ struct CollectionsView: View {
                                     .foregroundColor(.white)
                                     .multilineTextAlignment(.center)
                                 Button("Retry") {
-                                    fetchArtifacts()
+                                    Task {
+                                        await artifactManager.preloadArtifacts()
+                                    }
                                 }
                                 .foregroundColor(.white)
                             }
@@ -509,7 +466,9 @@ struct CollectionsView: View {
         }
         .onAppear {
             fetchUserAvatar()
-            fetchArtifacts()
+            Task {
+                await artifactManager.preloadArtifacts()
+            }
             // Add this to load collections when view appears
             if let userId = userManager.currentUser?.uid {
                 Task {

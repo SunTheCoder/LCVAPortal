@@ -50,6 +50,7 @@ The LCVA Portal is a native iOS application developed for the Longwood Center fo
 - MVVM architecture
 - Component-based UI design
 - Real-time data synchronization
+- Efficient data preloading and caching
 
 ## Dependencies
 - Firebase
@@ -114,14 +115,62 @@ The app is gradually migrating user data from Firebase to Supabase:
 ## Database Functions
 
 ### Supabase RPC Functions
+#### Implementation Strategy
+The app uses a three-tier approach for efficient data management:
+
+1. **ArtifactManager** - Singleton state container
+```swift
+@MainActor
+class ArtifactManager: ObservableObject {
+    static let shared = ArtifactManager()
+    @Published var artifacts: [Artifact] = []
+    
+    func preloadArtifacts() async {
+        // Preload artifacts at app launch
+    }
+}
+```
+
+2. **App-Level Preloading** - Data ready before user needs it
+```swift
+@main
+struct LCVAPortalApp: App {
+    @StateObject private var artifactManager = ArtifactManager.shared
+    
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .task {
+                    await artifactManager.preloadArtifacts()
+                }
+                .environmentObject(artifactManager)
+        }
+    }
+}
+```
+
+3. **View-Level Consumption** - Clean, efficient data access
+```swift
+struct CollectionsView: View {
+    @EnvironmentObject var artifactManager: ArtifactManager
+    
+    var displayedArtPieces: [ArtPiece] {
+        artifactManager.artifacts
+            .filter { $0.on_display }
+            .map(convertToArtPiece)
+    }
+}
+```
+
+This architecture ensures:
+- Data is loaded once at app launch
+- No redundant network calls
+- Consistent state across views
+- Efficient memory usage
+
+#### Available Functions
 - `get_all_artifacts()`: Retrieves complete artifact collection
 - `get_artifacts_by_collection(collection_name TEXT)`: Filters artifacts by collection
-
-These functions are implemented with:
-- Security invoker permissions
-- Proper anon role access
-- Optimized query performance
-- Type-safe returns
 
 Example usage in Swift:
 ```swift

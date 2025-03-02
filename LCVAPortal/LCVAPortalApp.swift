@@ -41,6 +41,8 @@ struct LCVAPortalApp: App {
     
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @AppStorage("isDarkMode") private var isDarkMode = false
+    @StateObject private var userManager = UserManager(userCollections: UserCollections())
+    @StateObject private var artifactManager = ArtifactManager.shared
     
     init() {
         SupabaseConfig.setupEnvironment()
@@ -48,9 +50,12 @@ struct LCVAPortalApp: App {
     
     var body: some Scene {
         WindowGroup {
-            NavigationView {
-                ContentView()
-            }
+            ContentView()
+                .task {
+                    await artifactManager.preloadArtifacts()
+                }
+                .environmentObject(artifactManager)
+                .environmentObject(userManager)
             .preferredColorScheme(isDarkMode ? .dark : .light)
         }
     }
