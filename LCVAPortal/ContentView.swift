@@ -295,105 +295,11 @@ struct ContentView: View {
                                     }
                                     
                                     // Featured Art Section
-                                    VStack(alignment: .leading, spacing: 12) {
-                                        Text("Featured Art")
-                                            .font(.system(size: 18))
-                                            .bold()
-                                            .foregroundColor(.white)
-                                        
-                                        ScrollViewReader { scrollProxy in
-                                            HStack(spacing: 16) {  // Container for arrows and content
-                                                // Left arrow
-                                                Button(action: {
-                                                    withAnimation {
-                                                        let currentIndex = getCurrentIndex()
-                                                        let newIndex = max(currentIndex - 1, 0)
-                                                        scrollProxy.scrollTo(newIndex, anchor: .center)
-                                                    }
-                                                }) {
-                                                    Image(systemName: "chevron.left")
-                                                        .foregroundColor(.white)
-                                                        .padding(8)
-                                                        .background(Color.black.opacity(0.3))
-                                                        .clipShape(Circle())
-                                                }
-                                                
-                                                // ScrollView content
-                                                ScrollView(.horizontal, showsIndicators: false) {
-                                                    HStack(spacing: 32) {
-                                                        ForEach(Array(featuredArtPieces.enumerated()), id: \.element.id) { index, artPiece in
-                                                            VStack(alignment: .leading, spacing: 4) {
-                                                                AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
-                                                                    NavigationLink(destination: ArtDetailView(
-                                                                        artPiece: artPiece,
-                                                                        userManager: userManager,
-                                                                        userCollections: userCollections
-                                                                    )) {
-                                                                        image
-                                                                            .resizable()
-                                                                            .scaledToFill()
-                                                                            .frame(width: 120, height: 120)
-                                                                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                                            .shadow(radius: 2)
-                                                                    }
-                                                                } placeholder: {
-                                                                    ProgressView()
-                                                                        .frame(width: 120, height: 120)
-                                                                }
-                                                                
-                                                                VStack(alignment: .leading, spacing: 2) {
-                                                                    Text(artPiece.title)
-                                                                        .font(.caption)
-                                                                        .bold()
-                                                                        .foregroundColor(.white)
-                                                                        .lineLimit(3)
-                                                                        .frame(width: 120, alignment: .leading)
-                                                                        .fixedSize(horizontal: false, vertical: true)
-                                                                    
-                                                                    Text("Campus Art")
-                                                                        .font(.caption)
-                                                                        .foregroundColor(.white.opacity(0.7))
-                                                                        .lineLimit(2)
-                                                                        .frame(width: 120, alignment: .leading)
-                                                                        .fixedSize(horizontal: false, vertical: true)
-                                                                }
-                                                                .frame(height: 60)
-                                                            }
-                                                            .frame(width: 120)
-                                                            .id(index)
-                                                        }
-                                                    }
-                                                    .padding(.horizontal, 8)
-                                                }
-                                                .task {
-                                                    if !hasScrolledToInitialPositionFeatured {
-                                                        try? await Task.sleep(nanoseconds: 100_000_000)
-                                                        withAnimation(.easeOut(duration: 0.3)) {
-                                                            scrollProxy.scrollTo(0, anchor: .leading)
-                                                        }
-                                                        hasScrolledToInitialPositionFeatured = true
-                                                    }
-                                                }
-                                                
-                                                // Right arrow
-                                                Button(action: {
-                                                    withAnimation {
-                                                        let currentIndex = getCurrentIndex()
-                                                        let newIndex = min(currentIndex + 1, featuredArtPieces.count - 1)
-                                                        scrollProxy.scrollTo(newIndex, anchor: .center)
-                                                    }
-                                                }) {
-                                                    Image(systemName: "chevron.right")
-                                                        .foregroundColor(.white)
-                                                        .padding(8)
-                                                        .background(Color.black.opacity(0.3))
-                                                        .clipShape(Circle())
-                                                }
-                                            }
-                                        }
-                                    }
-                                    .padding(.horizontal, 16)
-                                    .frame(maxWidth: .infinity)
+                                    FeaturedArtSection(
+                                        featuredArtPieces: featuredArtPieces,
+                                        userManager: userManager,
+                                        userCollections: userCollections
+                                    )
                                 }
                                 .padding(.horizontal)
                                 
@@ -1189,5 +1095,112 @@ struct ScrollArrowIndicators: View {
 //    }
 //}
 //
+
+// Featured Art Section
+struct FeaturedArtSection: View {  // Create a separate view
+    @State private var featuredArtIndex = 0  // State at struct level
+    let featuredArtPieces: [ArtPiece]
+    let userManager: UserManager
+    let userCollections: UserCollections
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Featured Art")
+                .font(.system(size: 18))
+                .bold()
+                .foregroundColor(.white)
+            
+            ScrollViewReader { scrollProxy in
+                HStack(spacing: 16) {
+                    // Left arrow
+                    Button(action: {
+                        withAnimation {
+                            featuredArtIndex = max(featuredArtIndex - 1, 0)
+                            scrollProxy.scrollTo(featuredArtIndex, anchor: .center)
+                        }
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.white)
+                            .padding(8)
+                            .background(Color.black.opacity(0.3))
+                            .clipShape(Circle())
+                    }
+                    .disabled(featuredArtIndex == 0)
+                    
+                    // ScrollView content
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 32) {
+                            ForEach(Array(featuredArtPieces.enumerated()), id: \.element.id) { index, artPiece in
+                                VStack(alignment: .leading, spacing: 4) {
+                                    AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
+                                        NavigationLink(destination: ArtDetailView(
+                                            artPiece: artPiece,
+                                            userManager: userManager,
+                                            userCollections: userCollections
+                                        )) {
+                                            image
+                                                .resizable()
+                                                .scaledToFill()
+                                                .frame(width: 120, height: 120)
+                                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                .shadow(radius: 2)
+                                        }
+                                    } placeholder: {
+                                        ProgressView()
+                                            .frame(width: 120, height: 120)
+                                    }
+                                    
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(artPiece.title)
+                                            .font(.caption)
+                                            .bold()
+                                            .foregroundColor(.white)
+                                            .lineLimit(3)
+                                            .frame(width: 120, alignment: .leading)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                        
+                                        Text("Campus Art")
+                                            .font(.caption)
+                                            .foregroundColor(.white.opacity(0.7))
+                                            .lineLimit(2)
+                                            .frame(width: 120, alignment: .leading)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
+                                    .frame(height: 60)
+                                }
+                                .frame(width: 120)
+                                .id(index)
+                            }
+                        }
+                        .padding(.horizontal, 8)
+                    }
+                    .onChange(of: featuredArtIndex) { newIndex in
+                        withAnimation {
+                            scrollProxy.scrollTo(newIndex, anchor: .center)
+                        }
+                    }
+                    
+                    // Right arrow
+                    Button(action: {
+                        withAnimation {
+                            let maxIndex = featuredArtPieces.count - 1
+                            featuredArtIndex = min(featuredArtIndex + 1, maxIndex)
+                            scrollProxy.scrollTo(featuredArtIndex, anchor: .center)
+                        }
+                    }) {
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.white)
+                            .padding(8)
+                            .background(Color.black.opacity(0.3))
+                            .clipShape(Circle())
+                    }
+                    .disabled(featuredArtIndex == featuredArtPieces.count - 1)
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .frame(maxWidth: .infinity)
+    }
+}
 
 

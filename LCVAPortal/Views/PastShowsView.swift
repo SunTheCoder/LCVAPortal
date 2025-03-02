@@ -5,6 +5,7 @@ struct PastShowsView: View {
     @State private var isLoading = false
     @State private var error: String?
     @Binding var hasScrolledToInitialPositionPast: Bool
+    @State private var pastShowIndex = 0
     
     // Update the date formatter
     private let dateFormatter: DateFormatter = {
@@ -35,9 +36,8 @@ struct PastShowsView: View {
                         // Left arrow
                         Button(action: {
                             withAnimation {
-                                let currentIndex = getCurrentIndex()
-                                let newIndex = max(currentIndex - 1, 0)
-                                scrollProxy.scrollTo(newIndex, anchor: .center)
+                                pastShowIndex = max(pastShowIndex - 1, 0)
+                                scrollProxy.scrollTo(pastShowIndex, anchor: .center)
                             }
                         }) {
                             Image(systemName: "chevron.left")
@@ -46,6 +46,7 @@ struct PastShowsView: View {
                                 .background(Color.black.opacity(0.3))
                                 .clipShape(Circle())
                         }
+                        .disabled(pastShowIndex == 0)
                         
                         // ScrollView content
                         ScrollView(.horizontal, showsIndicators: false) {
@@ -90,22 +91,18 @@ struct PastShowsView: View {
                             }
                             .padding(.horizontal, 8)
                         }
-                        .task {
-                            if !hasScrolledToInitialPositionPast {
-                                try? await Task.sleep(nanoseconds: 100_000_000)
-                                withAnimation(.easeOut(duration: 0.3)) {
-                                    scrollProxy.scrollTo(0, anchor: .leading)
-                                }
-                                hasScrolledToInitialPositionPast = true
+                        .onChange(of: pastShowIndex) { newIndex in
+                            withAnimation {
+                                scrollProxy.scrollTo(newIndex, anchor: .center)
                             }
                         }
                         
                         // Right arrow
                         Button(action: {
                             withAnimation {
-                                let currentIndex = getCurrentIndex()
-                                let newIndex = min(currentIndex + 1, exhibitions.filter { $0.past }.count - 1)
-                                scrollProxy.scrollTo(newIndex, anchor: .center)
+                                let maxIndex = exhibitions.filter { $0.past }.count - 1
+                                pastShowIndex = min(pastShowIndex + 1, maxIndex)
+                                scrollProxy.scrollTo(pastShowIndex, anchor: .center)
                             }
                         }) {
                             Image(systemName: "chevron.right")
@@ -114,6 +111,7 @@ struct PastShowsView: View {
                                 .background(Color.black.opacity(0.3))
                                 .clipShape(Circle())
                         }
+                        .disabled(pastShowIndex == exhibitions.filter { $0.past }.count - 1)
                     }
                 }
             }
@@ -129,9 +127,5 @@ struct PastShowsView: View {
                 isLoading = false
             }
         }
-    }
-    
-    private func getCurrentIndex() -> Int {
-        0 // This is a simple implementation
     }
 } 

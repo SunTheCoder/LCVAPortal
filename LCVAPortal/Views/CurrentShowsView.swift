@@ -5,6 +5,7 @@ struct CurrentShowsView: View {
     @State private var isLoading = false
     @State private var error: String?
     @Binding var hasScrolledToInitialPositionCurrent: Bool
+    @State private var currentIndex = 0  // Add this to track current position
     
     // Date formatter for display
     private let dateFormatter: DateFormatter = {
@@ -35,9 +36,8 @@ struct CurrentShowsView: View {
                         // Left arrow
                         Button(action: {
                             withAnimation {
-                                let currentIndex = getCurrentIndex()
-                                let newIndex = max(currentIndex - 1, 0)
-                                scrollProxy.scrollTo(newIndex, anchor: .center)
+                                currentIndex = max(currentIndex - 1, 0)
+                                scrollProxy.scrollTo(currentIndex, anchor: .center)
                             }
                         }) {
                             Image(systemName: "chevron.left")
@@ -46,6 +46,7 @@ struct CurrentShowsView: View {
                                 .background(Color.black.opacity(0.3))
                                 .clipShape(Circle())
                         }
+                        .disabled(currentIndex == 0)  // Disable when at start
                         
                         // ScrollView content
                         ScrollView(.horizontal, showsIndicators: false) {
@@ -90,22 +91,18 @@ struct CurrentShowsView: View {
                             }
                             .padding(.horizontal, 8)
                         }
-                        .task {
-                            if !hasScrolledToInitialPositionCurrent {
-                                try? await Task.sleep(nanoseconds: 100_000_000)
-                                withAnimation(.easeOut(duration: 0.3)) {
-                                    scrollProxy.scrollTo(0, anchor: .leading)
-                                }
-                                hasScrolledToInitialPositionCurrent = true
+                        .onChange(of: currentIndex) { newIndex in
+                            withAnimation {
+                                scrollProxy.scrollTo(newIndex, anchor: .center)
                             }
                         }
                         
                         // Right arrow
                         Button(action: {
                             withAnimation {
-                                let currentIndex = getCurrentIndex()
-                                let newIndex = min(currentIndex + 1, exhibitions.filter { $0.current }.count - 1)
-                                scrollProxy.scrollTo(newIndex, anchor: .center)
+                                let maxIndex = exhibitions.filter { $0.current }.count - 1
+                                currentIndex = min(currentIndex + 1, maxIndex)
+                                scrollProxy.scrollTo(currentIndex, anchor: .center)
                             }
                         }) {
                             Image(systemName: "chevron.right")
@@ -114,6 +111,7 @@ struct CurrentShowsView: View {
                                 .background(Color.black.opacity(0.3))
                                 .clipShape(Circle())
                         }
+                        .disabled(currentIndex == exhibitions.filter { $0.current }.count - 1)  // Disable when at end
                     }
                 }
             }
@@ -129,9 +127,5 @@ struct CurrentShowsView: View {
                 isLoading = false
             }
         }
-    }
-    
-    private func getCurrentIndex() -> Int {
-        0 // This is a simple implementation
     }
 } 
