@@ -21,6 +21,7 @@ struct CollectionsView: View {
     @State private var error: String?
     
     private let supabase = SupabaseClient.shared  // Add this line
+    private let artifactService = ArtifactService.shared
     
     // Move enum outside the struct
     private var filterTitle: String {
@@ -105,7 +106,7 @@ struct CollectionsView: View {
                 if let subFilter = selectedSubFilter {
                     // Fetch filtered artifacts
                     print("📦 Fetching artifacts for collection: \(subFilter.collectionName)")
-                    let fetchedArtifacts = try await SupabaseClient.shared.fetchArtifactsByCollection(
+                    let fetchedArtifacts = try await artifactService.fetchArtifactsByCollection(
                         collectionName: subFilter.collectionName
                     )
                     print("📦 Fetched filtered artifacts count:", fetchedArtifacts.count)
@@ -117,7 +118,7 @@ struct CollectionsView: View {
                 } else {
                     // Fetch all artifacts when no filter is selected
                     print("📦 Fetching all artifacts")
-                    let fetchedArtifacts = try await SupabaseClient.shared.fetchArtifacts()
+                    let fetchedArtifacts = try await artifactService.fetchAllArtifacts()
                     print("📦 Fetched all artifacts count:", fetchedArtifacts.count)
                     
                     await MainActor.run {

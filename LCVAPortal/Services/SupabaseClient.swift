@@ -145,7 +145,7 @@ class SupabaseClient {
     }
     
     // Add a method that returns data for decoding
-    private func makeRequestWithResponse(
+    func makeRequestWithResponse(
         endpoint: String,
         method: String = "GET",
         body: Data? = nil,
