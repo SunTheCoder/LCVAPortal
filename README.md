@@ -28,6 +28,8 @@ The LCVA Portal is a native iOS application developed for the Longwood Center fo
 ### Technical Implementation
 - **Backend Services**:
   - Supabase for art collection data
+  - Custom RPC functions for optimized queries
+  - Row Level Security (RLS) for data protection
   - Firebase for user authentication and real-time chat
   - Cloud storage for high-resolution images
 
@@ -53,7 +55,7 @@ The LCVA Portal is a native iOS application developed for the Longwood Center fo
 - Firebase
 - FirebaseFirestore
 - SwiftUI
-- Supabase Client
+- Custom Supabase Client with RPC support
 
 ## Copyright
 © 2024 Sun English and Longwood Center for Visual Arts. All rights reserved.
@@ -108,3 +110,26 @@ The app is gradually migrating user data from Firebase to Supabase:
 - User profiles and avatars now stored in Supabase
 - Chat messages remain in Firebase
 - Media storage handled by Supabase Storage
+
+## Database Functions
+
+### Supabase RPC Functions
+- `get_all_artifacts()`: Retrieves complete artifact collection
+- `get_artifacts_by_collection(collection_name TEXT)`: Filters artifacts by collection
+
+These functions are implemented with:
+- Security invoker permissions
+- Proper anon role access
+- Optimized query performance
+- Type-safe returns
+
+Example usage in Swift:
+```swift
+// Fetch all artifacts
+let artifacts = try await artifactService.fetchAllArtifacts()
+
+// Fetch collection-specific artifacts
+let collectionArtifacts = try await artifactService.fetchArtifactsByCollection(
+    collectionName: "African Art"
+)
+```
