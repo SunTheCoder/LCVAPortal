@@ -50,9 +50,6 @@ struct PastShowsView: View {
                         // ScrollView content
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 32) {
-                                Spacer()
-                                    .frame(width: 120)
-                                
                                 ForEach(Array(exhibitions.filter { $0.past }.enumerated()), id: \.element.id) { index, exhibition in
                                     VStack(alignment: .leading, spacing: 4) {
                                         AsyncImage(url: URL(string: exhibition.image_url ?? "")) { image in
@@ -90,9 +87,6 @@ struct PastShowsView: View {
                                     .frame(width: 120)
                                     .id(index)
                                 }
-                                
-                                Spacer()
-                                    .frame(width: 120)
                             }
                             .padding(.horizontal, 8)
                         }

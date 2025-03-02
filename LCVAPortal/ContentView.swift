@@ -221,9 +221,6 @@ struct ContentView: View {
                                                 // ScrollView content
                                                 ScrollView(.horizontal, showsIndicators: false) {
                                                     HStack(spacing: 32) {
-                                                        Spacer()
-                                                            .frame(width: 120)
-                                                        
                                                         ForEach(Array(sampleArtist.imageUrls.enumerated()), id: \.element) { index, imageUrl in
                                                             VStack(alignment: .leading, spacing: 4) {
                                                                 NavigationLink(destination: ArtistDetailView(artist: sampleArtist)) {
@@ -256,9 +253,6 @@ struct ContentView: View {
                                                             .frame(width: 120)
                                                             .id(index)
                                                         }
-                                                        
-                                                        Spacer()
-                                                            .frame(width: 120)
                                                     }
                                                     .padding(.horizontal, 8)
                                                 }
@@ -327,9 +321,6 @@ struct ContentView: View {
                                                 // ScrollView content
                                                 ScrollView(.horizontal, showsIndicators: false) {
                                                     HStack(spacing: 32) {
-                                                        Spacer()
-                                                            .frame(width: 120)
-                                                        
                                                         ForEach(Array(featuredArtPieces.enumerated()), id: \.element.id) { index, artPiece in
                                                             VStack(alignment: .leading, spacing: 4) {
                                                                 AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
@@ -371,9 +362,6 @@ struct ContentView: View {
                                                             .frame(width: 120)
                                                             .id(index)
                                                         }
-                                                        
-                                                        Spacer()
-                                                            .frame(width: 120)
                                                     }
                                                     .padding(.horizontal, 8)
                                                 }
