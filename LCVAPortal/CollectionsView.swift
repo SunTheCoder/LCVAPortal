@@ -241,7 +241,7 @@ struct CollectionsView: View {
                     .animation(.spring(response: 0.4, dampingFraction: 0.8), value: selectedSubFilter)
                     
                     // On Display Section
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 4) {
                         Text("On Display")
                             .font(.title3)
                             .bold()
@@ -516,10 +516,9 @@ struct ArtPieceRow: View {
             userCollections: userCollections
         )) {
             HStack {
-                CachedCollectionThumbView(
+                CachedArtifactsListView(
                     urlString: artPiece.imageUrl,
-                    filename: "\(artPiece.id)-thumb.jpg",
-                    size: 60
+                    filename: "\(artPiece.id)-list.jpg"
                 )
                     .frame(width: 60, height: 60)
                     .clipShape(RoundedRectangle(cornerRadius: 4))
@@ -608,16 +607,16 @@ struct ArtPieceGridItem: View {
         VStack(alignment: .leading, spacing: 4) {
             ZStack {
                 // Image container
-                CachedCollectionImageView(
+                CachedArtifactsGridView(
                     urlString: artPiece.imageUrl,
-                    filename: "\(artPiece.id)-collection.jpg"
+                    filename: "\(artPiece.id)-grid.jpg"
                 )
-                    .frame(width: 160, height: 160)
+                    .frame(width: 100, height: 100)
                 
                 // Long press overlay
                 if isLongPressed {
                     Color.black.opacity(0.5)
-                        .frame(width: 160, height: 160)
+                        .frame(width: 100, height: 100)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                     
                     VStack(spacing: 12) {
@@ -702,7 +701,7 @@ struct ArtPieceGridItem: View {
                     .font(.caption2)
                     .foregroundColor(.white.opacity(0.7))
             }
-            .frame(width: 160)
+            .frame(width: 100)
         }
     }
 }
