@@ -299,16 +299,12 @@ struct CollectionsView: View {
                                             userCollections: userCollections
                                         )) {
                                             VStack(alignment: .leading, spacing: 4) {
-                                                AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
-                                                    image
-                                                        .resizable()
-                                                        .aspectRatio(contentMode: .fill)
-                                                        .frame(width: 160, height: 160)
-                                                        .clipShape(RoundedRectangle(cornerRadius: 4))
-                                                } placeholder: {
-                                                    ProgressView()
-                                                        .frame(width: 160, height: 160)
-                                                }
+                                                CachedCollectionImageView(
+                                                    urlString: artPiece.imageUrl,
+                                                    filename: "\(artPiece.id)-collection.jpg"
+                                                )
+                                                    .frame(width: 160, height: 160)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 4))
                                                 
                                                 VStack(alignment: .leading, spacing: 4) {
                                                     Text(artPiece.title)
@@ -520,16 +516,13 @@ struct ArtPieceRow: View {
             userCollections: userCollections
         )) {
             HStack {
-                AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 60, height: 60)
-                        .clipShape(RoundedRectangle(cornerRadius: 4))
-                } placeholder: {
-                    ProgressView()
-                        .frame(width: 60, height: 60)
-                }
+                CachedCollectionThumbView(
+                    urlString: artPiece.imageUrl,
+                    filename: "\(artPiece.id)-thumb.jpg",
+                    size: 60
+                )
+                    .frame(width: 60, height: 60)
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
                 
                 VStack(alignment: .leading) {
                     Text(artPiece.title)
@@ -615,21 +608,16 @@ struct ArtPieceGridItem: View {
         VStack(alignment: .leading, spacing: 4) {
             ZStack {
                 // Image container
-                AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 100, height: 100)
-                        .clipShape(RoundedRectangle(cornerRadius: 4))
-                } placeholder: {
-                    ProgressView()
-                        .frame(width: 100, height: 100)
-                }
+                CachedCollectionImageView(
+                    urlString: artPiece.imageUrl,
+                    filename: "\(artPiece.id)-collection.jpg"
+                )
+                    .frame(width: 160, height: 160)
                 
                 // Long press overlay
                 if isLongPressed {
                     Color.black.opacity(0.5)
-                        .frame(width: 100, height: 100)
+                        .frame(width: 160, height: 160)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                     
                     VStack(spacing: 12) {
@@ -714,7 +702,7 @@ struct ArtPieceGridItem: View {
                     .font(.caption2)
                     .foregroundColor(.white.opacity(0.7))
             }
-            .frame(width: 100)
+            .frame(width: 160)
         }
     }
 }
