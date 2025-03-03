@@ -1,9 +1,7 @@
 import SwiftUI
 
 struct PastShowsView: View {
-    @State private var exhibitions: [Exhibition] = []
-    @State private var isLoading = false
-    @State private var error: String?
+    @EnvironmentObject var exhibitionManager: ExhibitionManager
     @Binding var hasScrolledToInitialPositionPast: Bool
     @State private var pastShowIndex = 0
     
@@ -22,12 +20,12 @@ struct PastShowsView: View {
                 .bold()
                 .foregroundColor(.white)
             
-            if isLoading {
+            if exhibitionManager.isLoading {
                 ProgressView()
-            } else if let error = error {
+            } else if let error = exhibitionManager.error {
                 Text("Error: \(error)")
                     .foregroundColor(.red)
-            } else if exhibitions.filter({ $0.past }).isEmpty {
+            } else if exhibitionManager.pastExhibitions.isEmpty {
                 Text("No past exhibitions")
                     .foregroundColor(.white.opacity(0.7))
             } else {
@@ -52,7 +50,7 @@ struct PastShowsView: View {
                         // ScrollView content
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 32) {
-                                ForEach(Array(exhibitions.filter { $0.past }.enumerated()), id: \.element.id) { index, exhibition in
+                                ForEach(Array(exhibitionManager.pastExhibitions.enumerated()), id: \.element.id) { index, exhibition in
                                     VStack(alignment: .leading, spacing: 4) {
                                         AsyncImage(url: URL(string: exhibition.image_url ?? "")) { image in
                                             NavigationLink(destination: ExhibitionView(exhibition: exhibition)) {
@@ -101,33 +99,23 @@ struct PastShowsView: View {
                         // Right arrow
                         Button(action: {
                             withAnimation {
-                                let maxIndex = exhibitions.filter { $0.past }.count - 1
+                                let maxIndex = exhibitionManager.pastExhibitions.count - 1
                                 pastShowIndex = min(pastShowIndex + 1, maxIndex)
                                 scrollProxy.scrollTo(pastShowIndex, anchor: .center)
                             }
                         }) {
                             Image(systemName: "chevron.right")
                                 .foregroundColor(.white)
-                                .opacity(pastShowIndex == exhibitions.filter { $0.past }.count - 1 ? 0.3 : 1)
+                                .opacity(pastShowIndex == exhibitionManager.pastExhibitions.count - 1 ? 0.3 : 1)
                                 .padding(8)
                                 .background(Color.black.opacity(0.3))
                                 .clipShape(Circle())
                         }
-                        .disabled(pastShowIndex == exhibitions.filter { $0.past }.count - 1)
+                        .disabled(pastShowIndex == exhibitionManager.pastExhibitions.count - 1)
                     }
                 }
             }
         }
         .padding(.horizontal, 16)
-        .task {
-            do {
-                isLoading = true
-                exhibitions = try await SupabaseClient.shared.fetchExhibitions()
-                isLoading = false
-            } catch {
-                self.error = error.localizedDescription
-                isLoading = false
-            }
-        }
     }
 } 
