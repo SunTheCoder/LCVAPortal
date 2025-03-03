@@ -103,7 +103,7 @@ enum ChatContent: Identifiable, Equatable {
                 // Convert to Eastern Time
                 let easternFormatter = DateFormatter()
                 easternFormatter.timeZone = TimeZone(identifier: "America/New_York")
-                print("📅 Converting UTC: \(utcDate) to Eastern: \(easternFormatter.string(from: utcDate))")
+                // print("📅 Converting UTC: \(utcDate) to Eastern: \(easternFormatter.string(from: utcDate))")
                 return utcDate
             }
             

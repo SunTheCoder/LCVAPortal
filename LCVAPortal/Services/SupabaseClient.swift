@@ -36,7 +36,7 @@ class SupabaseClient {
             throw URLError(.badURL)
         }
         
-        print("🔍 Making request to: \(url.absoluteString)")
+        print("🔍 Making request line 39 to: \(url.absoluteString)")
         
         var request = URLRequest(url: url)
         request.httpMethod = method
@@ -81,10 +81,8 @@ class SupabaseClient {
     // For museum artifacts (rarely changes)
     func fetchArtifacts() async throws -> [Artifact] {
         let data = try await makeRequestWithResponse(
-            endpoint: "artifacts?select=*",
-            method: "GET",
-            cachePolicy: .returnCacheDataElseLoad,  // Aggressive caching
-            cacheTime: 604800  // Cache for 1 week (7 * 24 * 60 * 60)
+            endpoint: "rpc/get_all_artifacts",
+            method: "GET"
         )
         return try JSONDecoder().decode([Artifact].self, from: data)
     }
@@ -157,7 +155,7 @@ class SupabaseClient {
             throw URLError(.badURL)
         }
         
-        print("🔍 Making request to: \(url.absoluteString)")
+        print("🔍 Making request line 160 to: \(url.absoluteString)")
         
         var request = URLRequest(
             url: url,
@@ -453,5 +451,35 @@ class SupabaseClient {
         
         print("✅ Successfully fetched user: \(user.email)")
         return user
+    }
+    
+    func getTransformedImageUrl(_ path: String, options: TransformOptions) -> URL? {
+        guard let baseUrl = URL(string: supabaseUrl) else { return nil }
+        
+        // Extract the relative path from the full URL if needed
+        let relativePath = path.replacingOccurrences(of: "\(supabaseUrl)/storage/v1/object/public/", with: "")
+        
+        var components = URLComponents()
+        components.scheme = baseUrl.scheme
+        components.host = baseUrl.host
+        components.path = "/storage/v1/render/image/public/\(relativePath)"
+        
+        var queryItems = [URLQueryItem]()
+        
+        if let width = options.width {
+            queryItems.append(URLQueryItem(name: "width", value: String(width)))
+        }
+        if let height = options.height {
+            queryItems.append(URLQueryItem(name: "height", value: String(height)))
+        }
+        if let resize = options.resize {
+            queryItems.append(URLQueryItem(name: "resize", value: resize))
+        }
+        if let quality = options.quality {
+            queryItems.append(URLQueryItem(name: "quality", value: String(quality)))
+        }
+        
+        components.queryItems = queryItems
+        return components.url
     }
 } 

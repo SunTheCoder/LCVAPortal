@@ -1,5 +1,6 @@
 import SwiftUI
 import FirebaseFirestore
+import Foundation
 
 struct CollectionsView: View {
     @Binding var selectedArtPiece: ArtPiece?
@@ -31,7 +32,7 @@ struct CollectionsView: View {
     
     // Convert Supabase Artifact to ArtPiece for now (we'll phase this out later)
     private func convertToArtPiece(_ artifact: Artifact) -> ArtPiece {
-        print("🔄 Converting artifact:", artifact)
+        // print("🔄 Converting artifact:", artifact)
         let artPiece = ArtPiece(
             id: artifact.id,
             title: artifact.title,
@@ -48,7 +49,7 @@ struct CollectionsView: View {
             brailleLabel: nil,
             adaAccessibility: nil
         )
-        print("✨ Converted to ArtPiece:", artPiece)
+        // print("✨ Converted to ArtPiece:", artPiece)
         return artPiece
     }
     
@@ -250,7 +251,7 @@ struct CollectionsView: View {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 16) {
                                 if artifactManager.isLoading {
-                                    // Show loading indicators with the same styling
+                                    // Loading placeholders
                                     ForEach(0..<3) { _ in
                                         VStack(alignment: .leading, spacing: 4) {
                                             RoundedRectangle(cornerRadius: 4)

@@ -14,7 +14,6 @@ class ArtifactService {
         return try JSONDecoder().decode([Artifact].self, from: data)
     }
     
-    // Add more specific fetch methods as needed
     func fetchFeaturedArtifacts() async throws -> [Artifact] {
         return try await fetchAllArtifacts().filter { $0.featured }
     }

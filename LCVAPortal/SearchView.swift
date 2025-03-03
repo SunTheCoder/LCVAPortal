@@ -72,7 +72,15 @@ struct SearchView: View {
                                 userCollections: userCollections
                             )) {
                                 HStack {
-                                    AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
+                                    AsyncImage(url: SupabaseClient.shared.getTransformedImageUrl(
+                                        artPiece.imageUrl,
+                                        options: TransformOptions(
+                                            width: 60,
+                                            height: 60,
+                                            resize: "cover",
+                                            quality: 85
+                                        )
+                                    )) { image in
                                         image
                                             .resizable()
                                             .aspectRatio(contentMode: .fill)
