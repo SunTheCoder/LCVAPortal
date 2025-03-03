@@ -189,6 +189,7 @@ This architecture ensures:
 #### Available Functions
 - `get_all_artifacts()`: Retrieves complete artifact collection
 - `get_artifacts_by_collection(collection_name TEXT)`: Filters artifacts by collection
+- `get_exhibition_data()`: Retrieves all exhibitions
 
 Example usage in Swift:
 ```swift
