@@ -8,6 +8,7 @@ extension Color {
 
 struct SplashView: View {
     @Binding var isPresented: Bool
+    @ObservedObject var preloadManager = PreloadManager.shared
     @State private var isAnimating = false
     @State private var opacity: CGFloat = 1
     
@@ -48,15 +49,27 @@ struct SplashView: View {
                 isAnimating = true
             }
             
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            // Wait for both animation and preloading
+            Task {
+                // Wait minimum time for animation
+                try? await Task.sleep(nanoseconds: 3_000_000_000)
+                
+                // Wait for preloading if it's not done
+                await waitForPreload()
+                
                 withAnimation(.easeOut(duration: 1.2)) {
                     opacity = 0
                 }
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-                    isPresented = false
-                }
+                try? await Task.sleep(nanoseconds: 1_200_000_000)
+                isPresented = false
             }
+        }
+    }
+    
+    private func waitForPreload() async {
+        while preloadManager.isLoading {
+            try? await Task.sleep(nanoseconds: 100_000_000) // Check every 0.1 seconds
         }
     }
 }
