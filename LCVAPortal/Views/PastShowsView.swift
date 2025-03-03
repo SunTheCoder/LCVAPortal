@@ -52,18 +52,14 @@ struct PastShowsView: View {
                             HStack(spacing: 32) {
                                 ForEach(Array(exhibitionManager.pastExhibitions.enumerated()), id: \.element.id) { index, exhibition in
                                     VStack(alignment: .leading, spacing: 4) {
-                                        AsyncImage(url: URL(string: exhibition.image_url ?? "")) { image in
-                                            NavigationLink(destination: ExhibitionView(exhibition: exhibition)) {
-                                                image
-                                                    .resizable()
-                                                    .scaledToFill()
-                                                    .frame(width: 120, height: 120)
-                                                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                    .shadow(radius: 2)
-                                            }
-                                        } placeholder: {
-                                            ProgressView()
+                                        NavigationLink(destination: ExhibitionView(exhibition: exhibition)) {
+                                            CachedImageView(
+                                                urlString: exhibition.image_url ?? "",
+                                                filename: "\(exhibition.id)-thumb.jpg"
+                                            )
                                                 .frame(width: 120, height: 120)
+                                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                .shadow(radius: 2)
                                         }
                                         
                                         VStack(alignment: .leading, spacing: 2) {
