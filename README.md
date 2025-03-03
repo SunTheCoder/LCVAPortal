@@ -34,27 +34,38 @@ The LCVA Portal is a native iOS application developed for the Longwood Center fo
   - Cloud storage for high-resolution images
 
 - **Performance Optimizations**:
+
   - **Image Caching System**:
     - Custom FileManager-based image cache
     - First-load persistence to disk
     - Offline image availability
     - Memory-efficient loading
     - Specialized image views for different contexts:
+      - On Display section images
       - Exhibition thumbnails
       - Collection grid views
       - List view thumbnails
 
   - **Data Preloading**:
-    - App-level artifact preloading
-    - Exhibition data prefetching
+    - Unified PreloadManager
+    - Concurrent artifact and exhibition loading
+    - Background image prefetching
+    - Progress tracking system
     - Efficient state management via managers
     - Reduced API calls through caching
 
-  - **Network Optimization**:
-    - Single-fetch data persistence
-    - Cached image responses
-    - Bandwidth reduction through local storage
-    - Smart reload policies
+- **Loading Architecture**:
+  - Elegant splash screen with animations
+  - Concurrent data loading behind splash
+  - No visible loading indicators
+  - Smooth transition to main content
+  - Minimum display time for branding
+
+- **Network Optimization**:
+  - Single-fetch data persistence
+  - Cached image responses
+  - Bandwidth reduction through local storage
+  - Smart reload policies
 
 - **Data Models**:
   - UUID-based artifact identification
@@ -74,6 +85,36 @@ The LCVA Portal is a native iOS application developed for the Longwood Center fo
 - Component-based UI design
 - Real-time data synchronization
 - Efficient data preloading and caching
+
+### Loading Strategy
+```swift
+// Unified PreloadManager
+class PreloadManager: ObservableObject {
+    static let shared = PreloadManager()
+    
+    func preloadAllContent() async {
+        // 1. Load artifacts
+        // 2. Load exhibitions
+        // 3. Preload images
+    }
+}
+
+// Elegant Splash Screen
+struct SplashView: View {
+    @ObservedObject var preloadManager = PreloadManager.shared
+    
+    // Beautiful animations while loading
+    // Waits for preloading completion
+    // Smooth transition to main content
+}
+```
+
+This architecture ensures:
+- Professional first impression
+- No visible loading screens
+- Data ready when needed
+- Efficient resource usage
+- Polished user experience
 
 ## Dependencies
 - Firebase
