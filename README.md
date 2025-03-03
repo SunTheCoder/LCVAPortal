@@ -33,6 +33,29 @@ The LCVA Portal is a native iOS application developed for the Longwood Center fo
   - Firebase for user authentication and real-time chat
   - Cloud storage for high-resolution images
 
+- **Performance Optimizations**:
+  - **Image Caching System**:
+    - Custom FileManager-based image cache
+    - First-load persistence to disk
+    - Offline image availability
+    - Memory-efficient loading
+    - Specialized image views for different contexts:
+      - Exhibition thumbnails
+      - Collection grid views
+      - List view thumbnails
+
+  - **Data Preloading**:
+    - App-level artifact preloading
+    - Exhibition data prefetching
+    - Efficient state management via managers
+    - Reduced API calls through caching
+
+  - **Network Optimization**:
+    - Single-fetch data persistence
+    - Cached image responses
+    - Bandwidth reduction through local storage
+    - Smart reload policies
+
 - **Data Models**:
   - UUID-based artifact identification
   - Structured art piece information
@@ -57,11 +80,6 @@ The LCVA Portal is a native iOS application developed for the Longwood Center fo
 - FirebaseFirestore
 - SwiftUI
 - Custom Supabase Client with RPC support
-
-## Copyright
-© 2024 Sun English and Longwood Center for Visual Arts. All rights reserved.
-This application and its source code are the property of Sun English and LCVA.
-Unauthorized copying, modification, or distribution is prohibited.
 
 ## Features
 
@@ -182,3 +200,47 @@ let collectionArtifacts = try await artifactService.fetchArtifactsByCollection(
     collectionName: "African Art"
 )
 ```
+
+## Caching Architecture
+
+### Image Caching Implementation
+```swift
+class ImageCache {
+    static let shared = ImageCache()
+    private let cacheDirectory: URL
+    
+    func saveImageToDisk(image: UIImage, filename: String)
+    func loadImageFromDisk(filename: String) -> UIImage?
+    func imageExists(filename: String) -> Bool
+}
+```
+
+### Specialized Image Views
+```swift
+// Main collection grid images
+struct CachedCollectionImageView: View {
+    let urlString: String
+    let filename: String
+    // Optimized for grid display
+}
+
+// Thumbnail list images
+struct CachedCollectionThumbView: View {
+    let urlString: String
+    let filename: String
+    let size: CGFloat
+    // Optimized for list views
+}
+```
+
+### Benefits
+- Instant loading of previously viewed images and views
+- Reduced server load and bandwidth usage
+- Offline functionality for cached content
+- Optimized memory usage
+- Context-specific image handling
+
+## Copyright
+© 2024 Bobby "Sun" English and Longwood Center for Visual Arts. All rights reserved.
+This application and its source code are the property of Sun English and LCVA.
+Unauthorized copying, modification, or distribution is prohibited.
