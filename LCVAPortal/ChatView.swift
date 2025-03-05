@@ -129,7 +129,7 @@ struct ChatView: View {
     let artPieceID: UUID
     @StateObject var userManager: UserManager
     @State private var newMessage = ""
-    @State private var messages = [Message]()
+    @StateObject private var chatViewModel = ChatViewModel()
     @State private var artPiece: ArtPiece?
     @State private var selectedMediaType: ReflectionMediaType = .text
     @State private var selectedItem: PhotosPickerItem?
@@ -157,7 +157,7 @@ struct ChatView: View {
                 // Combined messages and reflections view
                 ScrollViewReader { scrollViewProxy in
                     ScrollView {
-                        if messages.isEmpty && reflectionViewModel.reflections.isEmpty {
+                        if chatViewModel.messages.isEmpty && reflectionViewModel.reflections.isEmpty {
                             EmptyMessagesView()
                         }
                         
@@ -226,7 +226,7 @@ struct ChatView: View {
         }
         .task {
             await loadArtPiece()
-            loadMessages()
+            await chatViewModel.loadMessages(for: artPieceID)
             await reflectionViewModel.loadReflections(for: artPieceID)
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -247,7 +247,7 @@ struct ChatView: View {
         var content: [ChatContent] = []
         
         // Convert Firebase timestamps to Date
-        let messageContent = messages.map { message -> ChatContent in
+        let messageContent = chatViewModel.messages.map { message -> ChatContent in
             let date = message.timestamp.dateValue()
             print("📱 Message date: \(date), content: \(message.text)")
             return .message(message)
@@ -311,58 +311,6 @@ struct ChatView: View {
         }
     }
     
-    // Keep existing methods
-    private func loadMessages() {
-        // Update the collection path to use UUID string
-        let messagesRef = db.collection("chats")
-            .document(artPieceID.uuidString)
-            .collection("messages")
-            .order(by: "timestamp", descending: false)
-        
-        messagesRef.addSnapshotListener { querySnapshot, error in
-            guard let documents = querySnapshot?.documents else {
-                print("Error fetching documents: \(error?.localizedDescription ?? "Unknown error")")
-                return
-            }
-            
-            messages = documents.compactMap { document -> Message? in
-                try? document.data(as: Message.self)
-            }
-        }
-    }
-    
-    private func sendMessage() {
-        guard !newMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-              let userId = userManager.currentUser?.uid else {
-            return
-        }
-        
-        // Get username, defaulting to "Anonymous" if not available
-        let username = userManager.currentUser?.displayName ?? "Anonymous"
-        
-        let messageData: [String: Any] = [
-            "id": UUID().uuidString,
-            "username": username,
-            "userId": userId,
-            "text": newMessage,
-            "timestamp": Timestamp(),
-            "artPieceID": artPieceID.uuidString
-        ]
-        
-        // Update to use UUID string in the path
-        let chatRef = db.collection("chats")
-            .document(artPieceID.uuidString)
-            .collection("messages")
-        
-        chatRef.addDocument(data: messageData) { error in
-            if let error = error {
-                print("❌ Error sending message: \(error)")
-            } else {
-                newMessage = ""
-            }
-        }
-    }
-    
     private func deleteMessage(messageID: String) {
         db.collection("chats")
             .document("\(artPieceID)")
@@ -373,6 +321,25 @@ struct ChatView: View {
                     print("Error deleting message: \(error.localizedDescription)")
                 }
             }
+    }
+    
+    private func sendMessage() {
+        guard !newMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              let userId = userManager.currentUser?.uid else {
+            return
+        }
+        
+        let username = userManager.currentUser?.displayName ?? "Anonymous"
+        
+        Task {
+            await chatViewModel.sendMessage(
+                artifactId: artPieceID,
+                userId: userId,
+                username: username,
+                content: newMessage
+            )
+            newMessage = ""
+        }
     }
     
     private func submitMediaReflection() {
@@ -524,9 +491,10 @@ struct ReflectionBubble: View {
                     case "video":
                         if let mediaUrl = reflection.mediaUrl,
                            let url = URL(string: mediaUrl) {
-                            VideoPlayer(player: AVPlayer(url: url))
-                                .frame(height: 150)
-                                .cornerRadius(8)
+                            CachedVideoPlayer(
+                                urlString: mediaUrl,
+                                filename: url.lastPathComponent
+                            )
                         }
                         
                     default:
@@ -552,38 +520,13 @@ struct ReflectionBubble: View {
 // Add this new view at the top level
 struct ChatImageView: View {
     let url: URL
-    @State private var image: UIImage?
-    @State private var isLoading = true
     
     var body: some View {
-        Group {
-            if let image = image {
-                Image(uiImage: image)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: 150)  // Only constrain height
-                    .cornerRadius(8)
-            } else if isLoading {
-                ProgressView()
-                    .frame(width: 150, height: 150)  // Square loading indicator
-            } else {
-                Image(systemName: "photo.fill")
-                    .foregroundColor(.red)
-                    .frame(width: 150, height: 150)  // Square error state
-            }
-        }
-        .task {
-            do {
-                let (data, _) = try await URLSession.shared.data(from: url)
-                if let loadedImage = UIImage(data: data) {
-                    await MainActor.run {
-                        self.image = loadedImage
-                    }
-                }
-            } catch {
-                print("Failed to load image: \(error)")
-            }
-            isLoading = false
-        }
+        CachedImageView(
+            urlString: url.absoluteString,
+            filename: url.lastPathComponent
+        )
+        .frame(height: 150)
+        .cornerRadius(8)
     }
 }
