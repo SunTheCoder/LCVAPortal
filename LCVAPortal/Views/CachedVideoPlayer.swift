@@ -4,6 +4,7 @@ import AVKit
 struct CachedVideoPlayer: View {
     let urlString: String
     let filename: String
+    var autoPlay: Bool = false  // Default to false for thumbnails
     @State private var player: AVPlayer?
     @State private var isLoading = true
     @State private var error: Error?
@@ -16,6 +17,11 @@ struct CachedVideoPlayer: View {
                     .cornerRadius(8)
                     .onDisappear {
                         player.pause()
+                    }
+                    .onAppear {
+                        if autoPlay {
+                            player.play()
+                        }
                     }
             } else if isLoading {
                 ProgressView()
@@ -42,6 +48,9 @@ struct CachedVideoPlayer: View {
                     filename: filename
                 ) {
                     player = cachedPlayer
+                    if autoPlay {
+                        player?.play()
+                    }
                     isLoading = false
                     return
                 }
@@ -54,6 +63,9 @@ struct CachedVideoPlayer: View {
                 
                 try await VideoCache.shared.cacheVideo(from: url, filename: filename)
                 player = VideoCache.shared.getCachedVideo(urlString: urlString, filename: filename)
+                if autoPlay {
+                    player?.play()
+                }
             } catch {
                 print("❌ Failed to cache video: \(error)")
                 self.error = error

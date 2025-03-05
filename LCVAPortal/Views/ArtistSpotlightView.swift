@@ -147,16 +147,12 @@ struct MediaThumbnail: View {
             if media.media_type == "video" {
                 CachedVideoPlayer(
                     urlString: media.media_url,
-                    filename: URL(string: media.media_url)?.lastPathComponent ?? ""
+                    filename: URL(string: media.media_url)?.lastPathComponent ?? "",
+                    autoPlay: true
                 )
                 .frame(width: 120, height: 120)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .shadow(radius: 2)
-                .overlay(
-                    Image(systemName: "play.circle.fill")
-                        .font(.title)
-                        .foregroundColor(.white)
-                )
                 .contentShape(Rectangle())
             } else {
                 CachedImageView(
@@ -187,8 +183,8 @@ struct EnlargedMediaView: View {
                     if media.media_type == "video" {
                         CachedVideoPlayer(
                             urlString: media.media_url,
-                            filename: URL(string: media.media_url)?.lastPathComponent ?? ""
-//                            autoPlay: true
+                            filename: URL(string: media.media_url)?.lastPathComponent ?? "",
+                            autoPlay: true
                         )
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .aspectRatio(contentMode: .fit)
