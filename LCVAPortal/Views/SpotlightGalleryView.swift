@@ -2,9 +2,33 @@ import SwiftUI
 
 struct SpotlightGalleryView: View {
     let artist: SpotlightArtist
-    let media: [SpotlightMedia]
+    private let media: [SpotlightMedia]
+    // Computed property to ensure consistent sorting
+    private var sortedMedia: [SpotlightMedia] {
+        media.sorted { $0.media_order > $1.media_order }
+    }
     @State private var selectedMedia: SpotlightMedia?
     @Environment(\.dismiss) var dismiss
+    
+    init(artist: SpotlightArtist, media: [SpotlightMedia]) {
+        self.artist = artist
+        self.media = media
+        print("🎨 Gallery View Created")
+        print("📱 Media array order:")
+        media.sorted { $0.media_order > $1.media_order }.enumerated().forEach { index, m in
+            print("  \(index). \(m.id) - \(m.media_url.split(separator: "/").last ?? "")")
+        }
+    }
+    
+    // Add debug print to track selection
+    private func selectMedia(_ item: SpotlightMedia) {
+        print("📱 Selecting media: \(item.id)")
+        print("🔗 Selected URL: \(item.media_url)")
+        print("📱 Selected type: \(item.media_type)")
+        print("🔢 Media order: \(item.media_order)")
+        print("📍 Index in sorted array: \(sortedMedia.firstIndex(where: { $0.id == item.id }) ?? -1)")
+        selectedMedia = item
+    }
     
     var body: some View {
         ScrollView {
@@ -95,27 +119,12 @@ struct SpotlightGalleryView: View {
                     
                     LazyVStack(spacing: 16) {
                         Spacer(minLength: 24)  // Top padding
-                        // First show all videos
-                        let videos = media
-                            .filter { $0.media_type == "video" }
-                            .sorted { $0.id.uuidString < $1.id.uuidString }
-                        ForEach(videos) { item in
+                        // Show all media in original order
+                        ForEach(sortedMedia) { item in
                             MediaGridItem(media: item)
                                 .onTapGesture {
                                     UIImpactFeedbackGenerator(style: .soft).impactOccurred()
-                                    selectedMedia = item
-                                }
-                        }
-                        
-                        // Then show all images
-                        let images = media
-                            .filter { $0.media_type == "image" }
-                            .sorted { $0.id.uuidString < $1.id.uuidString }
-                        ForEach(images) { item in
-                            MediaGridItem(media: item)
-                                .onTapGesture {
-                                    UIImpactFeedbackGenerator(style: .soft).impactOccurred()
-                                    selectedMedia = item
+                                    selectMedia(item)
                                 }
                         }
                         Spacer(minLength: 24)  // Bottom padding
@@ -139,6 +148,14 @@ struct MediaDetailView: View {
     let media: SpotlightMedia
     let onDismiss: () -> Void
     @State private var isLandscape = false
+    
+    init(media: SpotlightMedia, onDismiss: @escaping () -> Void) {
+        self.media = media
+        self.onDismiss = onDismiss
+        print("🖼️ Opening detail view for: \(media.id)")
+        print("🔗 Media URL: \(media.media_url)")
+        print("📱 Media type: \(media.media_type)")
+    }
     
     var body: some View {
         ZStack {
@@ -231,6 +248,7 @@ struct MediaGridItem: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: 200)
                 .clipped()
+                .contentShape(Rectangle())
                 .overlay(
                     Image(systemName: "arrow.up.left.and.arrow.down.right")
                         .font(.system(size: 18))
@@ -245,5 +263,6 @@ struct MediaGridItem: View {
         }
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .shadow(radius: 4)
+        .contentShape(Rectangle())
     }
 } 

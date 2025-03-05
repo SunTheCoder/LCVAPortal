@@ -72,14 +72,7 @@ struct ArtistSpotlightView: View {
                             // Media Gallery
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 20) {
-                                    // Show videos first, then images
-                                    let sortedMedia = viewModel.spotlightMedia.sorted { first, second in
-                                        if first.media_type == second.media_type {
-                                            return true // Keep original order within same type
-                                        }
-                                        return first.media_type == "video" // Videos first
-                                    }
-                                    ForEach(sortedMedia) { media in
+                                    ForEach(viewModel.spotlightMedia) { media in
                                         MediaThumbnail(media: media)
                                     }
                                 }

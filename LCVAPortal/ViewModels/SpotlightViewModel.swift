@@ -42,7 +42,7 @@ extension SupabaseClient {
     }
     
     func fetchSpotlightMedia(for artistId: UUID) async throws -> [SpotlightMedia] {
-        let endpoint = "spotlight_media?select=*&spotlight_artist_id=eq.\(artistId)&order=media_order.asc"
+        let endpoint = "spotlight_media?select=*&spotlight_artist_id=eq.\(artistId)&order=media_order.desc"
         let data = try await makeRequestWithResponse(
             endpoint: endpoint,
             method: "GET",

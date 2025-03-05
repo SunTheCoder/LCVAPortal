@@ -1,6 +1,6 @@
 import Foundation
 
-struct SpotlightMedia: Identifiable, Codable {
+struct SpotlightMedia: Identifiable, Codable, Equatable {
     let id: UUID
     let spotlight_artist_id: UUID
     let media_url: String
@@ -28,5 +28,11 @@ struct SpotlightMedia: Identifiable, Codable {
         case title
         case description
         case medium
+    }
+    
+    // Explicit equality check
+    static func == (lhs: SpotlightMedia, rhs: SpotlightMedia) -> Bool {
+        // Only compare IDs for equality
+        return lhs.id == rhs.id
     }
 } 

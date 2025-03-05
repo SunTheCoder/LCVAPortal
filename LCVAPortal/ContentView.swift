@@ -252,6 +252,36 @@ struct ContentView: View {
                                         .bold()
                                         .foregroundColor(.white)
                                     
+                                    // Clear Cache Button
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Button(action: {
+                                            showClearCacheAlert = true
+                                        }) {
+                                            HStack {
+                                                Image(systemName: "trash")
+                                                    .foregroundColor(.white)
+                                                Text("Clear Media Cache")
+                                                    .foregroundColor(.white)
+                                                Spacer()
+                                                Text(formatCacheSize())
+                                                    .foregroundColor(.gray)
+                                                    .font(.caption)
+                                            }
+                                            .padding()
+                                            .background(Color.white.opacity(0.1))
+                                            .cornerRadius(10)
+                                        }
+                                        .alert("Clear Cache?", isPresented: $showClearCacheAlert) {
+                                            Button("Cancel", role: .cancel) { }
+                                            Button("Clear", role: .destructive) {
+                                                clearCache()
+                                            }
+                                        } message: {
+                                            Text("This will free up \(formatCacheSize()) of space.")
+                                        }
+                                    }
+                                    .padding(.horizontal)
+                                    
                                     DarkModeToggle()
                                         .padding(.horizontal)
                                     
@@ -422,6 +452,25 @@ struct ContentView: View {
         // This is a simple implementation. You might want to add more sophisticated tracking
         // based on actual scroll position
         0
+    }
+
+    @State private var showClearCacheAlert = false
+    @State private var showClearCacheSuccess = false
+    
+    private func formatCacheSize() -> String {
+        let imageSize = ImageCache.shared.getCacheSize()
+        return ByteCountFormatter.string(fromByteCount: imageSize, countStyle: .file)
+    }
+    
+    private func clearCache() {
+        ImageCache.shared.clearCache()
+        VideoCache.shared.clearCache()
+        showClearCacheSuccess = true
+        
+        // Hide success message after 2 seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            showClearCacheSuccess = false
+        }
     }
 }
 
