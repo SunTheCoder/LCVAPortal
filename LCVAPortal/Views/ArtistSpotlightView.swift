@@ -44,10 +44,10 @@ struct ArtistSpotlightView: View {
             
             ZStack {
                 // Background Image
-                if let firstImage = viewModel.spotlightMedia.first(where: { $0.media_type == "image" }) {
+                if let artist = artist, let heroUrl = artist.hero_image_url {
                     CachedImageView(
-                        urlString: firstImage.media_url,
-                        filename: URL(string: firstImage.media_url)?.lastPathComponent ?? ""
+                        urlString: heroUrl,
+                        filename: URL(string: heroUrl)?.lastPathComponent ?? ""
                     )
                     .aspectRatio(contentMode: .fill)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -72,7 +72,14 @@ struct ArtistSpotlightView: View {
                             // Media Gallery
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 20) {
-                                    ForEach(viewModel.spotlightMedia.sorted(by: { $0.media_order < $1.media_order })) { media in
+                                    // Show videos first, then images
+                                    let sortedMedia = viewModel.spotlightMedia.sorted { first, second in
+                                        if first.media_type == second.media_type {
+                                            return true // Keep original order within same type
+                                        }
+                                        return first.media_type == "video" // Videos first
+                                    }
+                                    ForEach(sortedMedia) { media in
                                         MediaThumbnail(media: media)
                                     }
                                 }

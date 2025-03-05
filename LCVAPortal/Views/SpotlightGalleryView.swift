@@ -12,10 +12,10 @@ struct SpotlightGalleryView: View {
                 // Hero Section
                 ZStack(alignment: .bottom) {
                     // Background Image
-                    if let firstImage = media.first(where: { $0.media_type == "image" }) {
+                    if let heroUrl = artist.hero_image_url {
                         CachedImageView(
-                            urlString: firstImage.media_url,
-                            filename: URL(string: firstImage.media_url)?.lastPathComponent ?? ""
+                            urlString: heroUrl,
+                            filename: URL(string: heroUrl)?.lastPathComponent ?? ""
                         )
                         .aspectRatio(contentMode: .fill)
                         .frame(height: 360)
@@ -95,7 +95,23 @@ struct SpotlightGalleryView: View {
                     
                     LazyVStack(spacing: 16) {
                         Spacer(minLength: 24)  // Top padding
-                        ForEach(media.sorted(by: { $0.media_order > $1.media_order })) { item in
+                        // First show all videos
+                        let videos = media
+                            .filter { $0.media_type == "video" }
+                            .sorted { $0.id.uuidString < $1.id.uuidString }
+                        ForEach(videos) { item in
+                            MediaGridItem(media: item)
+                                .onTapGesture {
+                                    UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+                                    selectedMedia = item
+                                }
+                        }
+                        
+                        // Then show all images
+                        let images = media
+                            .filter { $0.media_type == "image" }
+                            .sorted { $0.id.uuidString < $1.id.uuidString }
+                        ForEach(images) { item in
                             MediaGridItem(media: item)
                                 .onTapGesture {
                                     UIImpactFeedbackGenerator(style: .soft).impactOccurred()
@@ -111,7 +127,7 @@ struct SpotlightGalleryView: View {
         }
         .background(Color.black)
         .ignoresSafeArea()
-        .sheet(item: $selectedMedia) { media in
+        .fullScreenCover(item: $selectedMedia) { media in
             MediaDetailView(media: media) {
                 selectedMedia = nil
             }
@@ -122,6 +138,7 @@ struct SpotlightGalleryView: View {
 struct MediaDetailView: View {
     let media: SpotlightMedia
     let onDismiss: () -> Void
+    @State private var isLandscape = false
     
     var body: some View {
         ZStack {
@@ -135,11 +152,23 @@ struct MediaDetailView: View {
                 )
                 .aspectRatio(contentMode: .fit)
             } else {
-                CachedImageView(
-                    urlString: media.media_url,
-                    filename: URL(string: media.media_url)?.lastPathComponent ?? ""
-                )
-                .aspectRatio(contentMode: .fit)
+                GeometryReader { geo in
+                    CachedImageView(
+                        urlString: media.media_url,
+                        filename: URL(string: media.media_url)?.lastPathComponent ?? ""
+                    )
+                    .aspectRatio(contentMode: .fit)
+                    .frame(
+                        width: isLandscape ? geo.size.height : geo.size.width,
+                        height: isLandscape ? geo.size.width : geo.size.height
+                    )
+                    .position(
+                        x: geo.size.width / 2,
+                        y: geo.size.height / 2
+                    )
+                    .rotationEffect(.degrees(isLandscape ? 90 : 0))
+                    .animation(.spring(), value: isLandscape)
+                }
             }
             
             // Close button
@@ -155,10 +184,27 @@ struct MediaDetailView: View {
                     .padding()
                     
                     Spacer()
+                    
+                    // Rotate button for images only
+                    if media.media_type == "image" {
+                        Button(action: { 
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                isLandscape.toggle()
+                            }
+                        }) {
+                            Image(systemName: "rotate.right")
+                                .foregroundColor(.white)
+                                .padding(8)
+                                .background(Color.black.opacity(0.5))
+                                .clipShape(Circle())
+                        }
+                        .padding()
+                    }
                 }
                 Spacer()
             }
         }
+        .statusBar(hidden: isLandscape)
     }
 }
 

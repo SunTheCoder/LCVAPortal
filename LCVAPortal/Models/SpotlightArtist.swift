@@ -9,4 +9,5 @@ struct SpotlightArtist: Identifiable, Codable {
     let featured_date: String  // Keep as string since it's TEXT in Supabase
     let extra_link: String?
     let artist_photo_url: String?
+    let hero_image_url: String?
 } 
