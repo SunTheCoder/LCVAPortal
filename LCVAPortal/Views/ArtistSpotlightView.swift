@@ -2,12 +2,37 @@ import SwiftUI
 
 struct ArtistSpotlightView: View {
     @StateObject private var viewModel = SpotlightViewModel()
-    @State private var selectedMedia: SpotlightMedia?
-    @State private var isMediaEnlarged = false
     @State private var slideInOffset: CGFloat = -UIScreen.main.bounds.width
     @State private var backgroundScale: CGFloat = 1.0
     
     var body: some View {
+        Group {
+            if let artist = viewModel.currentArtist {
+                NavigationLink(destination: SpotlightGalleryView(
+                    artist: artist,
+                    media: viewModel.spotlightMedia
+                )) {
+                    spotlightContent(artist: artist)
+                }
+            } else {
+                // Loading state
+                spotlightContent(artist: nil)
+                    .redacted(reason: .placeholder)
+                    .disabled(true)
+            }
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 1.3).delay(1)) {
+                slideInOffset = 0
+            }
+            Task {
+                await viewModel.loadCurrentSpotlight()
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func spotlightContent(artist: SpotlightArtist?) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             // Header outside frame
             Text("Artist Spotlight")
@@ -40,7 +65,7 @@ struct ArtistSpotlightView: View {
                 
                 // Content overlay
                 VStack(alignment: .center, spacing: 16) {
-                    if let artist = viewModel.currentArtist {
+                    if let artist = artist {
                         Spacer(minLength: 0)
                         
                         VStack(spacing: 16) {
@@ -49,10 +74,6 @@ struct ArtistSpotlightView: View {
                                 HStack(spacing: 20) {
                                     ForEach(viewModel.spotlightMedia.sorted(by: { $0.media_order < $1.media_order })) { media in
                                         MediaThumbnail(media: media)
-                                            .onTapGesture {
-                                                selectedMedia = media
-                                                isMediaEnlarged = true
-                                            }
                                     }
                                 }
                                 .padding(.horizontal)
@@ -80,7 +101,7 @@ struct ArtistSpotlightView: View {
                 .offset(x: slideInOffset)
                 
                 // Artist Info overlay at top left
-                if let artist = viewModel.currentArtist {
+                if let artist = artist {
                     VStack(alignment: .leading, spacing: 12) {
                         HStack(spacing: 12) {
                             // Artist Photo
@@ -122,19 +143,6 @@ struct ArtistSpotlightView: View {
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .ignoresSafeArea()
         }
-        .onAppear {
-            withAnimation(.easeOut(duration: 1.3).delay(1)) {
-                slideInOffset = 0
-            }
-            Task {
-                await viewModel.loadCurrentSpotlight()
-            }
-        }
-        .fullScreenCover(isPresented: $isMediaEnlarged) {
-            if let media = selectedMedia {
-                EnlargedMediaView(media: media, isPresented: $isMediaEnlarged)
-            }
-        }
     }
 }
 
@@ -153,7 +161,6 @@ struct MediaThumbnail: View {
                 .frame(width: 120, height: 120)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .shadow(radius: 2)
-                .contentShape(Rectangle())
             } else {
                 CachedImageView(
                     urlString: media.media_url,
@@ -162,61 +169,6 @@ struct MediaThumbnail: View {
                 .frame(width: 120, height: 120)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .shadow(radius: 2)
-            }
-        }
-    }
-}
-
-// Enlarged media view
-struct EnlargedMediaView: View {
-    let media: SpotlightMedia
-    @Binding var isPresented: Bool
-    @State private var scale: CGFloat = 1.0
-    @GestureState private var gestureScale: CGFloat = 1.0
-    
-    var body: some View {
-        NavigationView {
-            GeometryReader { geometry in
-                ZStack {
-                    Color.black.edgesIgnoringSafeArea(.all)
-                    
-                    if media.media_type == "video" {
-                        CachedVideoPlayer(
-                            urlString: media.media_url,
-                            filename: URL(string: media.media_url)?.lastPathComponent ?? "",
-                            autoPlay: true
-                        )
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .aspectRatio(contentMode: .fit)
-                        .edgesIgnoringSafeArea(.all)
-                    } else {
-                        CachedImageView(
-                            urlString: media.media_url,
-                            filename: URL(string: media.media_url)?.lastPathComponent ?? ""
-                        )
-                        .aspectRatio(contentMode: .fit)
-                        .scaleEffect(scale * gestureScale)
-                        .gesture(
-                            MagnificationGesture()
-                                .updating($gestureScale) { currentState, gestureState, _ in
-                                    gestureState = currentState
-                                }
-                                .onEnded { value in
-                                    scale *= value
-                                    scale = min(max(scale, 1), 4)
-                                }
-                        )
-                    }
-                }
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        scale = 1.0
-                        isPresented = false
-                    }
-                }
             }
         }
     }
