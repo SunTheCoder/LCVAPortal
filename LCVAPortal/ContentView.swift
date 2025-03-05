@@ -198,15 +198,15 @@ struct ContentView: View {
                                         hasScrolledToInitialPositionPast: $hasScrolledToInitialPositionPast
                                     )
                                     
-                                    // New Artist Spotlight
-                                    ArtistSpotlightView()
-                                    
                                     // Featured Art Section
                                     FeaturedArtSection(
                                         featuredArtPieces: featuredArtPieces,
                                         userManager: userManager,
                                         userCollections: userCollections
                                     )
+                                    
+                                    // New Artist Spotlight - moved after Featured Art
+                                    ArtistSpotlightView()
                                 }
                                 .padding(.horizontal)
                                 
