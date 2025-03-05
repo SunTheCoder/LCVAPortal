@@ -12,6 +12,14 @@ The LCVA Portal is a native iOS application developed for the Longwood Center fo
 - Add/remove artworks to personal collections
 - Mark artworks as favorites within collections
 
+### Artist Spotlight
+- Featured artist showcase with media gallery
+- Supports both images and videos
+- Media ordered by curator preference
+- Consistent media presentation across views
+- Efficient media caching and preloading
+- Full-screen media viewer with rotation support
+
 ### Art Piece Interaction
 - View detailed information about each artwork
 - High-quality artwork images
@@ -28,6 +36,7 @@ The LCVA Portal is a native iOS application developed for the Longwood Center fo
 ### Technical Implementation
 - **Backend Services**:
   - Supabase for art collection data
+  - Spotlight media management with ordered galleries
   - Custom RPC functions for optimized queries
   - Row Level Security (RLS) for data protection
   - Firebase for user authentication and real-time chat
@@ -42,6 +51,7 @@ The LCVA Portal is a native iOS application developed for the Longwood Center fo
     - Offline image availability
     - Memory-efficient loading
     - Specialized image views for different contexts:
+      - Artist Spotlight galleries
       - On Display section images
       - Exhibition thumbnails
       - Collection grid views
