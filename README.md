@@ -31,12 +31,13 @@ The LCVA Portal is a native iOS application developed for the Longwood Center fo
   - Custom RPC functions for optimized queries
   - Row Level Security (RLS) for data protection
   - Firebase for user authentication and real-time chat
-  - Cloud storage for high-resolution images
+  - Cloud storage for high-resolution images and videos (WebP, mp4)
 
 - **Performance Optimizations**:
 
-  - **Image Caching System**:
-    - Custom FileManager-based image cache
+  - **Media Caching System**:
+    - Custom FileManager-based caching
+  - **Image Caching**:
     - First-load persistence to disk
     - Offline image availability
     - Memory-efficient loading
@@ -45,11 +46,18 @@ The LCVA Portal is a native iOS application developed for the Longwood Center fo
       - Exhibition thumbnails
       - Collection grid views
       - List view thumbnails
+  - **Video Caching**:
+    - Concurrent download management
+    - Memory and disk caching
+    - Automatic player cleanup
+    - Download state tracking
+    - Error handling and recovery
+    - Efficient player reuse
 
   - **Data Preloading**:
     - Unified PreloadManager
     - Concurrent artifact and exhibition loading
-    - Background image prefetching
+    - Background media prefetching
     - Progress tracking system
     - Efficient state management via managers
     - Reduced API calls through caching
@@ -257,7 +265,21 @@ class ImageCache {
 }
 ```
 
-### Specialized Image Views
+### Video Caching Implementation
+```swift
+class VideoCache {
+    static let shared = VideoCache()
+    private let cacheDirectory: URL
+    private var memoryCache: [String: AVPlayer] = [:]
+    private var activeDownloads: [String: Task<Void, Error>] = [:]
+    
+    func cacheVideo(from url: URL, filename: String) async throws
+    func getCachedVideo(urlString: String, filename: String) -> AVPlayer?
+    func clearCache()
+}
+```
+
+### Specialized Media Views
 ```swift
 // Main collection grid images
 struct CachedCollectionImageView: View {
@@ -273,14 +295,23 @@ struct CachedCollectionThumbView: View {
     let size: CGFloat
     // Optimized for list views
 }
+
+// Video player with caching
+struct CachedVideoPlayer: View {
+    let urlString: String
+    let filename: String
+    // Handles loading, caching, and playback
+}
 ```
 
 ### Benefits
-- Instant loading of previously viewed images and views
+- Instant loading of previously viewed media
 - Reduced server load and bandwidth usage
 - Offline functionality for cached content
 - Optimized memory usage
-- Context-specific image handling
+- Context-specific media handling
+- Concurrent download management
+- Automatic resource cleanup
 
 ## Copyright
 © 2024 Bobby "Sun" English and Longwood Center for Visual Arts. All rights reserved.
