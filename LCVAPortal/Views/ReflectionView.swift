@@ -10,103 +10,154 @@ struct ReflectionView: View {
     @State private var selectedItem: PhotosPickerItem?
     @State private var selectedMediaType: ReflectionMediaType = .text
     @ObservedObject var userManager: UserManager
+    @State private var isShowingAllReflections = false
+    @State private var showingInputControls = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Reflections")
-                .font(.headline)
-                .foregroundColor(.white)
-            
-            // Media type selector
-            Picker("Media Type", selection: $selectedMediaType) {
-                ForEach(ReflectionMediaType.allCases, id: \.self) { type in
-                    Text(type.rawValue).tag(type)
-                }
-            }
-            .pickerStyle(.segmented)
-            
-            // Dynamic input based on media type
-            switch selectedMediaType {
-            case .text:
-                // Text input
-                HStack {
-                    TextField("Share your thoughts...", text: $newReflection)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                    
-                    Button(action: submitTextReflection) {
-                        Image(systemName: "arrow.up.circle.fill")
-                            .foregroundColor(.white)
-                            .font(.title2)
-                    }
-                    .disabled(newReflection.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
-                
-            case .photo:
-                // Photo picker
-                VStack {
-                    PhotosPicker(
-                        selection: $selectedItem,
-                        matching: .images
-                    ) {
-                        Label("Select Photo", systemImage: "photo")
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.white.opacity(0.2))
-                            .cornerRadius(8)
-                    }
-                    
-                    if selectedItem != nil {
-                        Button("Upload Photo") {
-                            submitMediaReflection()
-                        }
-                        .buttonStyle(.borderedProminent)
-                    }
-                }
-                
-            case .video:
-                // Video picker
-                VStack {
-                    PhotosPicker(
-                        selection: $selectedItem,
-                        matching: .videos
-                    ) {
-                        Label("Select Video", systemImage: "video")
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.white.opacity(0.2))
-                            .cornerRadius(8)
-                    }
-                    
-                    if selectedItem != nil {
-                        Button("Upload Video") {
-                            submitMediaReflection()
-                        }
-                        .buttonStyle(.borderedProminent)
-                    }
-                }
-                
-            case .audio:
-                Text("Audio upload coming soon")
-                    .foregroundColor(.secondary)
-            }
-            
-            if viewModel.isUploading {
-                ProgressView("Uploading...")
+            HStack {
+                Text(isShowingAllReflections ? "Community Journal" : "My Journal")
+                    .font(.headline)
                     .foregroundColor(.white)
+                
+                Spacer()
+                
+                Button {
+                    isShowingAllReflections.toggle()
+                } label: {
+                    Label(
+                        isShowingAllReflections ? "Show Mine" : "Show All",
+                        systemImage: isShowingAllReflections ? "person" : "person.3"
+                    )
+                    .foregroundColor(.white)
+                    .padding(6)
+                    .background(Color.white.opacity(0.2))
+                    .cornerRadius(8)
+                }
+            }
+            
+            // Add reflection button
+            Button {
+                showingInputControls.toggle()
+            } label: {
+                Label(
+                    showingInputControls ? "Close" : "Add Entry",
+                    systemImage: showingInputControls ? "xmark.circle" : "plus.circle"
+                )
+                .foregroundColor(.white)
+                .padding(8)
+                .background(Color.white.opacity(0.2))
+                .cornerRadius(8)
+            }
+            
+            // Input controls
+            if showingInputControls {
+                VStack(spacing: 12) {
+                    Picker("Media Type", selection: $selectedMediaType) {
+                        ForEach(ReflectionMediaType.allCases, id: \.self) { type in
+                            Text(type.rawValue).tag(type)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    
+                    // Dynamic input based on media type
+                    switch selectedMediaType {
+                    case .text:
+                        // Text input
+                        HStack {
+                            TextField("Share your thoughts...", text: $newReflection)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                            
+                            Button(action: submitTextReflection) {
+                                Image(systemName: "arrow.up.circle.fill")
+                                    .foregroundColor(.white)
+                                    .font(.title2)
+                            }
+                            .disabled(newReflection.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        }
+                        
+                    case .photo:
+                        // Photo picker
+                        VStack {
+                            PhotosPicker(
+                                selection: $selectedItem,
+                                matching: .images
+                            ) {
+                                Label("Select Photo", systemImage: "photo")
+                                    .foregroundColor(.white)
+                                    .padding()
+                                    .background(Color.white.opacity(0.2))
+                                    .cornerRadius(8)
+                            }
+                            
+                            if selectedItem != nil {
+                                Button("Upload Photo") {
+                                    submitMediaReflection()
+                                }
+                                .buttonStyle(.borderedProminent)
+                            }
+                        }
+                        
+                    case .video:
+                        // Video picker
+                        VStack {
+                            PhotosPicker(
+                                selection: $selectedItem,
+                                matching: .videos
+                            ) {
+                                Label("Select Video", systemImage: "video")
+                                    .foregroundColor(.white)
+                                    .padding()
+                                    .background(Color.white.opacity(0.2))
+                                    .cornerRadius(8)
+                            }
+                            
+                            if selectedItem != nil {
+                                Button("Upload Video") {
+                                    submitMediaReflection()
+                                }
+                                .buttonStyle(.borderedProminent)
+                            }
+                        }
+                        
+                    case .audio:
+                        Text("Audio upload coming soon")
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    if viewModel.isUploading {
+                        ProgressView("Uploading...")
+                            .foregroundColor(.white)
+                    }
+                }
+                .transition(.move(edge: .top).combined(with: .opacity))
             }
             
             // Reflections list
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 12) {
-                    ForEach(viewModel.reflections) { reflection in
+                    ForEach(filteredReflections) { reflection in
                         ReflectionItemView(reflection: reflection)
+                            .transition(.opacity)
                     }
                 }
             }
         }
         .padding()
+        .animation(.spring(), value: showingInputControls)
+        .animation(.easeInOut, value: isShowingAllReflections)
         .task {
             await viewModel.loadReflections(for: artifactId)
+        }
+    }
+    
+    private var filteredReflections: [ArtifactReflection] {
+        if isShowingAllReflections {
+            return viewModel.reflections
+        } else {
+            return viewModel.reflections.filter { reflection in
+                reflection.userId == userManager.currentUser?.uid
+            }
         }
     }
     
@@ -150,11 +201,11 @@ struct ReflectionItemView: View {
     let reflection: ArtifactReflection
     
     private var formattedDate: String {
-        // Convert ISO string to formatted date
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+        formatter.timeZone = TimeZone(identifier: "UTC")
         if let date = formatter.date(from: reflection.createdAt) {
-            formatter.dateStyle = .medium
+            formatter.dateStyle = .long
             formatter.timeStyle = .short
             return formatter.string(from: date)
         }
@@ -163,41 +214,53 @@ struct ReflectionItemView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
+            // Header with date and type
+            HStack {
+                Image(systemName: reflectionTypeIcon)
+                    .foregroundColor(.white.opacity(0.7))
+                
+                Text(formattedDate)
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.7))
+            }
+            .padding(.bottom, 4)
+            
             // Show different content based on reflection type
             switch reflection.reflectionType {
             case "text":
                 Text(reflection.textContent)
                     .foregroundColor(.white)
+                    .fixedSize(horizontal: false, vertical: true)
                 
             case "image":
                 if let url = URL(string: reflection.mediaUrl ?? "") {
-                    AsyncImage(url: url) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(maxHeight: 200)
-                    } placeholder: {
-                        ProgressView()
-                    }
+                    ChatImageView(url: url)
                 }
                 
             case "video":
                 if let url = URL(string: reflection.mediaUrl ?? "") {
-                    VideoPlayer(player: AVPlayer(url: url))
-                        .frame(height: 200)
+                    CachedVideoPlayer(
+                        urlString: url.absoluteString,
+                        filename: url.lastPathComponent
+                    )
                 }
                 
             default:
                 Text("Unsupported media type")
                     .foregroundColor(.secondary)
             }
-            
-            Text(formattedDate)
-                .font(.caption)
-                .foregroundColor(.white.opacity(0.7))
         }
         .padding()
-        .background(Color.white.opacity(0.1))
-        .cornerRadius(8)
+        .background(Color.white.opacity(0.15))
+        .cornerRadius(12)
+    }
+    
+    private var reflectionTypeIcon: String {
+        switch reflection.reflectionType {
+        case "text": return "text.bubble"
+        case "image": return "photo"
+        case "video": return "video"
+        default: return "questionmark.circle"
+        }
     }
 } 

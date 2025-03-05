@@ -14,6 +14,7 @@ struct CollectionsView: View {
     @State private var selectedSubFilter: SubFilter? = nil
     @Namespace private var subFilterAnimation
     @State private var userAvatar: String? = nil
+    @State private var showingJournal = false
     
     // Add Supabase data states
     @EnvironmentObject var artifactManager: ArtifactManager
@@ -110,22 +111,26 @@ struct CollectionsView: View {
                     // Header with title and buttons
                     HStack {
                         // User avatar/profile pic
-                        if let avatarUrl = userAvatar {
-                            AsyncImage(url: URL(string: avatarUrl)) { image in
-                                image
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 35, height: 35)
-                                    .clipShape(Circle())
-                            } placeholder: {
+                        Button {
+                            showingJournal = true
+                        } label: {
+                            if let avatarUrl = userAvatar {
+                                AsyncImage(url: URL(string: avatarUrl)) { image in
+                                    image
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 35, height: 35)
+                                        .clipShape(Circle())
+                                } placeholder: {
+                                    Circle()
+                                        .fill(Color.white.opacity(0.3))
+                                        .frame(width: 35, height: 35)
+                                }
+                            } else {
                                 Circle()
                                     .fill(Color.white.opacity(0.3))
                                     .frame(width: 35, height: 35)
                             }
-                        } else {
-                            Circle()
-                                .fill(Color.white.opacity(0.3))
-                                .frame(width: 35, height: 35)
                         }
                         
                         Text("Collections")
@@ -473,6 +478,7 @@ struct CollectionsView: View {
                 }
             }
         }
+      
     }
 }
 
