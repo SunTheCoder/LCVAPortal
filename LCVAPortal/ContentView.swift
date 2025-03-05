@@ -75,15 +75,6 @@ struct SplashView: View {
 }
 
 struct ContentView: View {
-    let sampleArtist = Artist(
-        name: "Sun English Jr.",
-        medium: "Sculpture",
-        bio: "Sun English Jr. is a sculptor and performance artist known for immersive installations.",
-        
-        imageUrls: ["Black Front", "M1", "Poison I", "Poison II"],
-        videos: ["small", "immure"]
-    )
-    
     @State private var email = ""
     @State private var password = ""
     @State private var name = ""
@@ -207,14 +198,8 @@ struct ContentView: View {
                                         hasScrolledToInitialPositionPast: $hasScrolledToInitialPositionPast
                                     )
                                     
-                                    // Artist Spotlight Section
-                                    ArtistSpotlightSection(
-                                        sampleArtist: sampleArtist,
-                                        isArtistDetailPresented: $isArtistDetailPresented
-                                    )
-                                    .sheet(isPresented: $isArtistDetailPresented) {
-                                        ArtistDetailModalView(artist: sampleArtist, isPresented: $isArtistDetailPresented)
-                                    }
+                                    // New Artist Spotlight
+                                    ArtistSpotlightView()
                                     
                                     // Featured Art Section
                                     FeaturedArtSection(
