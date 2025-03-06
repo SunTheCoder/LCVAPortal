@@ -119,7 +119,7 @@ struct SpotlightGalleryView: View {
                         .foregroundColor(.white)
                         .padding(.horizontal, 24)
                     
-                    LazyVStack(spacing: 16) {
+                    LazyVStack(spacing: 32) {
                         Spacer(minLength: 24)  // Top padding
                         // Show all media in original order
                         ForEach(sortedMedia) { item in
@@ -235,41 +235,92 @@ struct MediaDetailView: View {
 
 struct MediaGridItem: View {
     let media: SpotlightMedia
+    @State private var isDescriptionExpanded = false
     
     var body: some View {
-        Group {
-            if media.media_type == "video" {
-                VideoPreviewView(
-                    urlString: media.media_url,
-                    filename: URL(string: media.media_url)?.lastPathComponent ?? ""
-                )
-                .aspectRatio(16/9, contentMode: .fit)
-                .frame(maxWidth: .infinity)
-                .frame(height: 200)
-            } else {
-                CachedImageView(
-                    urlString: media.media_url,
-                    filename: URL(string: media.media_url)?.lastPathComponent ?? ""
-                )
-                .aspectRatio(contentMode: .fill)
-                .frame(maxWidth: .infinity)
-                .frame(height: 200)
-                .clipped()
-                .contentShape(Rectangle())
-                .overlay(
-                    Image(systemName: "arrow.up.left.and.arrow.down.right")
-                        .font(.system(size: 18))
-                        .foregroundColor(.white)
-                        .padding(6)
-                        .background(Color.black.opacity(0.3))
-                        .clipShape(Circle())
-                        .padding(12),
-                    alignment: .bottomTrailing
-                )
+        VStack(alignment: .leading, spacing: 8) {
+            Group {
+                if media.media_type == "video" {
+                    VideoPreviewView(
+                        urlString: media.media_url,
+                        filename: URL(string: media.media_url)?.lastPathComponent ?? ""
+                    )
+                    .aspectRatio(16/9, contentMode: .fit)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 200)
+                } else {
+                    CachedImageView(
+                        urlString: media.media_url,
+                        filename: URL(string: media.media_url)?.lastPathComponent ?? ""
+                    )
+                    .aspectRatio(contentMode: .fill)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 200)
+                    .clipped()
+                    .contentShape(Rectangle())
+                    .overlay(
+                        Image(systemName: "arrow.up.left.and.arrow.down.right")
+                            .font(.system(size: 18))
+                            .foregroundColor(.white)
+                            .padding(6)
+                            .background(Color.black.opacity(0.3))
+                            .clipShape(Circle())
+                            .padding(12),
+                        alignment: .bottomTrailing
+                    )
+                }
             }
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .shadow(radius: 4)
+            .contentShape(Rectangle())
+            
+            // Media details
+            VStack(alignment: .leading, spacing: 4) {
+                if let title = media.title {
+                    Text(title)
+                        .font(.headline)
+                        .foregroundColor(.white)
+                }
+                
+                if let description = media.description {
+                    DisclosureGroup(
+                        isExpanded: $isDescriptionExpanded,
+                        content: {
+                            Text(description)
+                                .font(.subheadline)
+                                .foregroundColor(.white.opacity(0.8))
+                                .padding(.vertical, 8)
+                        },
+                        label: {
+                            HStack {
+                                Text("Description")
+                                    .font(.subheadline)
+                                    .foregroundColor(.white.opacity(0.7))
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.white.opacity(0.7))
+                                    .rotationEffect(.degrees(isDescriptionExpanded ? 90 : 0))
+                                    .animation(.easeInOut(duration: 0.2), value: isDescriptionExpanded)
+                            }
+                        }
+                    )
+                    .tint(.clear)
+                    .accentColor(.white)
+                }
+                
+                if let medium = media.medium {
+                    Text(medium)
+                        .font(.caption)
+                        .foregroundColor(.white.opacity(0.6))
+                        .padding(.vertical, 2)
+                        .padding(.horizontal, 8)
+                        .background(Color.white.opacity(0.1))
+                        .clipShape(Capsule())
+                }
+            }
+            .padding(.horizontal, 15)
         }
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .shadow(radius: 4)
-        .contentShape(Rectangle())
+        .padding(.horizontal, 15)
+        .animation(.easeInOut(duration: 0.2), value: isDescriptionExpanded)
     }
 } 
