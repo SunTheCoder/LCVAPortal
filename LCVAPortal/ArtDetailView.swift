@@ -30,6 +30,7 @@ struct ArtDetailView: View {
                         ProgressView()
                             .frame(height: 300)
                     }
+                    .padding(.top, 130)
                     
                     VStack(alignment: .leading, spacing: 16) {
                         // Title and Actions
@@ -251,36 +252,13 @@ struct ArtDetailView: View {
                     }
                 }
             }
+            .ignoresSafeArea(.container, edges: .top)
         }
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(
-            LinearGradient(
-                gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaBlue.opacity(0.4)]),
-                startPoint: .top,
-                endPoint: .bottom
-            ),
-            for: .navigationBar
-        )
-        .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
     }
 }
 
-// Helper view for detail rows
-struct DetailRow: View {
-    let title: String
-    let content: String
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-            Text(content)
-                .font(.body)
-        }
-    }
-}
 
 // Helper view for ADA features
 struct AccessibilityFeatureRow: View {
