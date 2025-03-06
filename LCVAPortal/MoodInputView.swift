@@ -205,6 +205,7 @@ struct MoodInputView: View {
                     let newArtPiece = ArtPiece(
                         id: UUID(),  // Generate new UUID instead of Int
                         title: title,
+                        artist: "",
                         description: currentDescription.trimmingCharacters(in: .whitespacesAndNewlines),
                         imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/default.jpg",
                         latitude: 37.2973,
@@ -234,6 +235,7 @@ struct MoodInputView: View {
             let newArtPiece = ArtPiece(
                 id: UUID(),  // Generate new UUID instead of Int
                 title: title,
+                artist: "",
                 description: currentDescription.trimmingCharacters(in: .whitespacesAndNewlines),
                 imageUrl: "https://lcva.longwood.edu/wp-content/uploads/2024/08/default.jpg",
                 latitude: 37.2973,

@@ -60,6 +60,7 @@ class UserCollections: ObservableObject {
         return ArtPiece(
             id: artifact.id,
             title: artifact.title,
+            artist: "",
             description: artifact.description ?? "",
             imageUrl: artifact.image_url ?? "",
             latitude: 0.0,

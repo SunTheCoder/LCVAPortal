@@ -292,6 +292,7 @@ struct ChatView: View {
                 self.artPiece = ArtPiece(
                     id: artifact.id,
                     title: artifact.title,
+                    artist: "",
                     description: artifact.description ?? "",
                     imageUrl: artifact.image_url ?? "",
                     latitude: 0.0,

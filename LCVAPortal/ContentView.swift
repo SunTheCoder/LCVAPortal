@@ -111,6 +111,7 @@ struct ContentView: View {
         ArtPiece(
             id: artifact.id,
             title: artifact.title,
+            artist: artifact.artist,
             description: artifact.description ?? "",
             imageUrl: artifact.image_url ?? "",
             latitude: 0.0,
@@ -799,44 +800,6 @@ struct FeaturedArtistView: View {
 }
 
 
-// MARK: - Featured Art on Campus View
-struct FeaturedArtOnCampusView: View {
-    let colorScheme: ColorScheme
-    @Binding var selectedArtPiece: ArtPiece?
-    let userCollections: UserCollections
-    let userManager: UserManager
-    var body: some View {
-        VStack(alignment: .center, spacing: 16) {
-            Text("Featured Art on Campus")
-                .font(.title2)
-                .bold()
-                .foregroundColor(.white)
-            
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 20) {
-                    ForEach(featuredArtPieces) { artPiece in
-                        ArtPieceCard(artPiece: artPiece, selectedArtPiece: $selectedArtPiece)
-                    }
-                }
-                .padding(.horizontal)
-            }
-        }
-        .padding(.vertical, 16)
-        .padding(.horizontal, 24)
-        .background(
-            RoundedRectangle(cornerRadius: 7)
-                .fill(Color.lcvaNavy.opacity(0.6))
-                .shadow(radius: 3)
-        )
-        .frame(maxWidth: 400)
-        .padding(.horizontal)
-        .sheet(item: $selectedArtPiece) { artPiece in
-            NavigationView {
-                MapModalView(artPiece: artPiece, userManager: userManager, userCollections: userCollections)
-            }
-        }
-    }
-}
 
 // MARK: - User Authentication View
 struct UserAuthenticationView: View {
@@ -1053,113 +1016,113 @@ struct ScrollArrowIndicators: View {
 //
 
 // Featured Art Section
-struct FeaturedArtSection: View {  // Create a separate view
-    @State private var featuredArtIndex = 0  // State at struct level
-    let featuredArtPieces: [ArtPiece]
-    let userManager: UserManager
-    let userCollections: UserCollections
+// struct FeaturedArtSection: View {  // Create a separate view
+//     @State private var featuredArtIndex = 0  // State at struct level
+//     let featuredArtPieces: [ArtPiece]
+//     let userManager: UserManager
+//     let userCollections: UserCollections
     
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Featured Art")
-                .font(.system(size: 18))
-                .bold()
-                .foregroundColor(.white)
+//     var body: some View {
+//         VStack(alignment: .leading, spacing: 12) {
+//             Text("Featured Art")
+//                 .font(.system(size: 18))
+//                 .bold()
+//                 .foregroundColor(.white)
             
-            ScrollViewReader { scrollProxy in
-                HStack(spacing: 16) {
-                    // Left arrow
-                    Button(action: {
-                        withAnimation {
-                            featuredArtIndex = max(featuredArtIndex - 1, 0)
-                            scrollProxy.scrollTo(featuredArtIndex, anchor: .center)
-                        }
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .foregroundColor(.white)
-                            .opacity(featuredArtIndex == 0 ? 0.3 : 1)  // Fade when disabled
-                            .padding(8)
-                            .background(Color.black.opacity(0.3))
-                            .clipShape(Circle())
-                    }
-                    .disabled(featuredArtIndex == 0)
+//             ScrollViewReader { scrollProxy in
+//                 HStack(spacing: 16) {
+//                     // Left arrow
+//                     Button(action: {
+//                         withAnimation {
+//                             featuredArtIndex = max(featuredArtIndex - 1, 0)
+//                             scrollProxy.scrollTo(featuredArtIndex, anchor: .center)
+//                         }
+//                     }) {
+//                         Image(systemName: "chevron.left")
+//                             .foregroundColor(.white)
+//                             .opacity(featuredArtIndex == 0 ? 0.3 : 1)  // Fade when disabled
+//                             .padding(8)
+//                             .background(Color.black.opacity(0.3))
+//                             .clipShape(Circle())
+//                     }
+//                     .disabled(featuredArtIndex == 0)
                     
-                    // ScrollView content
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 32) {
-                            ForEach(Array(featuredArtPieces.enumerated()), id: \.element.id) { index, artPiece in
-                                VStack(alignment: .leading, spacing: 4) {
-                                    AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
-                                        NavigationLink(destination: ArtDetailView(
-                                            artPiece: artPiece,
-                                            userManager: userManager,
-                                            userCollections: userCollections
-                                        )) {
-                                            image
-                                                .resizable()
-                                                .scaledToFill()
-                                                .frame(width: 120, height: 120)
-                                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                .shadow(radius: 2)
-                                        }
-                                    } placeholder: {
-                                        ProgressView()
-                                            .frame(width: 120, height: 120)
-                                    }
+//                     // ScrollView content
+//                     ScrollView(.horizontal, showsIndicators: false) {
+//                         HStack(spacing: 32) {
+//                             ForEach(Array(featuredArtPieces.enumerated()), id: \.element.id) { index, artPiece in
+//                                 VStack(alignment: .leading, spacing: 4) {
+//                                     AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
+//                                         NavigationLink(destination: ArtDetailView(
+//                                             artPiece: artPiece,
+//                                             userManager: userManager,
+//                                             userCollections: userCollections
+//                                         )) {
+//                                             image
+//                                                 .resizable()
+//                                                 .scaledToFill()
+//                                                 .frame(width: 120, height: 120)
+//                                                 .clipShape(RoundedRectangle(cornerRadius: 8))
+//                                                 .shadow(radius: 2)
+//                                         }
+//                                     } placeholder: {
+//                                         ProgressView()
+//                                             .frame(width: 120, height: 120)
+//                                     }
                                     
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(artPiece.title)
-                                            .font(.caption)
-                                            .bold()
-                                            .foregroundColor(.white)
-                                            .lineLimit(3)
-                                            .frame(width: 120, alignment: .leading)
-                                            .fixedSize(horizontal: false, vertical: true)
+//                                     VStack(alignment: .leading, spacing: 2) {
+//                                         Text(artPiece.title)
+//                                             .font(.caption)
+//                                             .bold()
+//                                             .foregroundColor(.white)
+//                                             .lineLimit(3)
+//                                             .frame(width: 120, alignment: .leading)
+//                                             .fixedSize(horizontal: false, vertical: true)
                                         
-                                        Text("Campus Art")
-                                            .font(.caption)
-                                            .foregroundColor(.white.opacity(0.7))
-                                            .lineLimit(2)
-                                            .frame(width: 120, alignment: .leading)
-                                            .fixedSize(horizontal: false, vertical: true)
-                                    }
-                                    .frame(height: 60)
-                                }
-                                .frame(width: 120)
-                                .id(index)
-                            }
-                        }
-                        .padding(.horizontal, 8)
-                    }
-                    .onChange(of: featuredArtIndex) { newIndex in
-                        withAnimation {
-                            scrollProxy.scrollTo(newIndex, anchor: .center)
-                        }
-                    }
+//                                         Text("Campus Art")
+//                                             .font(.caption)
+//                                             .foregroundColor(.white.opacity(0.7))
+//                                             .lineLimit(2)
+//                                             .frame(width: 120, alignment: .leading)
+//                                             .fixedSize(horizontal: false, vertical: true)
+//                                     }
+//                                     .frame(height: 60)
+//                                 }
+//                                 .frame(width: 120)
+//                                 .id(index)
+//                             }
+//                         }
+//                         .padding(.horizontal, 8)
+//                     }
+//                     .onChange(of: featuredArtIndex) { newIndex in
+//                         withAnimation {
+//                             scrollProxy.scrollTo(newIndex, anchor: .center)
+//                         }
+//                     }
                     
-                    // Right arrow
-                    Button(action: {
-                        withAnimation {
-                            let maxIndex = featuredArtPieces.count - 1
-                            featuredArtIndex = min(featuredArtIndex + 1, maxIndex)
-                            scrollProxy.scrollTo(featuredArtIndex, anchor: .center)
-                        }
-                    }) {
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(.white)
-                            .opacity(featuredArtIndex == featuredArtPieces.count - 1 ? 0.3 : 1)  // Fade when disabled
-                            .padding(8)
-                            .background(Color.black.opacity(0.3))
-                            .clipShape(Circle())
-                    }
-                    .disabled(featuredArtIndex == featuredArtPieces.count - 1)
-                }
-            }
-        }
-        .padding(.horizontal, 16)
-        .frame(maxWidth: .infinity)
-    }
-}
+//                     // Right arrow
+//                     Button(action: {
+//                         withAnimation {
+//                             let maxIndex = featuredArtPieces.count - 1
+//                             featuredArtIndex = min(featuredArtIndex + 1, maxIndex)
+//                             scrollProxy.scrollTo(featuredArtIndex, anchor: .center)
+//                         }
+//                     }) {
+//                         Image(systemName: "chevron.right")
+//                             .foregroundColor(.white)
+//                             .opacity(featuredArtIndex == featuredArtPieces.count - 1 ? 0.3 : 1)  // Fade when disabled
+//                             .padding(8)
+//                             .background(Color.black.opacity(0.3))
+//                             .clipShape(Circle())
+//                     }
+//                     .disabled(featuredArtIndex == featuredArtPieces.count - 1)
+//                 }
+//             }
+//         }
+//         .padding(.horizontal, 16)
+//         .frame(maxWidth: .infinity)
+//     }
+// }
 
 // Artist Spotlight Section
 struct ArtistSpotlightSection: View {

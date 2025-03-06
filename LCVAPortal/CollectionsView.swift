@@ -37,6 +37,7 @@ struct CollectionsView: View {
         let artPiece = ArtPiece(
             id: artifact.id,
             title: artifact.title,
+            artist: artifact.artist,
             description: artifact.description ?? "",
             imageUrl: artifact.image_url ?? "",
             latitude: 0.0,  // Default values for now
