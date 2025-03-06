@@ -153,10 +153,9 @@ struct MediaThumbnail: View {
     var body: some View {
         Group {
             if media.media_type == "video" {
-                CachedVideoPlayer(
+                VideoPreviewView(
                     urlString: media.media_url,
-                    filename: URL(string: media.media_url)?.lastPathComponent ?? "",
-                    autoPlay: true
+                    filename: URL(string: media.media_url)?.lastPathComponent ?? ""
                 )
                 .frame(width: 120, height: 120)
                 .clipShape(RoundedRectangle(cornerRadius: 8))

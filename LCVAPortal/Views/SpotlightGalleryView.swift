@@ -55,14 +55,16 @@ struct SpotlightGalleryView: View {
                     
                     // Artist Info
                     VStack(alignment: .leading, spacing: 16) {
-                        Text(artist.artist_name)
-                            .font(.system(size: 42, weight: .bold))
-                            .foregroundColor(.white)
-                        
-                        if let title = artist.art_title {
-                            Text(title)
-                                .font(.title3)
-                                .foregroundColor(.white.opacity(0.8))
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(artist.artist_name)
+                                .font(.system(size: 42, weight: .bold))
+                                .foregroundColor(.white)
+                            
+                            if let title = artist.art_title {
+                                Text(title)
+                                    .font(.title3)
+                                    .foregroundColor(.white.opacity(0.8))
+                            }
                         }
                         
                         HStack {
@@ -148,6 +150,7 @@ struct MediaDetailView: View {
     let media: SpotlightMedia
     let onDismiss: () -> Void
     @State private var isLandscape = false
+    @State private var isAnimating = false
     
     init(media: SpotlightMedia, onDismiss: @escaping () -> Void) {
         self.media = media
@@ -162,10 +165,9 @@ struct MediaDetailView: View {
             Color.black.ignoresSafeArea()
             
             if media.media_type == "video" {
-                CachedVideoPlayer(
+                GalleryVideoPlayer(
                     urlString: media.media_url,
-                    filename: URL(string: media.media_url)?.lastPathComponent ?? "",
-                    autoPlay: true
+                    filename: URL(string: media.media_url)?.lastPathComponent ?? ""
                 )
                 .aspectRatio(contentMode: .fit)
             } else {
@@ -184,7 +186,7 @@ struct MediaDetailView: View {
                         y: geo.size.height / 2
                     )
                     .rotationEffect(.degrees(isLandscape ? 90 : 0))
-                    .animation(.spring(), value: isLandscape)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isLandscape)
                 }
             }
             
@@ -199,14 +201,18 @@ struct MediaDetailView: View {
                             .clipShape(Circle())
                     }
                     .padding()
+                    .disabled(isAnimating)
                     
                     Spacer()
                     
                     // Rotate button for images only
                     if media.media_type == "image" {
-                        Button(action: { 
+                        Button(action: {
+                            isAnimating = true
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                 isLandscape.toggle()
+                            } completion: {
+                                isAnimating = false
                             }
                         }) {
                             Image(systemName: "rotate.right")
@@ -216,12 +222,14 @@ struct MediaDetailView: View {
                                 .clipShape(Circle())
                         }
                         .padding()
+                        .disabled(isAnimating)
                     }
                 }
                 Spacer()
             }
         }
         .statusBar(hidden: isLandscape)
+        .interactiveDismissDisabled(isAnimating)
     }
 }
 
@@ -231,10 +239,9 @@ struct MediaGridItem: View {
     var body: some View {
         Group {
             if media.media_type == "video" {
-                CachedVideoPlayer(
+                VideoPreviewView(
                     urlString: media.media_url,
-                    filename: URL(string: media.media_url)?.lastPathComponent ?? "",
-                    autoPlay: true
+                    filename: URL(string: media.media_url)?.lastPathComponent ?? ""
                 )
                 .aspectRatio(16/9, contentMode: .fit)
                 .frame(maxWidth: .infinity)
