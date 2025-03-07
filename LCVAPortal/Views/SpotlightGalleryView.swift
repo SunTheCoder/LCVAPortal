@@ -2,20 +2,16 @@ import SwiftUI
 
 struct SpotlightGalleryView: View {
     let artist: SpotlightArtist
-    private let media: [SpotlightMedia]
-    // Computed property to ensure consistent sorting
-    private var sortedMedia: [SpotlightMedia] {
-        media.sorted { $0.media_order > $1.media_order }
-    }
+    private let sortedMedia: [SpotlightMedia]
     @State private var selectedMedia: SpotlightMedia?
     @Environment(\.dismiss) var dismiss
     
     init(artist: SpotlightArtist, media: [SpotlightMedia]) {
         self.artist = artist
-        self.media = media
+        self.sortedMedia = media.sorted { $0.media_order > $1.media_order }
         print("🎨 Gallery View Created")
         print("📱 Media array order:")
-        media.sorted { $0.media_order > $1.media_order }.enumerated().forEach { index, m in
+        sortedMedia.enumerated().forEach { index, m in
             print("  \(index). \(m.id) - \(m.media_url.split(separator: "/").last ?? "")")
         }
     }
