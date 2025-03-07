@@ -122,12 +122,25 @@ struct SpotlightGalleryView: View {
                     LazyVStack(spacing: 32) {
                         Spacer(minLength: 24)  // Top padding
                         // Show all media in original order
-                        ForEach(sortedMedia) { item in
-                            MediaGridItem(media: item)
-                                .onTapGesture {
-                                    UIImpactFeedbackGenerator(style: .soft).impactOccurred()
-                                    selectMedia(item)
-                                }
+                        ForEach(sortedMedia) { media in
+                            if media.media_type == "video" {
+                                // Direct video player
+                                GalleryVideoPlayer(
+                                    urlString: media.media_url,
+                                    filename: URL(string: media.media_url)?.lastPathComponent ?? ""
+                                )
+                                .frame(height: 250)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                                )
+                            } else {
+                                MediaGridItem(media: media)
+                                    .onTapGesture {
+                                        UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+                                        selectMedia(media)
+                                    }
+                            }
                         }
                         Spacer(minLength: 24)  // Bottom padding
                     }
@@ -139,8 +152,11 @@ struct SpotlightGalleryView: View {
         .background(Color.black)
         .ignoresSafeArea()
         .fullScreenCover(item: $selectedMedia) { media in
-            MediaDetailView(media: media) {
-                selectedMedia = nil
+            // Only show fullscreen for images
+            if media.media_type == "image" {
+                MediaDetailView(media: media) {
+                    selectedMedia = nil
+                }
             }
         }
     }

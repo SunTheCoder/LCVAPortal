@@ -47,6 +47,11 @@ struct GalleryVideoPlayer: UIViewControllerRepresentable {
         player.isMuted = false
         player.actionAtItemEnd = .pause
         
+        // Seek to preview frame (3 seconds in)
+        let previewTime = CMTime(seconds: 4, preferredTimescale: 1)
+        player.seek(to: previewTime, toleranceBefore: .zero, toleranceAfter: .zero)
+        player.pause()
+        
         controller.player = player
     }
     
