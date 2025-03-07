@@ -205,9 +205,11 @@ struct ContentView: View {
                                         userManager: userManager,
                                         userCollections: userCollections
                                     )
+                                    .padding(.bottom, 8)  // Add extra padding before Spotlight
                                     
                                     // New Artist Spotlight - moved after Featured Art
                                     ArtistSpotlightView()
+                                    .padding(.top, 16)  // Add extra padding after Featured Art
                                 }
                                 .padding(.horizontal)
                                 
