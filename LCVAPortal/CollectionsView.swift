@@ -140,7 +140,6 @@ struct CollectionsView: View {
                         // Search and Add buttons
                         Button(action: { /* Search action */ }) {
                             NavigationLink(destination: SearchView(
-                                artPieces: artifactManager.artifacts.map(convertToArtPiece),  // Use artifactManager
                                 userCollections: userCollections,
                                 userManager: userManager
                             )) {
