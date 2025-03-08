@@ -4,6 +4,7 @@ struct SpotlightGalleryView: View {
     let artist: SpotlightArtist
     private let sortedMedia: [SpotlightMedia]
     @State private var selectedMedia: SpotlightMedia?
+    @State private var expandedDescriptions: Set<UUID> = []
     @Environment(\.dismiss) var dismiss
     
     init(artist: SpotlightArtist, media: [SpotlightMedia]) {
@@ -119,17 +120,141 @@ struct SpotlightGalleryView: View {
                         Spacer(minLength: 24)  // Top padding
                         // Show all media in original order
                         ForEach(sortedMedia) { media in
-                            if media.media_type == "video" {
-                                // Direct video player
-                                GalleryVideoPlayer(
-                                    urlString: media.media_url,
-                                    filename: URL(string: media.media_url)?.lastPathComponent ?? ""
-                                )
-                                .frame(height: 250)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                                )
+                            if media.media_type == "audio" {
+                                // Audio player
+                                VStack(alignment: .leading, spacing: 8) {
+                                    AudioPlayerView(
+                                        audioUrl: URL(string: media.media_url)!,
+                                        title: media.title ?? "Audio"
+                                    )
+                                    .frame(maxWidth: .infinity)
+                                    
+                                    // Media details
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        if let title = media.title {
+                                            Text(title)
+                                                .font(.headline)
+                                                .foregroundColor(.white)
+                                        }
+                                        
+                                        if let description = media.description {
+                                            DisclosureGroup(
+                                                isExpanded: Binding(
+                                                    get: { expandedDescriptions.contains(media.id) },
+                                                    set: { isExpanded in
+                                                        if isExpanded {
+                                                            expandedDescriptions.insert(media.id)
+                                                        } else {
+                                                            expandedDescriptions.remove(media.id)
+                                                        }
+                                                    }
+                                                ),
+                                                content: {
+                                                    Text(description)
+                                                        .font(.subheadline)
+                                                        .foregroundColor(.white.opacity(0.8))
+                                                        .padding(.vertical, 8)
+                                                },
+                                                label: {
+                                                    HStack {
+                                                        Text("Description")
+                                                            .font(.subheadline)
+                                                            .foregroundColor(.white.opacity(0.7))
+                                                        Spacer()
+                                                        Image(systemName: "chevron.right")
+                                                            .foregroundColor(.white.opacity(0.7))
+                                                            .rotationEffect(.degrees(expandedDescriptions.contains(media.id) ? 90 : 0))
+                                                            .animation(.easeInOut(duration: 0.2), value: expandedDescriptions.contains(media.id))
+                                                    }
+                                                }
+                                            )
+                                            .tint(.clear)
+                                            .accentColor(.white)
+                                        }
+                                        
+                                        if let medium = media.medium {
+                                            Text(medium)
+                                                .font(.caption)
+                                                .foregroundColor(.white.opacity(0.6))
+                                                .padding(.vertical, 2)
+                                                .padding(.horizontal, 8)
+                                                .background(Color.white.opacity(0.1))
+                                                .clipShape(Capsule())
+                                        }
+                                    }
+                                    .padding(.horizontal, 15)
+                                }
+                                .padding(.horizontal, 15)
+                            } else if media.media_type == "video" {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    // Video player
+                                    GalleryVideoPlayer(
+                                        urlString: media.media_url,
+                                        filename: URL(string: media.media_url)?.lastPathComponent ?? ""
+                                    )
+                                    .frame(height: 250)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                                    )
+                                    
+                                    // Media details
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        if let title = media.title {
+                                            Text(title)
+                                                .font(.headline)
+                                                .foregroundColor(.white)
+                                        }
+                                        
+                                        if let description = media.description {
+                                            DisclosureGroup(
+                                                isExpanded: Binding(
+                                                    get: { expandedDescriptions.contains(media.id) },
+                                                    set: { isExpanded in
+                                                        if isExpanded {
+                                                            expandedDescriptions.insert(media.id)
+                                                        } else {
+                                                            expandedDescriptions.remove(media.id)
+                                                        }
+                                                    }
+                                                ),
+                                                content: {
+                                                    Text(description)
+                                                        .font(.subheadline)
+                                                        .foregroundColor(.white.opacity(0.8))
+                                                        .padding(.vertical, 8)
+                                                },
+                                                label: {
+                                                    HStack {
+                                                        Text("Description")
+                                                            .font(.subheadline)
+                                                            .foregroundColor(.white.opacity(0.7))
+                                                        Spacer()
+                                                        Image(systemName: "chevron.right")
+                                                            .foregroundColor(.white.opacity(0.7))
+                                                            .rotationEffect(.degrees(expandedDescriptions.contains(media.id) ? 90 : 0))
+                                                            .animation(.easeInOut(duration: 0.2), value: expandedDescriptions.contains(media.id))
+                                                    }
+                                                }
+                                            )
+                                            .tint(.clear)
+                                            .accentColor(.white)
+                                        }
+                                        
+                                        if let medium = media.medium {
+                                            Text(medium)
+                                                .font(.caption)
+                                                .foregroundColor(.white.opacity(0.6))
+                                                .padding(.vertical, 2)
+                                                .padding(.horizontal, 8)
+                                                .background(Color.white.opacity(0.1))
+                                                .clipShape(Capsule())
+                                        }
+                                    }
+                                    .padding(.horizontal, 15)
+                                }
+                                .padding(.horizontal, 15)
+                                .animation(.easeInOut(duration: 0.2), value: expandedDescriptions.contains(media.id))
                             } else {
                                 MediaGridItem(media: media)
                                     .onTapGesture {

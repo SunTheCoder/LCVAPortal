@@ -72,7 +72,7 @@ struct ArtistSpotlightView: View {
                             // Media Gallery
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 20) {
-                                    ForEach(viewModel.spotlightMedia) { media in
+                                    ForEach(viewModel.spotlightMedia.filter { $0.media_type != "audio" }) { media in
                                         MediaThumbnail(media: media)
                                     }
                                 }
