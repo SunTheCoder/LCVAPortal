@@ -134,9 +134,21 @@ struct ArtistSpotlightView: View {
                                 .lineLimit(3)
                                 .multilineTextAlignment(.leading)
                         }
+                        
+                        // Audio player
+                        if let audioUrlString = artist.audio_url,
+                           let audioUrl = URL(string: audioUrlString) {
+                            AudioPlayerView(
+                                audioUrl: audioUrl,
+                                title: "Artist Audio"
+                            )
+                            .frame(maxWidth: 250, alignment: .leading)
+                            .padding(.top, 8)
+                        }
                     }
                     .frame(maxWidth: 300, alignment: .leading)
                     .padding(.horizontal, 24)
+                    .padding(.top, 40)
                     .position(x: 170, y: 85)
                 }
             }

@@ -1,6 +1,6 @@
 import Foundation
 
-struct SpotlightArtist: Identifiable, Codable {
+struct SpotlightArtist: Identifiable, Decodable {
     let id: UUID
     let artist_name: String
     let bio: String?
@@ -10,4 +10,5 @@ struct SpotlightArtist: Identifiable, Codable {
     let extra_link: String?
     let artist_photo_url: String?
     let hero_image_url: String?
+    let audio_url: String?
 } 
