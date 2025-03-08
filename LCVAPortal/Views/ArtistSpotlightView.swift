@@ -88,8 +88,7 @@ struct ArtistSpotlightView: View {
                             //         .cornerRadius(8)
                             // }
                         }
-                        .padding(.top, 390)
-                        .padding(.bottom, 24)
+                        .padding(.top, 420)
                     } else {
                         ProgressView()
                             .tint(.white)
@@ -147,7 +146,7 @@ struct ArtistSpotlightView: View {
                     }
                     .frame(maxWidth: 300, alignment: .leading)
                     .padding(.horizontal, 24)
-                    .padding(.top, 50)
+                    .padding(.top, 60)
                     .position(x: 170, y: 85)
                 }
             }
