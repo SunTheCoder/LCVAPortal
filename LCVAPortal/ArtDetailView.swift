@@ -50,16 +50,9 @@ struct ArtDetailView: View {
                                         userCollections.addToCollection(artPiece)
                                     }
                                 }) {
-                                    Image(systemName: userCollections.isInCollection(artPiece) ? "minus.circle.fill" : "plus.circle.fill")
+                                    Image(systemName: userCollections.isInCollection(artPiece) ? "heart.fill" : "heart")
                                         .font(.title2)
-                                }
-                                
-                                Button(action: {
-                                    userCollections.toggleFavorite(artPiece)
-                                }) {
-                                    Image(systemName: userCollections.isFavorite(artPiece) ? "heart.fill" : "heart")
-                                        .font(.title2)
-                                        .foregroundColor(userCollections.isFavorite(artPiece) ? .red : .primary)
+                                        .foregroundColor(userCollections.isInCollection(artPiece) ? .red : .primary)
                                 }
                             }
                         }

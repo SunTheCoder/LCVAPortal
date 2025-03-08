@@ -254,35 +254,21 @@ class SupabaseClient {
     }
     
     // Create user collections
-    func createUserCollections(userId: String) async throws -> (personal: UUID, favorites: UUID) {
-        let personal = try await createCollection(
-            userId: userId,
-            name: "Personal",
-            description: "My personal collection"
-        )
-        
-        let favorites = try await createCollection(
-            userId: userId,
-            name: "Favorites",
-            description: "My favorite pieces"
-        )
-        
-        return (personal, favorites)
-    }
-    
-    private func createCollection(userId: String, name: String, description: String) async throws -> UUID {
-        let endpoint = "user_collections"
-        
+    func createUserCollection(userId: String) async throws -> UUID {
         let collection = [
             "user_id": userId,
-            "name": name,
-            "description": description
+            "name": "Personal",
+            "description": "My personal collection"
         ]
         
-        let body = try JSONSerialization.data(withJSONObject: collection)
-        let data = try await makeRequestWithResponse(endpoint: endpoint, method: "POST", body: body)
-        let createdCollection = try JSONDecoder().decode(UserCollection.self, from: data)
-        return createdCollection.id
+        let data = try await makeRequestWithResponse(
+            endpoint: "user_collections",
+            method: "POST",
+            body: try JSONSerialization.data(withJSONObject: collection)
+        )
+        
+        let created = try JSONDecoder().decode(UserCollection.self, from: data)
+        return created.id
     }
     
     // Add artifact to collection
@@ -325,25 +311,6 @@ class SupabaseClient {
     func removeArtifactFromCollection(artifactId: UUID, collectionId: UUID) async throws {
         let endpoint = "user_collection_artifacts?collection_id=eq.\(collectionId.uuidString)&artifact_id=eq.\(artifactId.uuidString)"
         try await makeRequest(endpoint: endpoint, method: "DELETE")
-    }
-    
-    // Update favorite status for an artifact in collection
-    func updateArtifactFavoriteStatus(artifactId: UUID, collectionId: UUID, isFavorite: Bool) async throws {
-        print("⭐️ Updating favorite status for artifact \(artifactId)")
-        let endpoint = "user_collection_artifacts?collection_id=eq.\(collectionId.uuidString)&artifact_id=eq.\(artifactId.uuidString)"
-        
-        let entry = [
-            "is_favorite": isFavorite
-        ]
-        
-        let body = try JSONSerialization.data(withJSONObject: entry)
-        
-        try await makeRequest(
-            endpoint: endpoint,
-            method: "PATCH",
-            body: body
-        )
-        print("✅ Successfully updated favorite status")
     }
     
     // For reflections (frequent updates)

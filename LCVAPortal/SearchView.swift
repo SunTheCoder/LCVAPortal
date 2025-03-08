@@ -24,9 +24,7 @@ struct SearchView: View {
         userCollections.isInCollection(artPiece)
     }
     
-    func isFavorite(_ artPiece: ArtPiece) -> Bool {
-        userCollections.isFavorite(artPiece)
-    }
+  
     
     var body: some View {
         ZStack {

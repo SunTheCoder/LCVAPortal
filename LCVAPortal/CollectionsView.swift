@@ -27,7 +27,6 @@ struct CollectionsView: View {
         switch selectedFilter {
         case .museum: return "Museum Collection"
         case .personal: return "Your Collection"
-        case .favorites: return "Favorites"
         }
     }
     
@@ -50,6 +49,7 @@ struct CollectionsView: View {
             audioTour: nil,
             brailleLabel: nil,
             adaAccessibility: nil
+           
         )
         // print("✨ Converted to ArtPiece:", artPiece)
         return artPiece
@@ -59,11 +59,9 @@ struct CollectionsView: View {
     var filteredArtPieces: [ArtPiece] {
         switch selectedFilter {
         case .museum:
-            return artifactManager.artifacts.map(convertToArtPiece)  // Use Supabase artifacts
+            return artifactManager.artifacts.map(convertToArtPiece)
         case .personal:
             return userCollections.personalCollection
-        case .favorites:
-            return userCollections.favorites
         }
     }
     
@@ -72,12 +70,10 @@ struct CollectionsView: View {
         switch selectedFilter {
         case .museum:
             return artifactManager.artifacts
-                .filter { $0.on_display }  // Only show artifacts that are on display
+                .filter { $0.on_display }
                 .map(convertToArtPiece)
         case .personal:
             return userCollections.personalCollection.prefix(5).map { $0 }
-        case .favorites:
-            return userCollections.favorites.prefix(5).map { $0 }
         }
     }
     
@@ -221,7 +217,6 @@ struct CollectionsView: View {
                                 ForEach([
                                     ("Museum Collection", CollectionFilter.museum),
                                     ("Your Collection", CollectionFilter.personal),
-                                    ("Favorites", CollectionFilter.favorites)
                                 ], id: \.0) { title, filter in
                                     FilterButton(
                                         title: title,
@@ -544,25 +539,21 @@ struct ArtPieceRow: View {
                 // Collection and favorite buttons
                 HStack(spacing: 12) {
                     Button(action: {
-                        print("👆 User tapped + button for art piece: \(artPiece.id)")
                         if userCollections.isInCollection(artPiece) {
-                            print("🗑 Removing from collection")
                             userCollections.removeFromCollection(artPiece)
+                            let impact = UIImpactFeedbackGenerator(style: .medium)
+                            impact.impactOccurred()
                         } else {
-                            print("➕ Adding to collection")
                             userCollections.addToCollection(artPiece)
+                            let impact = UIImpactFeedbackGenerator(style: .medium)
+                            impact.impactOccurred()
                         }
                     }) {
-                        Image(systemName: userCollections.isInCollection(artPiece) ? "minus.circle.fill" : "plus.circle.fill")
-                            .foregroundColor(.white)
+                        Image(systemName: userCollections.isInCollection(artPiece) ? "heart.fill" : "heart")
+                            .foregroundColor(userCollections.isInCollection(artPiece) ? .red : .white)
+                            .font(.title2)
                     }
                     
-                    Button(action: {
-                        userCollections.toggleFavorite(artPiece)
-                    }) {
-                        Image(systemName: userCollections.isFavorite(artPiece) ? "heart.fill" : "heart")
-                            .foregroundColor(userCollections.isFavorite(artPiece) ? .red : .white)
-                    }
                 }
                 
                 NavigationLink(destination: ChatView(artPieceID: artPiece.id, userManager: userManager)) {
@@ -628,31 +619,22 @@ struct ArtPieceGridItem: View {
                     
                     VStack(spacing: 12) {
                         Button(action: {
-                            print("👆 User tapped + button for art piece: \(artPiece.id)")
                             if userCollections.isInCollection(artPiece) {
-                                print("🗑 Removing from collection")
                                 userCollections.removeFromCollection(artPiece)
+                                let impact = UIImpactFeedbackGenerator(style: .medium)
+                                impact.impactOccurred()
                             } else {
-                                print("➕ Adding to collection")
                                 userCollections.addToCollection(artPiece)
+                                let impact = UIImpactFeedbackGenerator(style: .medium)
+                                impact.impactOccurred()
                             }
-                            let impact = UIImpactFeedbackGenerator(style: .medium)
-                            impact.impactOccurred()
                         }) {
-                            Image(systemName: userCollections.isInCollection(artPiece) ? "minus.circle.fill" : "plus.circle.fill")
-                                .foregroundColor(.white)
+                            Image(systemName: userCollections.isInCollection(artPiece) ? "heart.fill" : "heart")
+                                .foregroundColor(userCollections.isInCollection(artPiece) ? .red : .white)
                                 .font(.title2)
                         }
                         
-                        Button(action: {
-                            userCollections.toggleFavorite(artPiece)
-                            let impact = UIImpactFeedbackGenerator(style: .medium)
-                            impact.impactOccurred()
-                        }) {
-                            Image(systemName: userCollections.isFavorite(artPiece) ? "heart.fill" : "heart")
-                                .foregroundColor(userCollections.isFavorite(artPiece) ? .red : .white)
-                                .font(.title2)
-                        }
+                        
                         
                         NavigationLink(destination: ChatView(artPieceID: artPiece.id, userManager: userManager)) {
                             Image(systemName: "bubble.left.fill")
@@ -773,7 +755,7 @@ extension Array {
 
 // Define enum at file level
 enum CollectionFilter {
-    case museum, personal, favorites  // Remove artists case
+    case museum, personal
 }
 
 enum SubFilter {
@@ -808,4 +790,8 @@ enum SubFilter {
         case .virginia: return "Virginia Artists"
         }
     }
+}
+
+enum Tab {
+    case personal
 } 

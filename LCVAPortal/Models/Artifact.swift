@@ -12,7 +12,6 @@ struct Artifact: Identifiable, Codable {
     let location: String?
     let on_display: Bool
     let featured: Bool
-    
     enum CodingKeys: String, CodingKey {
         case id
         case title
