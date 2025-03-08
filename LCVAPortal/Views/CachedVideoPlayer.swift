@@ -14,7 +14,7 @@ struct CachedVideoPlayer: View {
             if let player = player {
                 VideoPlayer(player: player)
                     .frame(height: 150)
-                    .cornerRadius(8)
+                    .cornerRadius(4)
                     .onDisappear {
                         player.pause()
                     }

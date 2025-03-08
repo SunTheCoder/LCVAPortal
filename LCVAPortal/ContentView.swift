@@ -161,7 +161,7 @@ struct ContentView: View {
     
     var body: some View {
         ZStack {
-            NavigationView {
+        NavigationView {
                 TabView(selection: $selectedTab) {
                     // Home Tab
                     ZStack {
@@ -174,8 +174,8 @@ struct ContentView: View {
                         .ignoresSafeArea()
                         
                         // Content
-                        ScrollView {
-                            VStack {
+            ScrollView {
+                VStack {
                                 // Add padding for notch/camera area
                                 Color.clear
                                     .frame(height: 35)
@@ -218,7 +218,7 @@ struct ContentView: View {
                                     .padding(.vertical)
                                 
                                 // Login at the bottom
-                                UserAuthenticationView(userManager: userManager)
+                    UserAuthenticationView(userManager: userManager)
 
                                 MuseumInfoAccordionView(userManager: userManager)
                                     .padding(.vertical)
@@ -425,7 +425,7 @@ struct ContentView: View {
                 }
             }
             .navigationBarHidden(true)
-            .navigationViewStyle(StackNavigationViewStyle())
+        .navigationViewStyle(StackNavigationViewStyle())
             .accentColor(Color.lcvaBlue)
             
             if showingSplash {
@@ -514,13 +514,13 @@ struct HeaderView: View {
 struct CurrentExhibitionsView: View {
     let exhibitions: [Exhibition]
     let colorScheme: ColorScheme
-    
+
     @State private var slideInIndices: Set<Int> = []
     @State private var loadedIndices: Set<Int> = []
     @State private var proxyExhibition: Exhibition? = nil
     @State private var selectedExhibition: Exhibition? 
     @State private var isExhibitionDetailPresented = false
-    
+
     var body: some View {
         VStack(alignment: .center, spacing: 16) {
             Text("Current Exhibitions")
@@ -528,7 +528,7 @@ struct CurrentExhibitionsView: View {
                 .italic()
                 .foregroundColor(.secondary)
                 .padding(.bottom, 8)
-            
+
             ForEach(Array(exhibitions.enumerated()), id: \.1.id) { index, exhibition in
                 Button(action: {
                     proxyExhibition = exhibition
@@ -552,17 +552,17 @@ struct CurrentExhibitionsView: View {
                         } placeholder: {
                             ProgressView()
                         }
-                        
+
                         VStack(alignment: .center, spacing: 4) {
                             Text(exhibition.name)
                                 .font(.headline)
                                 .padding(.bottom, 4)
-                            
+
                             Text(exhibition.artist.joined(separator: ", "))
                                 .font(.subheadline)
                                 .italic()
                                 .bold()
-                            
+
                             Text("Reception:")
                                 .font(.caption)
                                 .padding(.top, 6)
@@ -570,30 +570,30 @@ struct CurrentExhibitionsView: View {
                             Text(exhibition.start_date)
                                 .font(.caption)
                                 .accessibilityLabel(Text("Reception: \(exhibition.start_date)"))
-                            
+                                
                             Text(exhibition.start_date)
                                 .font(.caption)
-                            
+
                             Text("Closing:")
                                 .font(.caption)
                                 .bold()
                             Text(exhibition.end_date)
                                 .font(.caption)
                                 .accessibilityLabel(Text("Closing: \(exhibition.end_date)"))
-                            
+                                
                             Text(exhibition.end_date)
                                 .font(.caption)
                                 .padding(.bottom, 8)
-                            
+
                             if let surveyUrl = exhibition.survey_url, let url = URL(string: surveyUrl) {
                                 Link("Survey Link", destination: url)
-                                    .font(.caption)
-                                    .padding(2)
-                                    .padding(.horizontal, 2)
-                                    .background(Color.primary.opacity(0.2))
-                                    .foregroundColor(.white)
-                                    .cornerRadius(3)
-                                    .shadow(radius: 2)
+                                .font(.caption)
+                                .padding(2)
+                                .padding(.horizontal, 2)
+                                .background(Color.primary.opacity(0.2))
+                                .foregroundColor(.white)
+                                .cornerRadius(3)
+                                .shadow(radius: 2)
                             }
                         }
                         .frame(width: 190)
@@ -901,7 +901,7 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
- 
+
 
     // Separate view for VideoPlayer to manage AVPlayer setup
     struct VideoPlayerView: View {

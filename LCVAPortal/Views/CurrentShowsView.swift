@@ -58,7 +58,7 @@ struct CurrentShowsView: View {
                                                 filename: "\(exhibition.id)-thumb.jpg"
                                             )
                                             .frame(width: 120, height: 120)
-                                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                                            .clipShape(RoundedRectangle(cornerRadius: 4))
                                             .shadow(radius: 2)
                                         }
                                         

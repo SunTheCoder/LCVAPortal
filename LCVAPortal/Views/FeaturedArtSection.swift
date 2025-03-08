@@ -45,7 +45,7 @@ struct FeaturedArtSection: View {
                                     .aspectRatio(contentMode: .fill)
                                     .frame(width: 280, height: 200)
                                     .clipped()
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .clipShape(RoundedRectangle(cornerRadius: 4))
                             } placeholder: {
                                 ProgressView()
                                     .frame(width: 280, height: 200)

@@ -76,7 +76,6 @@ struct ArtistSpotlightView: View {
                                         MediaThumbnail(media: media)
                                     }
                                 }
-                                .padding(.leading)
                             }
                             
                             // Extra Link if available
@@ -90,7 +89,7 @@ struct ArtistSpotlightView: View {
                             // }
                         }
                         .padding(.top, 390)
-                        
+                        .padding(.bottom, 24)
                     } else {
                         ProgressView()
                             .tint(.white)
@@ -152,7 +151,7 @@ struct ArtistSpotlightView: View {
                     .position(x: 170, y: 85)
                 }
             }
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .clipShape(RoundedRectangle(cornerRadius: 8))
             .ignoresSafeArea()
         }
     }
@@ -170,7 +169,7 @@ struct MediaThumbnail: View {
                     filename: URL(string: media.media_url)?.lastPathComponent ?? ""
                 )
                 .frame(width: 120, height: 120)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .clipShape(RoundedRectangle(cornerRadius: 4))
                 .shadow(radius: 2)
             } else {
                 CachedImageView(
@@ -178,7 +177,7 @@ struct MediaThumbnail: View {
                     filename: URL(string: media.media_url)?.lastPathComponent ?? ""
                 )
                 .frame(width: 120, height: 120)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .clipShape(RoundedRectangle(cornerRadius: 4))
                 .shadow(radius: 2)
             }
         }

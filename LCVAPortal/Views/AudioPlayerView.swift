@@ -52,7 +52,7 @@ struct AudioPlayerView: View {
         .padding(.vertical, 4)
         .padding(.horizontal, 8)
         .background(Color.black.opacity(0.2))
-        .cornerRadius(8)
+        .cornerRadius(4)
         .onAppear {
             loadAudio()
         }

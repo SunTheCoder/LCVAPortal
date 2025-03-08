@@ -10,7 +10,7 @@ struct VideoPreviewView: UIViewControllerRepresentable {
         let playerViewController = AVPlayerViewController()
         
         // Style the video view
-        playerViewController.view.layer.cornerRadius = 12
+        playerViewController.view.layer.cornerRadius = 4
         playerViewController.view.layer.masksToBounds = true
         
         // Try to get cached video first
