@@ -76,7 +76,7 @@ struct ArtistSpotlightView: View {
                                         MediaThumbnail(media: media)
                                     }
                                 }
-                                .padding(.horizontal)
+                                .padding(.leading)
                             }
                             
                             // Extra Link if available
@@ -90,7 +90,7 @@ struct ArtistSpotlightView: View {
                             // }
                         }
                         .padding(.top, 390)
-                        .padding(.bottom, 24)
+                        
                     } else {
                         ProgressView()
                             .tint(.white)
