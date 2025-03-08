@@ -41,7 +41,7 @@ struct CollectionsView: View {
             imageUrl: artifact.image_url ?? "",
             latitude: 0.0,  // Default values for now
             longitude: 0.0,
-            material: artifact.gallery ?? "Unknown",
+            material: artifact.collection ?? "",
             era: "",        // Default empty string
             origin: "",     // Default empty string
             lore: "",      // Default empty string
@@ -65,7 +65,6 @@ struct CollectionsView: View {
             if let subFilter = selectedSubFilter {
                 return artifacts
                     .filter { artifact in
-                        // Match collection name from sub-filter
                         artifact.collection?.lowercased() == subFilter.collectionName.lowercased()
                     }
                     .map(convertToArtPiece)
@@ -74,6 +73,22 @@ struct CollectionsView: View {
             return artifacts.map(convertToArtPiece)
             
         case .personal:
+            let personalArtPieces = userCollections.personalCollection
+            
+            // Apply sub-filter if selected
+            if let subFilter = selectedSubFilter {
+                print("🔍 Filtering personal collection with: \(subFilter.title)")
+                print("📚 Personal collection count: \(personalArtPieces.count)")
+                
+                let filtered = personalArtPieces.filter { artPiece in
+                    print("🎨 Comparing: '\(artPiece.material)' with '\(subFilter.collectionName)'")
+                    return artPiece.material.lowercased() == subFilter.collectionName.lowercased()
+                }
+                
+                print("✅ Filtered count: \(filtered.count)")
+                return filtered
+            }
+            
             return userCollections.personalCollection
         }
     }

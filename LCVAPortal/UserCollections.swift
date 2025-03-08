@@ -45,7 +45,7 @@ class UserCollections: ObservableObject {
             imageUrl: artifact.image_url ?? "",
             latitude: 0.0,
             longitude: 0.0,
-            material: artifact.gallery ?? "",
+            material: artifact.collection ?? "",
             era: "",
             origin: "",
             lore: "",
