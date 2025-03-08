@@ -55,11 +55,24 @@ struct CollectionsView: View {
         return artPiece
     }
     
-    // Update filteredArtPieces to use Supabase data
+    // Update filteredArtPieces to handle sub-filters
     var filteredArtPieces: [ArtPiece] {
         switch selectedFilter {
         case .museum:
-            return artifactManager.artifacts.map(convertToArtPiece)
+            let artifacts = artifactManager.artifacts
+            
+            // Apply sub-filter if selected
+            if let subFilter = selectedSubFilter {
+                return artifacts
+                    .filter { artifact in
+                        // Match collection name from sub-filter
+                        artifact.collection?.lowercased() == subFilter.collectionName.lowercased()
+                    }
+                    .map(convertToArtPiece)
+            }
+            
+            return artifacts.map(convertToArtPiece)
+            
         case .personal:
             return userCollections.personalCollection
         }
@@ -90,6 +103,23 @@ struct CollectionsView: View {
                 print("❌ Error fetching user avatar:", error)
             }
         }
+    }
+    
+    // Add helper method to handle sub-filter selection
+    private func handleSubFilterSelection(_ subFilter: SubFilter) {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+            if selectedSubFilter == subFilter {
+                // Deselect if tapping the same filter
+                selectedSubFilter = nil
+            } else {
+                selectedSubFilter = subFilter
+            }
+            showingAllFilters = false
+        }
+        
+        // Haptic feedback
+        let impactMedium = UIImpactFeedbackGenerator(style: .medium)
+        impactMedium.impactOccurred()
     }
     
     var body: some View {
@@ -195,15 +225,7 @@ struct CollectionsView: View {
                                         title: filter.title,
                                         isSelected: selectedSubFilter == filter
                                     ) {
-                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                            if selectedSubFilter == filter {
-                                                selectedSubFilter = nil
-                                            } else {
-                                                selectedSubFilter = filter
-                                            }
-                                        }
-                                        let impactLight = UIImpactFeedbackGenerator(style: .light)
-                                        impactLight.impactOccurred()
+                                        handleSubFilterSelection(filter)
                                     }
                                     .matchedGeometryEffect(id: filter, in: subFilterAnimation)
                                     .transition(.asymmetric(
