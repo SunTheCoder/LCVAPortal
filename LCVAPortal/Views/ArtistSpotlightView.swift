@@ -80,14 +80,14 @@ struct ArtistSpotlightView: View {
                             }
                             
                             // Extra Link if available
-                            if let link = artist.extra_link {
-                                Link("Learn More", destination: URL(string: link)!)
-                                    .font(.system(size: 16))
-                                    .foregroundColor(.white)
-                                    .padding(8)
-                                    .background(Color.lcvaBlue.opacity(0.6))
-                                    .cornerRadius(8)
-                            }
+                            // if let link = artist.extra_link {
+                            //     Link("Learn More", destination: URL(string: link)!)
+                            //         .font(.system(size: 16))
+                            //         .foregroundColor(.white)
+                            //         .padding(8)
+                            //         .background(Color.lcvaBlue.opacity(0.6))
+                            //         .cornerRadius(8)
+                            // }
                         }
                         .padding(.top, 390)
                         .padding(.bottom, 24)
@@ -148,7 +148,7 @@ struct ArtistSpotlightView: View {
                     }
                     .frame(maxWidth: 300, alignment: .leading)
                     .padding(.horizontal, 24)
-                    .padding(.top, 40)
+                    .padding(.top, 50)
                     .position(x: 170, y: 85)
                 }
             }

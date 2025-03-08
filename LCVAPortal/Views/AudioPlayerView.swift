@@ -13,14 +13,46 @@ struct AudioPlayerView: View {
     private let timer = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
     
     var body: some View {
-        HStack {
+        HStack(spacing: 12) {
             Button(action: togglePlayPause) {
-                Image(systemName: isPlaying ? "pause.circle" : "play.circle")
+                Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                    .font(.system(size: 22))
+                    .foregroundColor(Color.white.opacity(0.7))
             }
+            
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    Rectangle()
+                        .fill(Color.white.opacity(0.2))
+                        .frame(height: 2)
+                    
+                    Rectangle()
+                        .fill(Color.white.opacity(0.7))
+                        .frame(width: geometry.size.width * CGFloat(progress / max(duration, 1)), height: 2)
+                }
+                .cornerRadius(1)
+                .contentShape(Rectangle())
+                .padding(.vertical, 15)
+                .gesture(
+                    DragGesture(minimumDistance: 0)
+                        .onChanged { value in
+                            let percentage = value.location.x / geometry.size.width
+                            let time = duration * Double(percentage)
+                            player?.seek(to: CMTime(seconds: time, preferredTimescale: 1))
+                        }
+                )
+            }
+            .frame(height: 32)
             
             Text(formatTime(progress))
                 .font(.caption)
+                .foregroundColor(.white.opacity(0.7))
+                .frame(width: 45, alignment: .trailing)
         }
+        .padding(.vertical, 4)
+        .padding(.horizontal, 8)
+        .background(Color.black.opacity(0.2))
+        .cornerRadius(8)
         .onAppear {
             loadAudio()
         }
