@@ -142,13 +142,13 @@ struct SearchView: View {
                                         .font(.caption)
                                         .foregroundColor(.white)
                                         .lineLimit(2)
-                                        .frame(maxWidth: .infinity)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
 
                                     Text(artPiece.artist)
                                         .font(.caption)
                                         .foregroundColor(.white)
                                         .lineLimit(2)
-                                        .frame(maxWidth: .infinity)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
                                         
                                         
                                 }
