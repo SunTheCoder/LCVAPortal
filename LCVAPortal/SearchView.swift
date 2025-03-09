@@ -142,12 +142,17 @@ struct SearchView: View {
                                         .font(.caption)
                                         .foregroundColor(.white)
                                         .lineLimit(2)
-                                        .multilineTextAlignment(.center)
                                         .frame(maxWidth: .infinity)
-                                        .padding(.horizontal, 4)
+
+                                    Text(artPiece.artist)
+                                        .font(.caption)
+                                        .foregroundColor(.white)
+                                        .lineLimit(2)
+                                        .frame(maxWidth: .infinity)
+                                        
+                                        
                                 }
                                 .padding()
-                                .background(Color.white.opacity(0.1))
                                 .cornerRadius(4)
                             }
                         }
