@@ -15,66 +15,73 @@ struct ExhibitionView: View {
             .ignoresSafeArea()
             
             ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(spacing: 0) {
+                    // Hero image - full width
                     AsyncImage(url: URL(string: exhibition.image_url ?? "")) { image in
                         image
                             .resizable()
-                            .scaledToFit()
-                            .frame(maxHeight: 300)
+                            .aspectRatio(contentMode: .fill)
+                            .frame(height: 360)
+                            .clipped()
                     } placeholder: {
                         ProgressView()
+                            .frame(height: 360)
                     }
-                    .padding(.top, 130)
                     
-                    VStack(alignment: .leading, spacing: 16) {
-                        // Title
-                        Text(exhibition.name)
-                            .font(.title)
-                            .bold()
-                            .foregroundColor(.white)
-                        
-                        // Dates Section
-                        VStack(alignment: .leading, spacing: 12) {
-                            DetailRow(title: "Start Date", content: exhibition.start_date)
-                            DetailRow(title: "Closing", content: exhibition.end_date)
-                        }
-                        .padding(.vertical)
-                        
-                        // Description
-                        if let description = exhibition.description {
-                            Text("About")
-                                .font(.headline)
+                    // Content in fixed-width container
+                    VStack(alignment: .leading) {
+                        // Content container with fixed width
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text(exhibition.name)
+                                .font(.title)
+                                .bold()
                                 .foregroundColor(.white)
-                            Text(description)
-                                .font(.body)
-                                .foregroundColor(.white.opacity(0.8))
-                        }
-                        
-                        // Links
-                        VStack(alignment: .leading, spacing: 12) {
-                            if let surveyUrl = exhibition.survey_url, 
-                               let url = URL(string: surveyUrl) {
-                                Link("Survey Link", destination: url)
-                                    .font(.subheadline)
-                                    .foregroundColor(.blue)
+                            
+                            // Dates Section
+                            VStack(alignment: .leading, spacing: 12) {
+                                DetailRow(title: "Start Date", content: exhibition.start_date)
+                                DetailRow(title: "Closing", content: exhibition.end_date)
+                            }
+                            .padding(.vertical)
+                            
+                            // Description
+                            if let description = exhibition.description {
+                                Text("About")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                Text(description)
+                                    .font(.body)
+                                    .foregroundColor(.white.opacity(0.8))
                             }
                             
-                            if let extraLink = exhibition.extra_link,
-                               !extraLink.isEmpty,
-                               let url = URL(string: extraLink) {
-                                Link("Learn More", destination: url)
-                                    .font(.subheadline)
-                                    .foregroundColor(.blue)
+                            // Links
+                            VStack(alignment: .leading, spacing: 12) {
+                                if let surveyUrl = exhibition.survey_url, 
+                                   let url = URL(string: surveyUrl) {
+                                    Link("Survey Link", destination: url)
+                                        .font(.subheadline)
+                                        .foregroundColor(.blue)
+                                }
+                                
+                                if let extraLink = exhibition.extra_link,
+                                   !extraLink.isEmpty,
+                                   let url = URL(string: extraLink) {
+                                    Link("Learn More", destination: url)
+                                        .font(.subheadline)
+                                        .foregroundColor(.blue)
+                                }
                             }
+                            .padding(.top)
                         }
-                        .padding(.top)
+                        .padding(24)
+                        .frame(width: UIScreen.main.bounds.width - 32)
                     }
-                    .padding()
+                    .frame(maxWidth: .infinity)
                 }
             }
             .ignoresSafeArea(.container, edges: .top)
         }
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbarBackground(.hidden, for: .navigationBar)
     }
 }
