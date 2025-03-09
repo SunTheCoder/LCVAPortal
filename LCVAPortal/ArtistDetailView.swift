@@ -72,7 +72,7 @@ struct ArtistDetailView: View {
         }
         .background(
             LinearGradient(
-                gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaBlue.opacity(0.4)]),
+                gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaNavy]),
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -81,7 +81,7 @@ struct ArtistDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(
             LinearGradient(
-                gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaBlue.opacity(0.4)]),
+                gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaNavy]),
                 startPoint: .top,
                 endPoint: .bottom
             ),

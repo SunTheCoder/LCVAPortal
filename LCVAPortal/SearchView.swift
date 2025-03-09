@@ -77,7 +77,7 @@ struct SearchView: View {
         ZStack {
             // Background gradient
             LinearGradient(
-                gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaBlue.opacity(0.4)]),
+                gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaNavy]),
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -166,7 +166,7 @@ struct SearchView: View {
         .toolbarColorScheme(.dark, for: .navigationBar)
         .toolbarBackground(
             LinearGradient(
-                gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaBlue.opacity(0.4)]),
+                gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaNavy]),
                 startPoint: .top,
                 endPoint: .bottom
             ),

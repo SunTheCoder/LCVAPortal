@@ -15,7 +15,7 @@ struct SplashView: View {
     var body: some View {
         ZStack {
             LinearGradient(
-                gradient: Gradient(colors: [Color.lcvaBlue, Color.white]),
+                gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaNavy]),
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -167,7 +167,7 @@ struct ContentView: View {
                     ZStack {
                         // Background gradient
                         LinearGradient(
-                            gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaBlue.opacity(0.4)]),
+                            gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaNavy]),
                             startPoint: .top,
                             endPoint: .bottom
                         )
@@ -242,7 +242,7 @@ struct ContentView: View {
                         ZStack {
                             // Background gradient
                             LinearGradient(
-                                gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaBlue.opacity(0.4)]),
+                                gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaNavy]),
                                 startPoint: .top,
                                 endPoint: .bottom
                             )
@@ -998,7 +998,7 @@ struct ScrollArrowIndicators: View {
 //            ZStack {
 //                // Use the same gradient background as Collections
 //                LinearGradient(
-//                    gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaBlue.opacity(0.4)]),
+//                    gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaNavy]),
 //                    startPoint: .top,
 //                    endPoint: .bottom
 //                )

@@ -24,7 +24,7 @@ struct ToursEducationView: View {
             ZStack {
                 // Background gradient
                 LinearGradient(
-                    gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaBlue.opacity(0.4)]),
+                    gradient: Gradient(colors: [Color.lcvaBlue, Color.lcvaNavy]),
                     startPoint: .top,
                     endPoint: .bottom
                 )
