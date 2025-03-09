@@ -58,6 +58,7 @@ struct ArtDetailView: View {
                         
                         // Details Section
                         VStack(alignment: .leading, spacing: 12) {
+                            DetailRow(title: "Artist", content: artPiece.artist)
                             DetailRow(title: "Medium", content: artPiece.material)
                             // DetailRow(title: "Era", content: artPiece.era)
                             // DetailRow(title: "Origin", content: artPiece.origin)
