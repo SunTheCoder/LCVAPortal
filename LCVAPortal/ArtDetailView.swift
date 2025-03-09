@@ -23,12 +23,11 @@ struct ArtDetailView: View {
                     AsyncImage(url: URL(string: artPiece.imageUrl)) { image in
                         image
                             .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(maxHeight: 300)
-                            .clipped()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(maxHeight: 600)
                     } placeholder: {
                         ProgressView()
-                            .frame(height: 300)
+                            .frame(height: 600)
                     }
                     .padding(.top, 130)
                     
@@ -125,17 +124,17 @@ struct ArtDetailView: View {
                             }
                             
                             // Reflections section
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Reflections")
-                                    .font(.headline)
-                                    .foregroundColor(.white)
-                                    .padding(.leading)
-                                
-                                ReflectionView(artifactId: artPiece.id, userManager: userManager)
-                                    .background(Color.white.opacity(0.1))
-                                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                                    .shadow(radius: 3)
-                            }
+//                            VStack(alignment: .leading, spacing: 8) {
+//                                Text("Reflections")
+//                                    .font(.headline)
+//                                    .foregroundColor(.white)
+//                                    .padding(.leading)
+//                                
+//                                ReflectionView(artifactId: artPiece.id, userManager: userManager)
+//                                    .background(Color.white.opacity(0.1))
+//                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+//                                    .shadow(radius: 3)
+//                            }
                         }
                         .padding(.top)
                     }
