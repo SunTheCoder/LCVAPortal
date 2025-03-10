@@ -19,6 +19,7 @@ struct AudioPlayerView: View {
                     .font(.system(size: 22))
                     .foregroundColor(Color.white.opacity(0.7))
             }
+            .buttonStyle(PlainButtonStyle())
             
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
@@ -31,8 +32,8 @@ struct AudioPlayerView: View {
                         .frame(width: geometry.size.width * CGFloat(progress / max(duration, 1)), height: 2)
                 }
                 .cornerRadius(1)
+                .frame(maxHeight: .infinity)
                 .contentShape(Rectangle())
-                .padding(.vertical, 15)
                 .gesture(
                     DragGesture(minimumDistance: 0)
                         .onChanged { value in
