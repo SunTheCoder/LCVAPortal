@@ -346,29 +346,41 @@ struct ContactFormView: View {
             HStack(spacing: 12) {
                 VStack(alignment: .leading) {
                     TextField("First", text: $firstName)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .foregroundColor(.black)
+                        .textFieldStyle(.plain)
+                        .foregroundColor(.white)
+                        .padding(8)
+                        .background(Color.white.opacity(0.08))
+                        .cornerRadius(8)
                 }
                 
                 VStack(alignment: .leading) {
                     TextField("Last", text: $lastName)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .foregroundColor(.black)
+                        .textFieldStyle(.plain)
+                        .foregroundColor(.white)
+                        .padding(8)
+                        .background(Color.white.opacity(0.08))
+                        .cornerRadius(8)
                 }
             }
             
             // Email
             Text("Email").foregroundColor(.white.opacity(0.7))
             TextField("Email", text: $email)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .foregroundColor(.black)
+                .textFieldStyle(.plain)
+                .foregroundColor(.white)
+                .padding(8)
+                .background(Color.white.opacity(0.08))
+                .cornerRadius(8)
                 .keyboardType(.emailAddress)
             
             // Phone
             Text("Phone").foregroundColor(.white.opacity(0.7))
             TextField("Phone", text: $phone)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .foregroundColor(.black)
+                 .textFieldStyle(.plain)
+                .foregroundColor(.white)
+                .padding(8)
+                .background(Color.white.opacity(0.08))
+                .cornerRadius(8)
                 .keyboardType(.phonePad)
             
             // Category
@@ -380,20 +392,20 @@ struct ContactFormView: View {
             }
             .pickerStyle(MenuPickerStyle())
             .accentColor(.white)
-            .background(Color.white.opacity(0.1))
+            .background(Color.white.opacity(0.08))
             .cornerRadius(8)
             
             // Message
             Text("What can we help you with?").foregroundColor(.white.opacity(0.7))
-            TextEditor(text: $message)
-                .frame(height: 100)
-                .cornerRadius(4)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 4)
-                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                )
-                .foregroundColor(.black)
-                .background(Color.white)
+            ZStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.white.opacity(0.08))
+                TextEditor(text: $message)
+                    .frame(height: 100)
+                    .foregroundColor(.white)
+                    .padding(8)
+                    .scrollContentBackground(.hidden) // Hides default background
+            }
             
             // Character count
             Text("\(message.count) of 1000 max characters")
@@ -500,32 +512,41 @@ struct AccessibilityContactForm: View {
             HStack(spacing: 12) {
                 VStack(alignment: .leading) {
                     TextField("First", text: $firstName)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .foregroundColor(.black)
+                         .textFieldStyle(.plain)
+                .foregroundColor(.white)
+                .padding(8)
+                .background(Color.white.opacity(0.08))
+                .cornerRadius(8)
                 }
                 
                 VStack(alignment: .leading) {
                     TextField("Last", text: $lastName)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .foregroundColor(.black)
+                         .textFieldStyle(.plain)
+                .foregroundColor(.white)
+                .padding(8)
+                .background(Color.white.opacity(0.08))
+                .cornerRadius(8)
                 }
             }
             
             TextField("Email", text: $email)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .foregroundColor(.black)
+                 .textFieldStyle(.plain)
+                .foregroundColor(.white)
+                .padding(8)
+                .background(Color.white.opacity(0.08))
+                .cornerRadius(8)
                 .keyboardType(.emailAddress)
             
             Text("How can we assist you?").foregroundColor(.white.opacity(0.7))
-            TextEditor(text: $message)
-                .frame(height: 100)
-                .cornerRadius(4)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 4)
-                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                )
-                .foregroundColor(.black)
-                .background(Color.white)
+            ZStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.white.opacity(0.08))
+                TextEditor(text: $message)
+                    .frame(height: 100)
+                    .foregroundColor(.white)
+                    .padding(8)
+                    .scrollContentBackground(.hidden) // Hides default background
+            }
             
             Button(action: submitForm) {
                 if isSubmitting {
