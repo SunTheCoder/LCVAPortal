@@ -10,9 +10,16 @@ class ReflectionViewModel: ObservableObject {
     
     func loadReflections(for artifactId: UUID) async {
         do {
-            reflections = try await supabase.fetchReflections(for: artifactId)
+            // Join with users table to get usernames
+            let endpoint = "artifact_reflections?artifact_id=eq.\(artifactId)&select=*,users(name)"
+            let data = try await supabase.makeRequestWithResponse(endpoint: endpoint)
+            let reflections = try JSONDecoder().decode([ArtifactReflection].self, from: data)
+            
+            await MainActor.run {
+                self.reflections = reflections
+            }
         } catch {
-            print("❌ Failed to load reflections: \(error)")
+            print("❌ Failed to load reflections:", error)
         }
     }
     

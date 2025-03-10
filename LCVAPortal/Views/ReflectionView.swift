@@ -214,6 +214,17 @@ struct ReflectionItemView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
+            // Add username header
+            HStack {
+                Text("Art Reflection")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.6))
+                Text("by \(reflection.username)")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.6))
+            }
+            .padding(.bottom, 4)
+            
             // Header with date and type
             HStack {
                 Image(systemName: reflectionTypeIcon)

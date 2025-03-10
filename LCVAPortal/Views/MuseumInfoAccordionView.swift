@@ -17,15 +17,10 @@ struct MuseumInfoAccordionView: View {
                     The Longwood Center for the Visual Arts is the only museum of its kind, scope, and size in the area surrounding our home base: Farmville, Virginia, and Prince Edward County. Our commitment to improving the quality of life in the region by providing full access to the visual arts is the heart of our mission. At the LCVA, we believe there should be no barriers to exploration of the visual arts. Admission to the LCVA and its programs is – and always has been – free for everyone.
                     """
                 ),
-                SubSection(
-                    title: "Mission",
-                    content: "To enrich lives by sharing transformative experiences in the visual arts with our community."
-                ),
-                SubSection(
-                    title: "Contact",
-                    content: "",  // Empty string for content
-                    isContactForm: true
-                ),
+                // SubSection(
+                //     title: "Mission",
+                //     content: "To enrich lives by sharing transformative experiences in the visual arts with our community."
+                // ),
                 SubSection(
                     title: "Values",
                     content: """
@@ -38,7 +33,12 @@ struct MuseumInfoAccordionView: View {
                     **Professionalism**
                     • In the conduct of its business and in the exhibition, collection, preservation, and maintenance of works of art, the LCVA adheres to the highest professional standards and ethical considerations as outlined by the American Association of Museums, the Commonwealth of Virginia, and Longwood University.
                     """
-                )
+                ),
+                SubSection(
+                    title: "Contact",
+                    content: "",  // Empty string for content
+                    isContactForm: true
+                ),
             ]
         ),
         AccordionSection(

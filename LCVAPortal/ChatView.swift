@@ -447,7 +447,7 @@ struct ReflectionBubble: View {
                    userManager.currentUser?.email ?? 
                    "Me"
         } else {
-            return "User"  // TODO: Implement user lookup
+            return reflection.username
         }
     }
     
