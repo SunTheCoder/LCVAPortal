@@ -190,7 +190,7 @@ struct ContentView: View {
                             
                                 
                                 // First row: Exhibitions
-                                VStack(spacing: 24) {  // Increased spacing between sections
+                                VStack(spacing: 24) {  
                                     CurrentShowsView(
                                         hasScrolledToInitialPositionCurrent: $hasScrolledToInitialPositionCurrent
                                     )
@@ -205,23 +205,27 @@ struct ContentView: View {
                                         userManager: userManager,
                                         userCollections: userCollections
                                     )
-                                    .padding(.bottom, 8)  // Add extra padding before Spotlight
+                                    .padding(.bottom, 8)  
                                     
-                                    // New Artist Spotlight - moved after Featured Art
                                     ArtistSpotlightView()
-                                    .padding(.top, 16)  // Add extra padding after Featured Art
+                                    .padding(.top, 16)
+                                    .padding(.bottom, 26)
+
                                 }
                                 .padding(.horizontal)
+                                .padding(.vertical)
                                 
-                                // Hours above login
+                                
+                                
+                    
+
                                 HoursAccordionView()
                                     .padding(.vertical)
-                                
-                                // Login at the bottom
-                    UserAuthenticationView(userManager: userManager)
 
                                 MuseumInfoAccordionView(userManager: userManager)
                                     .padding(.vertical)
+                    
+                                UserAuthenticationView(userManager: userManager)
                             }
                         }
                     }
@@ -262,12 +266,12 @@ struct ContentView: View {
                                         }) {
                                             HStack {
                                                 Image(systemName: "trash")
-                                                    .foregroundColor(.white)
+                                                    .foregroundColor(.red)
                                                 Text("Clear Media Cache")
                                                     .foregroundColor(.white)
                                                 Spacer()
                                                 Text(formatCacheSize())
-                                                    .foregroundColor(.gray)
+                                                    .foregroundColor(.red)
                                                     .font(.caption)
                                             }
                                             .padding()
@@ -285,30 +289,30 @@ struct ContentView: View {
                                     }
                                     .padding(.horizontal)
                                     
-                                    DarkModeToggle()
-                                        .padding(.horizontal)
+                                    // DarkModeToggle()
+                                    //     .padding(.horizontal)
                                     
                                     // Accessibility Assistance Section
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        Text("Accessibility")
-                                            .font(.headline)
-                                            .bold()
-                                            .foregroundColor(.white)
+                                    // VStack(alignment: .leading, spacing: 8) {
+                                    //     Text("Accessibility")
+                                    //         .font(.headline)
+                                    //         .bold()
+                                    //         .foregroundColor(.white)
                                         
-                                        Text("Plan your visit with accommodations")
-                                            .font(.subheadline)
-                                            .foregroundColor(.white.opacity(0.7))
+                                    //     Text("Plan your visit with accommodations")
+                                    //         .font(.subheadline)
+                                    //         .foregroundColor(.white.opacity(0.7))
                                         
-                                        AssistanceOptionButton(
-                                            title: "Request Assistance",
-                                            icon: "person.fill.checkmark",
-                                            action: { /* Form is handled by the button */ }
-                                        )
-                                    }
-                                    .padding()
-                                    .background(Color.white.opacity(0.1))
-                                    .cornerRadius(10)
-                                    .padding(.horizontal)
+                                    //     AssistanceOptionButton(
+                                    //         title: "Request Assistance",
+                                    //         icon: "person.fill.checkmark",
+                                    //         action: { /* Form is handled by the button */ }
+                                    //     )
+                                    // }
+                                    // .padding()
+                                    // .background(Color.white.opacity(0.1))
+                                    // .cornerRadius(10)
+                                    // .padding(.horizontal)
                                     
                                     Divider()
                                         .background(.white)
