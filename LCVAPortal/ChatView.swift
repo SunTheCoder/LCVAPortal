@@ -492,10 +492,16 @@ struct ReflectionBubble: View {
                     case "video":
                         if let mediaUrl = reflection.mediaUrl,
                            let url = URL(string: mediaUrl) {
-                            CachedVideoPlayer(
-                                urlString: mediaUrl,
-                                filename: url.lastPathComponent
-                            )
+                            VStack {
+                                CachedVideoPlayer(
+                                    urlString: mediaUrl,
+                                    filename: url.lastPathComponent
+                                )
+                                .frame(height: 200)
+                                .cornerRadius(8)
+                                .contentShape(Rectangle())
+                            }
+                            .clipped()
                         }
                         
                     default:
