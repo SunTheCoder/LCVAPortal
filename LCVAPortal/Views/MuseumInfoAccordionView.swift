@@ -255,7 +255,39 @@ struct MuseumInfoAccordionView: View {
                                             VolunteerContactForm(userManager: userManager)
                                         } else {
                                             VStack(alignment: .leading, spacing: 8) {
-                                                if subsection.title == "Values" {
+                                                if subsection.title == "Location" {
+                                                    Text(subsection.content)
+                                                        .font(.system(size: 14))
+                                                        .foregroundColor(.white.opacity(0.8))
+                                                    
+                                                    LocationMapView(
+                                                        latitude: 37.30249319029564,
+                                                        longitude: -78.39246396574411,
+                                                        title: "Longwood Center for the Visual Arts"
+                                                    )
+                                                    .frame(height: 200)
+                                                    .cornerRadius(8)
+                                                    .overlay(
+                                                        RoundedRectangle(cornerRadius: 8)
+                                                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                                                    )
+                                                } else if subsection.title == "Parking" {
+                                                    Text(subsection.content)
+                                                        .font(.system(size: 14))
+                                                        .foregroundColor(.white.opacity(0.8))
+                                                    
+                                                    LocationMapView(
+                                                        latitude: 37.303855171573666,
+                                                        longitude: -78.39315951094902,
+                                                        title: "Farmville Community Marketplace Parking"
+                                                    )
+                                                    .frame(height: 200)
+                                                    .cornerRadius(8)
+                                                    .overlay(
+                                                        RoundedRectangle(cornerRadius: 8)
+                                                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                                                    )
+                                                } else if subsection.title == "Values" {
                                                     Group {
                                                         Text("The Centrality of Art to Individual and Community Life")
                                                             .bold()
