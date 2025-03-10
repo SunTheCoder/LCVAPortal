@@ -24,34 +24,6 @@ struct SendButton: View {
     }
 }
 
-// Simplified MessageInputView
-struct MessageInputView: View {
-    @Binding var newMessage: String
-    let onSend: () -> Void
-    
-    private var isMessageEmpty: Bool {
-        newMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-    
-    var body: some View {
-        HStack {
-            TextField("Enter message...", text: $newMessage)
-                .textFieldStyle(.plain)
-                .foregroundColor(.white)
-                .padding(8)
-                .background(Color.white.opacity(0.08))
-                .cornerRadius(8)
-                .padding(.horizontal)
-            
-            SendButton(
-                isDisabled: isMessageEmpty,
-                action: onSend
-            )
-        }
-        .padding()
-    }
-}
-
 // Break out the art piece header
 struct ArtPieceHeaderView: View {
     let artPiece: ArtPiece
@@ -153,14 +125,14 @@ struct ChatView: View {
             )
             .ignoresSafeArea()
             
-        VStack {
+            VStack(spacing: 0) {  // Remove spacing between elements
                 if let artPiece = artPiece {
                     ArtPieceHeaderView(artPiece: artPiece)
                 }
                 
                 // Combined messages and reflections view
-            ScrollViewReader { scrollViewProxy in
-                ScrollView {
+                ScrollViewReader { scrollViewProxy in
+                    ScrollView {
                         if chatViewModel.messages.isEmpty && reflectionViewModel.reflections.isEmpty {
                             EmptyMessagesView()
                         }
@@ -169,11 +141,11 @@ struct ChatView: View {
                             ForEach(sortedContent) { item in
                                 switch item {
                                 case .message(let message):
-                            MessageView(
-                                message: message,
+                                    MessageView(
+                                        message: message,
                                         isFromCurrentUser: message.userId == userManager.currentUser?.uid,
-                                dateFormatter: dateFormatter,
-                                deleteAction: {
+                                        dateFormatter: dateFormatter,
+                                        deleteAction: {
                                             if let messageId = message.id {
                                                 deleteMessage(messageID: messageId)
                                             }
@@ -193,41 +165,17 @@ struct ChatView: View {
                     }
                 }
                 
-                // Input area
-                VStack(spacing: 8) {
-                    Picker("Type", selection: $selectedMediaType) {
-                        ForEach(ReflectionMediaType.allCases, id: \.self) { type in
-                            Text(type.rawValue).tag(type)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .padding(.horizontal)
-                    
-                    switch selectedMediaType {
-                    case .text:
-                        MessageInputView(newMessage: $newMessage, onSend: sendMessage)
-                    case .photo:
-                        MediaPickerView(
-                            type: .photo,
-                            selectedItem: $selectedItem,
-                            isPresented: $isMediaPickerPresented,
-                            textContent: $newMessage,
-                            onSubmit: submitMediaReflection
-                        )
-                    case .video:
-                        MediaPickerView(
-                            type: .video,
-                            selectedItem: $selectedItem,
-                            isPresented: $isMediaPickerPresented,
-                            textContent: $newMessage,
-                            onSubmit: submitMediaReflection
-                        )
-                    case .audio:
-                        Text("Audio coming soon")
-                            .foregroundColor(.secondary)
-                    }
-                }
-                .background(Color.black.opacity(0.2))
+                // New combined input view
+                ChatInputView(
+                    newMessage: $newMessage,
+                    selectedMediaType: $selectedMediaType,
+                    selectedItem: $selectedItem,
+                    isMediaPickerPresented: $isMediaPickerPresented,
+                    onSend: sendMessage,
+                    onSubmitMedia: submitMediaReflection
+                )
+                .background(Color.lcvaNavy)  // Solid background
+                .shadow(color: .black.opacity(0.2), radius: 5, y: -2)  // Add subtle shadow above
             }
         }
         .task {
@@ -376,57 +324,76 @@ struct ChatView: View {
     }
 }
 
-// Helper view for media selection
-struct MediaPickerView: View {
-    let type: ReflectionMediaType
+// Combined ChatInputView
+struct ChatInputView: View {
+    @Binding var newMessage: String
+    @Binding var selectedMediaType: ReflectionMediaType
     @Binding var selectedItem: PhotosPickerItem?
-    @Binding var isPresented: Bool
-    @Binding var textContent: String
-    let onSubmit: () -> Void
+    @Binding var isMediaPickerPresented: Bool
+    
+    let onSend: () -> Void
+    let onSubmitMedia: () -> Void
+    
+    private var isMessageEmpty: Bool {
+        newMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
     
     var body: some View {
-        HStack(alignment: .center, spacing: 12) {
-            // Text input with fixed dimensions
-            TextField("Add a caption...", text: $textContent)
-                .textFieldStyle(.plain)
-                .foregroundColor(.white)
-                .padding(8)
-                .background(Color.white.opacity(0.08))
-                .cornerRadius(8)
-                .padding(.horizontal)  // Take available width but allow shrinking
-               
-                
+        VStack(spacing: 8) {
+            // Add padding at the top
+            Color.clear.frame(height: 8)
             
-            // Media picker button with fixed size
-            PhotosPicker(
-                selection: $selectedItem,
-                matching: type == .photo ? .images : .videos,
-                photoLibrary: .shared()
-            ) {
-                Image(systemName: type == .photo ? "photo" : "video")
-                    .foregroundColor(.white)
-                    .frame(width: 24, height: 24)  // Fixed icon size
-                    .padding(8)
-                    .background(Circle().fill(Color.white.opacity(0.2)))
-            }
-            .frame(width: 40, height: 40)  // Fixed button size
-            
-            // Upload button with fixed size
-            if selectedItem != nil {
-                Button(action: onSubmit) {
-                    Image(systemName: "arrow.up.circle.fill")
-                        .foregroundColor(.blue)
-                        .font(.system(size: 24))
-                        .frame(width: 24, height: 24)  // Fixed icon size
+            // Type selector (Text, Photo, Video)
+            Picker("Type", selection: $selectedMediaType) {
+                ForEach(ReflectionMediaType.allCases, id: \.self) { type in
+                    Text(type.rawValue).tag(type)
                 }
-                .frame(width: 40, height: 40)  // Fixed button size
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal)
+
+            // Input field + media picker buttons
+            HStack(alignment: .center, spacing: 12) {
+                // Text field (used for both text and media captions)
+                TextField(selectedMediaType == .text ? "Enter message..." : "Add a caption...", text: $newMessage)
+                    .textFieldStyle(.plain)
+                    .foregroundColor(.white)
+                    .padding(8)
+                    .background(Color.white.opacity(0.08))
+                    .cornerRadius(8)
+                    .frame(height: 40) // Ensures consistency
+                
+                // Media picker button (only for photo/video)
+                if selectedMediaType != .text {
+                    PhotosPicker(
+                        selection: $selectedItem,
+                        matching: selectedMediaType == .photo ? .images : .videos,
+                        photoLibrary: .shared()
+                    ) {
+                        Image(systemName: selectedMediaType == .photo ? "photo" : "video")
+                            .foregroundColor(.white)
+                            .frame(width: 18, height: 18)
+                            .padding(8)
+                            .background(Circle().fill(Color.white.opacity(0.2)))
+                    }
+                    .frame(width: 40, height: 40)
+                }
+                
+                // Send or Upload button
+                Button(action: selectedMediaType == .text ? onSend : onSubmitMedia) {
+                    Image(systemName: "arrow.up.circle.fill")
+                        .foregroundColor(isMessageEmpty ? .gray : .blue)
+                        .font(.system(size: 24))
+                        .frame(width: 24, height: 24)
+                }
+                .frame(width: 40, height: 40)
+                .disabled(isMessageEmpty)
                 .transition(.scale.combined(with: .opacity))
             }
+            .padding()
+            .animation(.spring(response: 0.3, dampingFraction: 0.8), value: selectedItem)
         }
-        .frame(height: 54)  // Fixed overall height
-        .padding(.horizontal)
-        .padding(.bottom)
-        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: selectedItem)
+        .background(Color.lcvaNavy)  // Solid background color
     }
 }
 
