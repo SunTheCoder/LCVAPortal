@@ -385,43 +385,48 @@ struct MediaPickerView: View {
     let onSubmit: () -> Void
     
     var body: some View {
-        VStack {
+        HStack(alignment: .center, spacing: 12) {
+            // Text input with fixed dimensions
             TextField("Add a caption...", text: $textContent)
                 .textFieldStyle(.plain)
                 .foregroundColor(.white)
                 .padding(8)
                 .background(Color.white.opacity(0.08))
                 .cornerRadius(8)
-                .padding(.horizontal)
+                .padding(.horizontal)  // Take available width but allow shrinking
+               
+                
             
+            // Media picker button with fixed size
             PhotosPicker(
                 selection: $selectedItem,
                 matching: type == .photo ? .images : .videos,
                 photoLibrary: .shared()
             ) {
-                Label(
-                    type == .photo ? "Select Photo" : "Select Video",
-                    systemImage: type == .photo ? "photo" : "video"
-                )
-                .foregroundColor(.white)
-                .padding()
-                .background(Color.white.opacity(0.2))
-                .cornerRadius(8)
+                Image(systemName: type == .photo ? "photo" : "video")
+                    .foregroundColor(.white)
+                    .frame(width: 24, height: 24)  // Fixed icon size
+                    .padding(8)
+                    .background(Circle().fill(Color.white.opacity(0.2)))
             }
-            .onChange(of: selectedItem) { _, newValue in
-                if newValue != nil {
-                    isPresented = true
-                }
-            }
+            .frame(width: 40, height: 40)  // Fixed button size
             
+            // Upload button with fixed size
             if selectedItem != nil {
-                Button(type == .photo ? "Upload Photo" : "Upload Video") {
-                    onSubmit()
+                Button(action: onSubmit) {
+                    Image(systemName: "arrow.up.circle.fill")
+                        .foregroundColor(.blue)
+                        .font(.system(size: 24))
+                        .frame(width: 24, height: 24)  // Fixed icon size
                 }
-                .buttonStyle(.borderedProminent)
+                .frame(width: 40, height: 40)  // Fixed button size
+                .transition(.scale.combined(with: .opacity))
             }
         }
+        .frame(height: 54)  // Fixed overall height
+        .padding(.horizontal)
         .padding(.bottom)
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: selectedItem)
     }
 }
 
