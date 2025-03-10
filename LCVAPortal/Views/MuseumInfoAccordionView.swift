@@ -50,12 +50,12 @@ struct MuseumInfoAccordionView: View {
                     129 North Main Street
                     Farmville, VA 23901
                     
-                    Located in historic downtown Farmville, the LCVA is a short walk from Longwood University's campus.
+                    Located on Main Street in historic downtown Farmville, the LCVA is a short walk from Longwood University's campus.
                     """
                 ),
                 SubSection(
                     title: "Parking",
-                    content: "Free parking is available on Main Street and in the municipal lot behind the building."
+                    content: "Free, timed parking is available at the Farmville Community Marketplace (213 North St, Farmville, VA 23901). Parking is also available on Main Street (metered parking)."
                 ),
                 SubSection(
                     title: "Accessibility",
@@ -73,7 +73,8 @@ struct MuseumInfoAccordionView: View {
                 ),
                 SubSection(
                     title: "Volunteer",
-                    content: "We welcome volunteers who want to contribute their time and talents to support our mission."
+                    content: "We welcome volunteers who want to contribute their time and talents to support our mission.",
+                    hasVolunteerForm: true
                 ),
                 SubSection(
                     title: "Donate",
@@ -250,6 +251,8 @@ struct MuseumInfoAccordionView: View {
                                             .frame(maxWidth: .infinity, alignment: .leading)
                                             .background(Color.white.opacity(0.03))
                                             .transition(.opacity.combined(with: .move(edge: .top)))
+                                        } else if subsection.hasVolunteerForm {
+                                            VolunteerContactForm(userManager: userManager)
                                         } else {
                                             VStack(alignment: .leading, spacing: 8) {
                                                 if subsection.title == "Values" {
@@ -307,12 +310,14 @@ struct SubSection {
     let content: String
     var isContactForm: Bool = false
     var hasAccessibilityForm: Bool = false
+    var hasVolunteerForm: Bool = false
     
-    init(title: String, content: String = "", isContactForm: Bool = false, hasAccessibilityForm: Bool = false) {
+    init(title: String, content: String = "", isContactForm: Bool = false, hasAccessibilityForm: Bool = false, hasVolunteerForm: Bool = false) {
         self.title = title
         self.content = content
         self.isContactForm = isContactForm
         self.hasAccessibilityForm = hasAccessibilityForm
+        self.hasVolunteerForm = hasVolunteerForm
     }
 }
 
@@ -616,6 +621,163 @@ struct AccessibilityContactForm: View {
             } catch {
                 await MainActor.run {
                     errorMessage = "Failed to submit request. Please try again."
+                    isSubmitting = false
+                }
+            }
+        }
+    }
+}
+
+// Add this new form component
+struct VolunteerContactForm: View {
+    @ObservedObject var userManager: UserManager
+    @State private var firstName = ""
+    @State private var lastName = ""
+    @State private var email = ""
+    @State private var interests = "General"
+    @State private var message = ""
+    @State private var showingAlert = false
+    @State private var isSubmitting = false
+    @State private var errorMessage: String?
+    
+    let volunteerAreas = [
+        "General",
+        "Events",
+        "Education",
+        "Gallery",
+        "Administrative",
+        "Special Projects"
+    ]
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Volunteer Application")
+                .font(.headline)
+                .foregroundColor(.white)
+            
+            Text("Name").foregroundColor(.white.opacity(0.7))
+            HStack(spacing: 12) {
+                VStack(alignment: .leading) {
+                    TextField("First", text: $firstName)
+                        .textFieldStyle(.plain)
+                        .foregroundColor(.white)
+                        .padding(8)
+                        .background(Color.white.opacity(0.08))
+                        .cornerRadius(8)
+                }
+                
+                VStack(alignment: .leading) {
+                    TextField("Last", text: $lastName)
+                        .textFieldStyle(.plain)
+                        .foregroundColor(.white)
+                        .padding(8)
+                        .background(Color.white.opacity(0.08))
+                        .cornerRadius(8)
+                }
+            }
+            
+            Text("Email").foregroundColor(.white.opacity(0.7))
+            TextField("Email", text: $email)
+                .textFieldStyle(.plain)
+                .foregroundColor(.white)
+                .padding(8)
+                .background(Color.white.opacity(0.08))
+                .cornerRadius(8)
+                .keyboardType(.emailAddress)
+            
+            Text("Area of Interest").foregroundColor(.white.opacity(0.7))
+            Picker("Area", selection: $interests) {
+                ForEach(volunteerAreas, id: \.self) { area in
+                    Text(area).tag(area)
+                }
+            }
+            .pickerStyle(MenuPickerStyle())
+            .accentColor(.white)
+            .background(Color.white.opacity(0.08))
+            .cornerRadius(8)
+            
+            Text("Tell us about your interests and availability").foregroundColor(.white.opacity(0.7))
+            ZStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.white.opacity(0.08))
+                TextEditor(text: $message)
+                    .frame(height: 100)
+                    .foregroundColor(.white)
+                    .padding(8)
+                    .scrollContentBackground(.hidden)
+            }
+            
+            Button(action: submitForm) {
+                if isSubmitting {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                } else {
+                    Text("SUBMIT APPLICATION")
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.lcvaNavy)
+                        .cornerRadius(8)
+                }
+            }
+            .disabled(isSubmitting || !isValidForm)
+            
+            if let error = errorMessage {
+                Text(error)
+                    .foregroundColor(.red)
+                    .font(.caption)
+            }
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 32)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.white.opacity(0.03))
+        .alert("Application Sent", isPresented: $showingAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Thank you for your interest in volunteering! We'll contact you soon.")
+        }
+    }
+    
+    private var isValidForm: Bool {
+        !firstName.isEmpty &&
+        !lastName.isEmpty &&
+        !email.isEmpty &&
+        email.contains("@") &&
+        !message.isEmpty
+    }
+    
+    private func submitForm() {
+        Task {
+            isSubmitting = true
+            errorMessage = nil
+            
+            do {
+                let submission = ContactFormSubmission(
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email,
+                    phone: nil,
+                    category: "Volunteer",
+                    message: "Area of Interest: \(interests)\n\n\(message)",
+                    userId: userManager.currentUser?.uid
+                )
+                
+                try await SupabaseClient.shared.submitContactForm(submission)
+                
+                await MainActor.run {
+                    firstName = ""
+                    lastName = ""
+                    email = ""
+                    message = ""
+                    interests = "General"
+                    showingAlert = true
+                    isSubmitting = false
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = "Failed to submit application. Please try again."
                     isSubmitting = false
                 }
             }
