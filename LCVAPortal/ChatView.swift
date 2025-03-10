@@ -521,13 +521,24 @@ struct ReflectionBubble: View {
 // Add this new view at the top level
 struct ChatImageView: View {
     let url: URL
+    @State private var isExpanded = false
     
     var body: some View {
-        CachedImageView(
-            urlString: url.absoluteString,
-            filename: url.lastPathComponent
-        )
-        .frame(height: 150)
-        .cornerRadius(8)
+        // Container to isolate tap gesture
+        VStack {
+            CachedImageView(
+                urlString: url.absoluteString,
+                filename: url.lastPathComponent
+            )
+            .frame(maxHeight: isExpanded ? 400 : 200)
+            .cornerRadius(8)
+            .contentShape(Rectangle())  // Make entire frame tappable
+        }
+        .clipped()  // Prevent content from overflowing
+        .onTapGesture {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                isExpanded.toggle()
+            }
+        }
     }
 }
