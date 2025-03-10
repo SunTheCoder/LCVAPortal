@@ -69,7 +69,7 @@ struct MuseumInfoAccordionView: View {
             subsections: [
                 SubSection(
                     title: "Membership",
-                    content: "Join our community of art lovers and supporters. Members receive special benefits and invitations to exclusive events."
+                    content: "Join our community of art lovers and supporters. Members receive special benefits and invitations to exclusive events. Feature in development!"
                 ),
                 SubSection(
                     title: "Volunteer",
@@ -77,7 +77,7 @@ struct MuseumInfoAccordionView: View {
                 ),
                 SubSection(
                     title: "Donate",
-                    content: "Your support helps us continue to provide free admission and educational programs to our community."
+                    content: "Your support helps us continue to provide free admission and educational programs to our community. Feature in development!"
                 )
             ]
         ),
