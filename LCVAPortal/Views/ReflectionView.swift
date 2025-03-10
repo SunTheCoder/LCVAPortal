@@ -187,9 +187,11 @@ struct ReflectionView: View {
                     userId: userId,
                     item: item,
                     type: selectedMediaType,
+                    textContent: newReflection,
                     firebaseToken: token
                 )
                 selectedItem = nil
+                newReflection = ""
             } catch {
                 print("❌ Failed to get Firebase token: \(error)")
             }
@@ -239,7 +241,7 @@ struct ReflectionItemView: View {
             // Show different content based on reflection type
             switch reflection.reflectionType {
             case "text":
-                Text(reflection.textContent)
+                Text(reflection.textContent ?? "")
                     .foregroundColor(.white)
                     .fixedSize(horizontal: false, vertical: true)
                 

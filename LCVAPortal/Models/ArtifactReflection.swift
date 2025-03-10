@@ -5,7 +5,7 @@ struct ArtifactReflection: Identifiable, Codable, Equatable {
     let artifactId: UUID
     let userId: String
     let reflectionType: String  // Could be "text", "audio", "video" etc.
-    let textContent: String
+    let textContent: String?
     let mediaUrl: String?
     let createdAt: String  // This is the ISO timestamp from Supabase
     fileprivate let user: User?  // Make property fileprivate to match User struct

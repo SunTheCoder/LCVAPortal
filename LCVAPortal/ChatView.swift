@@ -143,7 +143,7 @@ struct ChatView: View {
     private let db = Firestore.firestore()
     private let supabase = SupabaseClient.shared
     private let dateFormatter = DateFormatter.shortDateTimeFormatter()
-    
+
     var body: some View {
         ZStack {
             LinearGradient(
@@ -153,14 +153,14 @@ struct ChatView: View {
             )
             .ignoresSafeArea()
             
-            VStack {
+        VStack {
                 if let artPiece = artPiece {
                     ArtPieceHeaderView(artPiece: artPiece)
                 }
                 
                 // Combined messages and reflections view
-                ScrollViewReader { scrollViewProxy in
-                    ScrollView {
+            ScrollViewReader { scrollViewProxy in
+                ScrollView {
                         if chatViewModel.messages.isEmpty && reflectionViewModel.reflections.isEmpty {
                             EmptyMessagesView()
                         }
@@ -169,11 +169,11 @@ struct ChatView: View {
                             ForEach(sortedContent) { item in
                                 switch item {
                                 case .message(let message):
-                                    MessageView(
-                                        message: message,
+                            MessageView(
+                                message: message,
                                         isFromCurrentUser: message.userId == userManager.currentUser?.uid,
-                                        dateFormatter: dateFormatter,
-                                        deleteAction: {
+                                dateFormatter: dateFormatter,
+                                deleteAction: {
                                             if let messageId = message.id {
                                                 deleteMessage(messageID: messageId)
                                             }
@@ -208,16 +208,18 @@ struct ChatView: View {
                         MessageInputView(newMessage: $newMessage, onSend: sendMessage)
                     case .photo:
                         MediaPickerView(
-                            type: selectedMediaType,
+                            type: .photo,
                             selectedItem: $selectedItem,
                             isPresented: $isMediaPickerPresented,
+                            textContent: $newMessage,
                             onSubmit: submitMediaReflection
                         )
                     case .video:
                         MediaPickerView(
-                            type: selectedMediaType,
+                            type: .video,
                             selectedItem: $selectedItem,
                             isPresented: $isMediaPickerPresented,
+                            textContent: $newMessage,
                             onSubmit: submitMediaReflection
                         )
                     case .audio:
@@ -360,10 +362,12 @@ struct ChatView: View {
                     userId: userId,
                     item: item,
                     type: selectedMediaType,
+                    textContent: newMessage,
                     firebaseToken: token
                 )
                 selectedItem = nil
                 isMediaPickerPresented = false
+                newMessage = ""
                 print("✅ Upload completed successfully")
             } catch {
                 print("❌ Failed to upload media: \(error)")
@@ -377,10 +381,19 @@ struct MediaPickerView: View {
     let type: ReflectionMediaType
     @Binding var selectedItem: PhotosPickerItem?
     @Binding var isPresented: Bool
+    @Binding var textContent: String
     let onSubmit: () -> Void
     
     var body: some View {
         VStack {
+            TextField("Add a caption...", text: $textContent)
+                .textFieldStyle(.plain)
+                .foregroundColor(.white)
+                .padding(8)
+                .background(Color.white.opacity(0.08))
+                .cornerRadius(8)
+                .padding(.horizontal)
+            
             PhotosPicker(
                 selection: $selectedItem,
                 matching: type == .photo ? .images : .videos,
@@ -451,7 +464,7 @@ struct ReflectionBubble: View {
                    userManager.currentUser?.email ?? 
                    "Me"
         } else {
-            return reflection.username
+            return reflection.username ?? "Anonymous"
         }
     }
     
@@ -481,9 +494,10 @@ struct ReflectionBubble: View {
                     .foregroundColor(.white)
                 
                 VStack(alignment: .leading, spacing: 8) {
+                    // Show media content first if available
                     switch reflection.reflectionType {
                     case "text":
-                        Text(reflection.textContent)
+                        Text(reflection.textContent ?? "")
                             .foregroundColor(.white)
                             .fixedSize(horizontal: false, vertical: true)
                         
@@ -491,6 +505,14 @@ struct ReflectionBubble: View {
                         if let mediaUrl = reflection.mediaUrl,
                            let url = URL(string: mediaUrl) {
                             ChatImageView(url: url)
+                            // Show text content below image if not empty
+                            if let text = reflection.textContent,
+                               !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                Text(text)
+                                    .foregroundColor(.white)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                    .padding(.top, 4)
+                            }
                         }
                         
                     case "video":
@@ -506,6 +528,14 @@ struct ReflectionBubble: View {
                                 .contentShape(Rectangle())
                             }
                             .clipped()
+                            // Show text content below video if not empty
+                            if let text = reflection.textContent,
+                               !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                Text(text)
+                                    .foregroundColor(.white)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                    .padding(.top, 4)
+                            }
                         }
                         
                     default:
@@ -548,7 +578,7 @@ struct ChatImageView: View {
         .onTapGesture {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                 isExpanded.toggle()
+                }
             }
-        }
     }
 }

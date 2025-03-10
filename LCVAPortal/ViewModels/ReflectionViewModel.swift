@@ -42,6 +42,7 @@ class ReflectionViewModel: ObservableObject {
         userId: String,
         item: PhotosPickerItem,
         type: ReflectionMediaType,
+        textContent: String,
         firebaseToken: String
     ) async {
         isUploading = true
@@ -63,12 +64,12 @@ class ReflectionViewModel: ObservableObject {
                 firebaseToken: firebaseToken
             )
             
-            // Create reflection with media URL - ensure correct reflection_type
+            // Create reflection with media URL and text content
             try await supabase.addReflection(
                 artifactId: artifactId,
                 userId: userId,
                 reflectionType: type == .photo ? "image" : "video",
-                textContent: "",
+                textContent: textContent,
                 mediaUrl: mediaUrl
             )
             
