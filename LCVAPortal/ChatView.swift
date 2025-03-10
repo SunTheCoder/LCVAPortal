@@ -334,16 +334,17 @@ struct ChatInputView: View {
     let onSend: () -> Void
     let onSubmitMedia: () -> Void
     
+    @State private var uploadProgress: CGFloat = 0
+    @State private var isMediaReady: Bool = false
+    
     private var isMessageEmpty: Bool {
         newMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
     
     var body: some View {
         VStack(spacing: 8) {
-            // Add padding at the top
             Color.clear.frame(height: 8)
             
-            // Type selector (Text, Photo, Video)
             Picker("Type", selection: $selectedMediaType) {
                 ForEach(ReflectionMediaType.allCases, id: \.self) { type in
                     Text(type.rawValue).tag(type)
@@ -352,34 +353,66 @@ struct ChatInputView: View {
             .pickerStyle(.segmented)
             .padding(.horizontal)
 
-            // Input field + media picker buttons
             HStack(alignment: .center, spacing: 12) {
-                // Text field (used for both text and media captions)
                 TextField(selectedMediaType == .text ? "Enter message..." : "Add a caption...", text: $newMessage)
                     .textFieldStyle(.plain)
                     .foregroundColor(.white)
                     .padding(8)
                     .background(Color.white.opacity(0.08))
                     .cornerRadius(8)
-                    .frame(height: 40) // Ensures consistency
+                    .frame(height: 40)
                 
-                // Media picker button (only for photo/video)
                 if selectedMediaType != .text {
                     PhotosPicker(
                         selection: $selectedItem,
                         matching: selectedMediaType == .photo ? .images : .videos,
                         photoLibrary: .shared()
                     ) {
-                        Image(systemName: selectedMediaType == .photo ? "photo" : "video")
-                            .foregroundColor(.white)
-                            .frame(width: 18, height: 18)
-                            .padding(8)
-                            .background(Circle().fill(Color.white.opacity(0.2)))
+                        ZStack {
+                            Circle()
+                                .fill(Color.white.opacity(0.2))
+                                .frame(width: 36, height: 36)
+                            
+                            Circle()
+                                .trim(from: 0, to: uploadProgress)
+                                .stroke(Color.blue, lineWidth: 2)
+                                .frame(width: 36, height: 36)
+                                .rotationEffect(.degrees(-90))
+                                .opacity(selectedItem != nil ? 1 : 0)
+                            
+                            Image(systemName: selectedMediaType == .photo ? "photo" : "video")
+                                .foregroundColor(.white)
+                                .frame(width: 18, height: 18)
+                                .opacity(isMediaReady ? 0 : 1)
+                            
+                            if isMediaReady {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.white)
+                                    .frame(width: 18, height: 18)
+                            }
+                        }
                     }
                     .frame(width: 40, height: 40)
+                    .onChange(of: selectedItem) { _, newValue in
+                        if newValue != nil {
+                            withAnimation(.easeInOut(duration: 0.8)) {
+                                uploadProgress = 1.0
+                            }
+                            
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                    isMediaReady = true
+                                }
+                            }
+                        } else {
+                            withAnimation {
+                                uploadProgress = 0
+                                isMediaReady = false
+                            }
+                        }
+                    }
                 }
                 
-                // Send or Upload button
                 Button(action: selectedMediaType == .text ? onSend : onSubmitMedia) {
                     Image(systemName: "arrow.up.circle.fill")
                         .foregroundColor(isMessageEmpty ? .gray : .blue)
@@ -389,11 +422,18 @@ struct ChatInputView: View {
                 .frame(width: 40, height: 40)
                 .disabled(isMessageEmpty)
                 .transition(.scale.combined(with: .opacity))
+                .onChange(of: selectedMediaType) { _, _ in
+                    withAnimation {
+                        uploadProgress = 0
+                        isMediaReady = false
+                        selectedItem = nil
+                    }
+                }
             }
             .padding()
             .animation(.spring(response: 0.3, dampingFraction: 0.8), value: selectedItem)
         }
-        .background(Color.lcvaNavy)  // Solid background color
+        .background(Color.lcvaNavy)
     }
 }
 
