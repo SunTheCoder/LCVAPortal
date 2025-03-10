@@ -36,7 +36,11 @@ struct MessageInputView: View {
     var body: some View {
         HStack {
             TextField("Enter message...", text: $newMessage)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .textFieldStyle(.plain)
+                .foregroundColor(.white)
+                .padding(8)
+                .background(Color.white.opacity(0.08))
+                .cornerRadius(8)
                 .padding(.horizontal)
             
             SendButton(
