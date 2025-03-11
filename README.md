@@ -3,6 +3,9 @@
 ## Overview
 The LCVA Portal is a native iOS application developed for the Longwood Center for Visual Arts (LCVA). This application serves as a digital gateway to LCVA's art collections, enabling users to explore, interact with, and learn about various artworks in the museum.
 
+![alt text](<ScreenRecording_03-11-2025 13-low.gif>) ![alt text](Lcvapreview2-low-5.gif) ![ ](Lcvapreview2-low-3.gif) ![alt text](<ScreenRecording_03-11-2025 12-10-14_1-low.gif>) ![alt text](Lcvapreview2-low.gif)
+
+
 ## Features
 
 ### Collections Management
